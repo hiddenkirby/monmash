@@ -5,6 +5,8 @@ namespace Tidepool.Domain
     [Serializable]
     public class CaughtTideling
     {
+        public const int NicknameCharacterLimit = 12;
+
         public string speciesId;
         public string nickname;
         public string caughtAtUtc;
@@ -12,4 +14,3 @@ namespace Tidepool.Domain
         public int timesSeen;
     }
 }
-

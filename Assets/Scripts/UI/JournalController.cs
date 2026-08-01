@@ -28,6 +28,7 @@ namespace Tidepool.UI
 
         private void OnEnable()
         {
+            ConfigureNicknameInput();
             PopulateGrid();
         }
 
@@ -92,6 +93,7 @@ namespace Tidepool.UI
 
             if (nicknameInput != null)
             {
+                ConfigureNicknameInput();
                 nicknameInput.text = isCaught ? GetSavedName(species, caught) : string.Empty;
                 nicknameInput.interactable = isCaught;
             }
@@ -107,6 +109,14 @@ namespace Tidepool.UI
             GameSaveService.Instance?.RenameCaught(selectedSpecies.Id, nicknameInput == null ? string.Empty : nicknameInput.text);
             SelectSpecies(selectedSpecies);
             PopulateGrid();
+        }
+
+        private void ConfigureNicknameInput()
+        {
+            if (nicknameInput != null)
+            {
+                nicknameInput.characterLimit = CaughtTideling.NicknameCharacterLimit;
+            }
         }
 
         private static string FormatCaughtName(TidelingSpecies species, CaughtTideling caught)
