@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Tidepool.Domain;
 using UnityEngine;
@@ -8,6 +9,8 @@ namespace Tidepool.Runtime
 {
     public class EncounterDirector : MonoBehaviour
     {
+        private const string OldBarnabySpeciesId = "old-barnaby";
+
         [SerializeField] private PlayerGridMover player;
         [SerializeField] private Tilemap seagrassTilemap;
         [SerializeField] private SpeciesDatabase speciesDatabase;
@@ -75,23 +78,27 @@ namespace Tidepool.Runtime
             EncounterContext.CurrentSpecies = species;
             EncounterContext.CurrentZone = currentZone;
             GameSaveService.Instance?.MarkSeen(species.Id);
-            player.SetInputEnabled(false);
+            player?.SetInputEnabled(false);
             SceneManager.LoadScene(catchSceneName, LoadSceneMode.Additive);
         }
 
         private TidelingSpecies PickSpecies()
         {
-            TidelingRarity rarity = RollRarity();
-            List<TidelingSpecies> matches = speciesDatabase.FindByZoneAndRarity(currentZone, rarity);
-
-            if (matches.Count == 0 && rarity == TidelingRarity.Rare)
+            if (speciesDatabase == null)
             {
-                matches = speciesDatabase.FindByZoneAndRarity(currentZone, TidelingRarity.Uncommon);
+                return null;
             }
+
+            TidelingRarity rarity = RollRarity();
+            List<TidelingSpecies> matches = FindNormalSpeciesByRarity(rarity);
 
             if (matches.Count == 0)
             {
-                matches = speciesDatabase.FindByZoneAndRarity(currentZone, TidelingRarity.Common);
+                TidelingRarity[] fallbackRarities = GetFallbackRarities(rarity);
+                for (int i = 0; i < fallbackRarities.Length && matches.Count == 0; i++)
+                {
+                    matches = FindNormalSpeciesByRarity(fallbackRarities[i]);
+                }
             }
 
             return matches.Count == 0 ? null : matches[Random.Range(0, matches.Count)];
@@ -108,11 +115,51 @@ namespace Tidepool.Runtime
             return roll < 0.92f ? TidelingRarity.Uncommon : TidelingRarity.Rare;
         }
 
+        private List<TidelingSpecies> FindNormalSpeciesByRarity(TidelingRarity rarity)
+        {
+            List<TidelingSpecies> matches = new List<TidelingSpecies>();
+            IReadOnlyList<TidelingSpecies> allSpecies = speciesDatabase.All;
+
+            for (int i = 0; i < allSpecies.Count; i++)
+            {
+                TidelingSpecies candidate = allSpecies[i];
+                if (IsNormalEncounterSpecies(candidate)
+                    && candidate.Rarity == rarity
+                    && candidate.LivesIn(currentZone))
+                {
+                    matches.Add(candidate);
+                }
+            }
+
+            return matches;
+        }
+
+        private static TidelingRarity[] GetFallbackRarities(TidelingRarity rolledRarity)
+        {
+            switch (rolledRarity)
+            {
+                case TidelingRarity.Common:
+                    return new[] { TidelingRarity.Uncommon, TidelingRarity.Rare };
+                case TidelingRarity.Uncommon:
+                    return new[] { TidelingRarity.Common, TidelingRarity.Rare };
+                case TidelingRarity.Rare:
+                    return new[] { TidelingRarity.Uncommon, TidelingRarity.Common };
+                default:
+                    return new[] { TidelingRarity.Common, TidelingRarity.Uncommon, TidelingRarity.Rare };
+            }
+        }
+
+        private static bool IsNormalEncounterSpecies(TidelingSpecies species)
+        {
+            return species != null
+                && species.Rarity != TidelingRarity.Secret
+                && !string.Equals(species.Id, OldBarnabySpeciesId, StringComparison.OrdinalIgnoreCase);
+        }
+
         private void HandleEncounterFinished(bool caught)
         {
             remainingGraceSteps = graceStepsAfterEncounter;
-            player.SetInputEnabled(true);
+            player?.SetInputEnabled(true);
         }
     }
 }
-
