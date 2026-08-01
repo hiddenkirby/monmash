@@ -3,7 +3,10 @@
 ## Boot
 
 - Add a `GameSaveService` object.
-- Load or route to `Overworld`.
+- Add `BootRouter`.
+  - For no title screen, leave `loadOverworldOnStart` enabled.
+  - For a title screen, disable `loadOverworldOnStart` and wire the Continue
+    button to `BootRouter.ContinueToOverworld`.
 
 ## Overworld
 
@@ -33,6 +36,8 @@
 - If Shallows and Meadow are built as one continuous scene, use one `EncounterDirector`
   per encounter zone until a later zone-volume system exists; each director should point
   at the seagrass tilemap for its own zone and set its `currentZone` accordingly.
+- Add `FirstRunGuidanceController` to a safe-area UI panel for the first-run line:
+  `Tap to walk. Look in the seagrass.`
 
 ## CatchEncounter
 

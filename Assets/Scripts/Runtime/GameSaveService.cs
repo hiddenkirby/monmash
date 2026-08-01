@@ -173,6 +173,19 @@ namespace Tidepool.Runtime
             return count;
         }
 
+        public bool HasAnyProgress()
+        {
+            if (Data == null)
+            {
+                return false;
+            }
+
+            bool hasCaught = Data.caught != null && Data.caught.Count > 0;
+            bool hasSeen = Data.seenSpeciesIds != null && Data.seenSpeciesIds.Count > 0;
+            bool hasMoved = Data.playerTile.ToVector2Int() != Vector2Int.zero;
+            return hasCaught || hasSeen || hasMoved || Data.currentZone != ZoneId.TidepoolShallows;
+        }
+
         public CaughtTideling FindCaught(string speciesId)
         {
             for (int i = 0; i < Data.caught.Count; i++)
