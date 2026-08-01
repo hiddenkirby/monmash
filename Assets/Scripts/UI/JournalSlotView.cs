@@ -13,14 +13,21 @@ namespace Tidepool.UI
 
         public void Bind(TidelingSpecies species, bool isCaught, Action onClick)
         {
-            creatureImage.sprite = species.Sprite;
-            creatureImage.enabled = species.Sprite != null;
+            bool hasSpecies = species != null;
+            Sprite sprite = hasSpecies ? species.Sprite : null;
+
+            creatureImage.sprite = sprite;
+            creatureImage.enabled = sprite != null;
             creatureImage.color = isCaught ? Color.white : Color.black;
-            nameText.text = isCaught ? species.DisplayName : "?";
+            creatureImage.preserveAspect = true;
+            nameText.text = isCaught && hasSpecies ? species.DisplayName : "?";
+            button.interactable = hasSpecies;
 
             button.onClick.RemoveAllListeners();
-            button.onClick.AddListener(() => onClick?.Invoke());
+            if (hasSpecies)
+            {
+                button.onClick.AddListener(() => onClick?.Invoke());
+            }
         }
     }
 }
-
