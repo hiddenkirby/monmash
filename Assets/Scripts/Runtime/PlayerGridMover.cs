@@ -46,6 +46,11 @@ namespace Tidepool.Runtime
         public void SetInputEnabled(bool enabled)
         {
             inputEnabled = enabled;
+            if (!enabled && walkRoutine != null)
+            {
+                StopCoroutine(walkRoutine);
+                walkRoutine = null;
+            }
         }
 
         public void MoveTo(Vector3Int targetCell)
@@ -124,4 +129,3 @@ namespace Tidepool.Runtime
         }
     }
 }
-
