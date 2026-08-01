@@ -43,6 +43,9 @@ Read these files before changing behavior:
 - Keep `.meta` files when Unity generates them. They are part of Unity asset identity.
 - Do not reorganize Unity folders casually; scene and asset references are path/GUID sensitive.
 - Prefer small, scoped commits and PRs mapped to GitHub issues.
+- When picking up an issue, immediately mark it with the `status: in progress` label so another agent does not claim it.
+- Keep GitHub issue state aligned with the work: link PRs with closing keywords when appropriate, close completed issues after merge, and leave explicit handoff comments for verification that could not be performed.
+- Remove `status: in progress` when the issue is closed, released back to the backlog, or handed off.
 
 ## Asset Rules
 
@@ -111,4 +114,3 @@ When finishing work, report:
 - What was verified.
 - What could not be verified, especially Unity editor or iPad build steps.
 - Any asset provenance entries that still need completion.
-
