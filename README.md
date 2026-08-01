@@ -55,3 +55,11 @@ See `docs/ASSET_PIPELINE.md` for the full import checklist.
 - Do not use protected franchise names in code, assets, prompts, or store copy.
 - Log every asset source in `Assets/ASSET_MANIFEST.md`.
 - Keep iPad UI touch targets at least 88pt.
+
+Before release or package changes, run:
+
+```sh
+scripts/verify-no-network-guardrails.sh
+```
+
+See `docs/NO_NETWORK_GUARDRAILS.md` and `docs/PRE_RELEASE_CHECKLIST.md` for the full offline/privacy checklist.

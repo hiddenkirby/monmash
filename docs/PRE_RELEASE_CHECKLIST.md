@@ -1,0 +1,23 @@
+# Pre-Release Checklist
+
+Use this checklist before tagging a playable build.
+
+## Offline And Privacy
+
+- `scripts/verify-no-network-guardrails.sh` passes.
+- No analytics, ads, IAP, accounts, notifications, crash SDKs, telemetry, multiplayer, or online services are present.
+- A clean iPad build works in airplane mode.
+- Airplane-mode play covers walking, encounters, catching or letting go, journal open, nickname edit, force-quit, relaunch, and save persistence.
+
+## iPad Build
+
+- `Tools -> Tidepool -> Validate iPad iOS Player Settings` passes in Unity.
+- Xcode builds and signs the generated iOS project.
+- The app launches on the target iPad after trusting the developer certificate if needed.
+
+## Asset Provenance
+
+- Every shipping or candidate asset is listed in `Assets/ASSET_MANIFEST.md`.
+- AI-generated assets include tool, model, date, prompt, and review status.
+- Third-party assets include source, license, date, and path.
+- `scripts/verify-lfs.sh` passes before committing binary assets.
