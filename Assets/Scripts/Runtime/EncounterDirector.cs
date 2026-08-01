@@ -19,6 +19,7 @@ namespace Tidepool.Runtime
         [SerializeField, Range(0f, 1f)] private float encounterChance = 0.12f;
         [SerializeField] private int graceStepsAfterEncounter = 3;
         [SerializeField] private int pitySteps = 25;
+        [SerializeField] private int oldBarnabyCaughtSpeciesThreshold = 10;
 
         private int remainingGraceSteps;
         private int drySeagrassSteps;
@@ -96,6 +97,12 @@ namespace Tidepool.Runtime
                 return null;
             }
 
+            TidelingSpecies oldBarnaby = PickOldBarnabyIfUnlocked();
+            if (oldBarnaby != null)
+            {
+                return oldBarnaby;
+            }
+
             TidelingRarity rarity = RollRarity();
             List<TidelingSpecies> matches = FindNormalSpeciesByRarity(rarity);
 
@@ -109,6 +116,30 @@ namespace Tidepool.Runtime
             }
 
             return matches.Count == 0 ? null : matches[Random.Range(0, matches.Count)];
+        }
+
+        private TidelingSpecies PickOldBarnabyIfUnlocked()
+        {
+            if (currentZone != ZoneId.TidepoolShallows || oldBarnabyCaughtSpeciesThreshold <= 0)
+            {
+                return null;
+            }
+
+            GameSaveService saveService = GameSaveService.Instance;
+            if (saveService == null
+                || saveService.HasSeen(OldBarnabySpeciesId)
+                || saveService.CountCaughtSpeciesExcluding(OldBarnabySpeciesId) < oldBarnabyCaughtSpeciesThreshold)
+            {
+                return null;
+            }
+
+            TidelingSpecies oldBarnaby = speciesDatabase.FindById(OldBarnabySpeciesId);
+            if (oldBarnaby == null || !oldBarnaby.LivesIn(currentZone))
+            {
+                return null;
+            }
+
+            return oldBarnaby;
         }
 
         private static TidelingRarity RollRarity()
