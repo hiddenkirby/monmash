@@ -7,6 +7,8 @@ namespace Tidepool.UI
 {
     public class JournalController : MonoBehaviour
     {
+        private const int V01JournalSlotCount = 13;
+
         [SerializeField] private SpeciesDatabase speciesDatabase;
         [SerializeField] private JournalSlotView slotPrefab;
         [SerializeField] private Transform gridRoot;
@@ -28,16 +30,24 @@ namespace Tidepool.UI
 
         public void PopulateGrid()
         {
+            if (gridRoot == null || slotPrefab == null)
+            {
+                SetProgressText(0, V01JournalSlotCount);
+                return;
+            }
+
             for (int i = gridRoot.childCount - 1; i >= 0; i--)
             {
                 Destroy(gridRoot.GetChild(i).gameObject);
             }
 
             int found = 0;
-            for (int i = 0; i < speciesDatabase.All.Count; i++)
+            int speciesCount = speciesDatabase == null ? 0 : speciesDatabase.All.Count;
+            int slotCount = Mathf.Max(V01JournalSlotCount, speciesCount);
+            for (int i = 0; i < slotCount; i++)
             {
-                TidelingSpecies species = speciesDatabase.All[i];
-                CaughtTideling caught = GameSaveService.Instance?.FindCaught(species.Id);
+                TidelingSpecies species = i < speciesCount ? speciesDatabase.All[i] : null;
+                CaughtTideling caught = species == null ? null : GameSaveService.Instance?.FindCaught(species.Id);
                 bool isCaught = caught != null;
                 if (isCaught)
                 {
@@ -48,11 +58,16 @@ namespace Tidepool.UI
                 slot.Bind(species, isCaught, () => SelectSpecies(species));
             }
 
-            progressText.text = $"{found} of {speciesDatabase.All.Count} found";
+            SetProgressText(found, slotCount);
         }
 
         public void SelectSpecies(TidelingSpecies species)
         {
+            if (species == null)
+            {
+                return;
+            }
+
             selectedSpecies = species;
             CaughtTideling caught = GameSaveService.Instance?.FindCaught(species.Id);
             bool isCaught = caught != null;
@@ -96,6 +111,13 @@ namespace Tidepool.UI
 
             return text;
         }
+
+        private void SetProgressText(int found, int total)
+        {
+            if (progressText != null)
+            {
+                progressText.text = $"{found} of {total} found";
+            }
+        }
     }
 }
-
