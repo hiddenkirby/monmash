@@ -1,3 +1,5 @@
+using System;
+using System.Globalization;
 using Tidepool.Domain;
 using Tidepool.Runtime;
 using UnityEngine;
@@ -16,6 +18,7 @@ namespace Tidepool.UI
         [SerializeField] private Text detailNameText;
         [SerializeField] private Text detailCurrentText;
         [SerializeField] private Text detailHabitatText;
+        [SerializeField] private Text detailCaughtText;
         [SerializeField] private Text detailFieldNoteText;
         [SerializeField] private Text detailTimesSeenText;
         [SerializeField] private InputField nicknameInput;
@@ -72,16 +75,26 @@ namespace Tidepool.UI
             CaughtTideling caught = GameSaveService.Instance?.FindCaught(species.Id);
             bool isCaught = caught != null;
 
-            detailImage.sprite = species.Sprite;
-            detailImage.color = isCaught ? Color.white : Color.black;
-            detailImage.enabled = species.Sprite != null;
-            detailNameText.text = isCaught ? caught.nickname : "?";
-            detailCurrentText.text = isCaught ? species.Current.ToString() : "Unknown";
-            detailHabitatText.text = isCaught ? FormatHabitats(species.HabitatZones) : "Unknown";
-            detailFieldNoteText.text = isCaught ? species.FieldNote : "Keep looking in the seagrass.";
-            detailTimesSeenText.text = isCaught ? $"Seen {caught.timesSeen}" : "Not found yet";
-            nicknameInput.text = isCaught ? caught.nickname : string.Empty;
-            nicknameInput.interactable = isCaught;
+            if (detailImage != null)
+            {
+                detailImage.sprite = species.Sprite;
+                detailImage.color = isCaught ? Color.white : Color.black;
+                detailImage.enabled = species.Sprite != null;
+                detailImage.preserveAspect = true;
+            }
+
+            SetText(detailNameText, isCaught ? FormatCaughtName(species, caught) : "?");
+            SetText(detailCurrentText, isCaught ? species.Current.ToString() : "Unknown");
+            SetText(detailHabitatText, isCaught ? FormatHabitats(species.HabitatZones) : "Unknown");
+            SetText(detailCaughtText, isCaught ? FormatCatchDetails(caught) : "Not found yet");
+            SetText(detailFieldNoteText, isCaught ? species.FieldNote : "Keep looking in the seagrass.");
+            SetText(detailTimesSeenText, isCaught ? $"Seen {caught.timesSeen}" : "Not found yet");
+
+            if (nicknameInput != null)
+            {
+                nicknameInput.text = isCaught ? GetSavedName(species, caught) : string.Empty;
+                nicknameInput.interactable = isCaught;
+            }
         }
 
         public void SaveNickname()
@@ -91,9 +104,45 @@ namespace Tidepool.UI
                 return;
             }
 
-            GameSaveService.Instance?.RenameCaught(selectedSpecies.Id, nicknameInput.text);
+            GameSaveService.Instance?.RenameCaught(selectedSpecies.Id, nicknameInput == null ? string.Empty : nicknameInput.text);
             SelectSpecies(selectedSpecies);
             PopulateGrid();
+        }
+
+        private static string FormatCaughtName(TidelingSpecies species, CaughtTideling caught)
+        {
+            string savedName = GetSavedName(species, caught);
+            if (string.IsNullOrWhiteSpace(species.DisplayName) || savedName == species.DisplayName)
+            {
+                return savedName;
+            }
+
+            return $"{savedName} ({species.DisplayName})";
+        }
+
+        private static string GetSavedName(TidelingSpecies species, CaughtTideling caught)
+        {
+            if (!string.IsNullOrWhiteSpace(caught.nickname))
+            {
+                return caught.nickname.Trim();
+            }
+
+            return string.IsNullOrWhiteSpace(species.DisplayName) ? "Tideling" : species.DisplayName;
+        }
+
+        private static string FormatCatchDetails(CaughtTideling caught)
+        {
+            string location = FormatZone(caught.caughtInZone);
+            if (DateTime.TryParse(
+                    caught.caughtAtUtc,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.RoundtripKind,
+                    out DateTime caughtAt))
+            {
+                return $"Caught {caughtAt.ToLocalTime():MMM d, yyyy} in {location}";
+            }
+
+            return $"Caught in {location}";
         }
 
         private static string FormatHabitats(ZoneId[] habitats)
@@ -103,20 +152,42 @@ namespace Tidepool.UI
                 return "Unknown";
             }
 
-            string text = habitats[0].ToString();
+            string text = FormatZone(habitats[0]);
             for (int i = 1; i < habitats.Length; i++)
             {
-                text += ", " + habitats[i];
+                text += ", " + FormatZone(habitats[i]);
             }
 
             return text;
         }
 
+        private static string FormatZone(ZoneId zone)
+        {
+            switch (zone)
+            {
+                case ZoneId.TidepoolShallows:
+                    return "Tidepool Shallows";
+                case ZoneId.SeagrassMeadow:
+                    return "Seagrass Meadow";
+                case ZoneId.KelpCurtain:
+                    return "Kelp Curtain";
+                case ZoneId.RockyShelf:
+                    return "Rocky Shelf";
+                default:
+                    return zone.ToString();
+            }
+        }
+
         private void SetProgressText(int found, int total)
         {
-            if (progressText != null)
+            SetText(progressText, $"{found} of {total} found");
+        }
+
+        private static void SetText(Text target, string value)
+        {
+            if (target != null)
             {
-                progressText.text = $"{found} of {total} found";
+                target.text = value;
             }
         }
     }
