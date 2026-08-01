@@ -129,9 +129,15 @@ namespace Tidepool.Runtime
                 return;
             }
 
-            caught.nickname = string.IsNullOrWhiteSpace(nickname)
-                ? caught.nickname
-                : nickname.Trim().Substring(0, Mathf.Min(12, nickname.Trim().Length));
+            if (string.IsNullOrWhiteSpace(nickname))
+            {
+                return;
+            }
+
+            string trimmedNickname = nickname.Trim();
+            caught.nickname = trimmedNickname.Substring(
+                0,
+                Mathf.Min(CaughtTideling.NicknameCharacterLimit, trimmedNickname.Length));
             Save();
         }
 
