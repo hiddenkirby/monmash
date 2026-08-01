@@ -1,3 +1,4 @@
+using System.Collections;
 using Tidepool.Domain;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -15,6 +16,7 @@ namespace Tidepool.Runtime
         [SerializeField] private Image[] jarPips = new Image[3];
         [SerializeField] private Text resultText;
         [SerializeField] private Button letGoButton;
+        [SerializeField, Min(0f)] private float escapeResultSeconds = 0.8f;
 
         private TidelingSpecies species;
         private float markerPosition;
@@ -93,7 +95,7 @@ namespace Tidepool.Runtime
 
                 if (misses >= 3)
                 {
-                    Finish(false);
+                    Finish(false, escapeResultSeconds);
                 }
             }
         }
@@ -146,7 +148,22 @@ namespace Tidepool.Runtime
 
         private void Finish(bool caught)
         {
+            Finish(caught, 0f);
+        }
+
+        private void Finish(bool caught, float delaySeconds)
+        {
             finished = true;
+            StartCoroutine(FinishAfterDelay(caught, delaySeconds));
+        }
+
+        private IEnumerator FinishAfterDelay(bool caught, float delaySeconds)
+        {
+            if (delaySeconds > 0f)
+            {
+                yield return new WaitForSecondsRealtime(delaySeconds);
+            }
+
             EncounterEvents.RaiseEncounterFinished(caught);
             SceneManager.UnloadSceneAsync(gameObject.scene);
         }
@@ -162,4 +179,3 @@ namespace Tidepool.Runtime
         }
     }
 }
-
