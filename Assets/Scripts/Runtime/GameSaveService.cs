@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using Tidepool.Domain;
@@ -37,10 +38,15 @@ namespace Tidepool.Runtime
                 return;
             }
 
-            string json = File.ReadAllText(SavePath);
-            Data = string.IsNullOrWhiteSpace(json) ? new SaveData() : JsonUtility.FromJson<SaveData>(json);
-            if (Data == null || Data.schemaVersion <= 0)
+            try
             {
+                string json = File.ReadAllText(SavePath);
+                Data = string.IsNullOrWhiteSpace(json) ? new SaveData() : JsonUtility.FromJson<SaveData>(json);
+                NormalizeLoadedData();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"Could not load Tidepool save data. Starting a new save. {exception.Message}");
                 Data = new SaveData();
             }
         }
@@ -66,6 +72,11 @@ namespace Tidepool.Runtime
 
         public void MarkSeen(string speciesId)
         {
+            MarkSeen(speciesId, true);
+        }
+
+        private void MarkSeen(string speciesId, bool saveWhenChanged)
+        {
             if (string.IsNullOrWhiteSpace(speciesId))
             {
                 return;
@@ -74,6 +85,10 @@ namespace Tidepool.Runtime
             if (!Data.seenSpeciesIds.Contains(speciesId))
             {
                 Data.seenSpeciesIds.Add(speciesId);
+                if (saveWhenChanged)
+                {
+                    Save();
+                }
             }
         }
 
@@ -84,7 +99,7 @@ namespace Tidepool.Runtime
                 return;
             }
 
-            MarkSeen(species.Id);
+            MarkSeen(species.Id, false);
 
             CaughtTideling existing = FindCaught(species.Id);
             if (existing != null)
@@ -133,6 +148,25 @@ namespace Tidepool.Runtime
             return null;
         }
 
+        private void NormalizeLoadedData()
+        {
+            if (Data == null || Data.schemaVersion <= 0)
+            {
+                Data = new SaveData();
+                return;
+            }
+
+            if (Data.caught == null)
+            {
+                Data.caught = new List<CaughtTideling>();
+            }
+
+            if (Data.seenSpeciesIds == null)
+            {
+                Data.seenSpeciesIds = new List<string>();
+            }
+        }
+
         private void OnApplicationPause(bool pauseStatus)
         {
             if (pauseStatus)
@@ -142,4 +176,3 @@ namespace Tidepool.Runtime
         }
     }
 }
-
