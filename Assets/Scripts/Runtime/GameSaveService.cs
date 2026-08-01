@@ -141,6 +141,38 @@ namespace Tidepool.Runtime
             Save();
         }
 
+        public bool HasSeen(string speciesId)
+        {
+            if (string.IsNullOrWhiteSpace(speciesId) || Data == null || Data.seenSpeciesIds == null)
+            {
+                return false;
+            }
+
+            return Data.seenSpeciesIds.Contains(speciesId);
+        }
+
+        public int CountCaughtSpeciesExcluding(string excludedSpeciesId)
+        {
+            if (Data == null || Data.caught == null)
+            {
+                return 0;
+            }
+
+            int count = 0;
+            for (int i = 0; i < Data.caught.Count; i++)
+            {
+                CaughtTideling caught = Data.caught[i];
+                if (caught != null
+                    && !string.IsNullOrWhiteSpace(caught.speciesId)
+                    && !string.Equals(caught.speciesId, excludedSpeciesId, StringComparison.OrdinalIgnoreCase))
+                {
+                    count += 1;
+                }
+            }
+
+            return count;
+        }
+
         public CaughtTideling FindCaught(string speciesId)
         {
             for (int i = 0; i < Data.caught.Count; i++)
