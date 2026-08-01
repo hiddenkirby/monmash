@@ -39,12 +39,15 @@ This repository is initialized for Unity 6.3 LTS, 2D URP, iOS 15+, landscape iPa
 
 ## Important Local Tooling Note
 
-`git-lfs` was not on PATH when this repo was scaffolded. The LFS tracking rules are present, but run this before committing binary assets:
+Binary art, audio, and video assets must go through Git LFS. Run this before committing binary assets:
 
 ```sh
 brew install git-lfs
 git lfs install --local
+scripts/verify-lfs.sh
 ```
+
+See `docs/ASSET_PIPELINE.md` for the full import checklist.
 
 ## Hard Requirements
 
@@ -52,4 +55,3 @@ git lfs install --local
 - Do not use protected franchise names in code, assets, prompts, or store copy.
 - Log every asset source in `Assets/ASSET_MANIFEST.md`.
 - Keep iPad UI touch targets at least 88pt.
-
