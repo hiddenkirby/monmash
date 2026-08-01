@@ -22,6 +22,7 @@ namespace Tidepool.Runtime
 
         private int remainingGraceSteps;
         private int drySeagrassSteps;
+        private bool encounterActive;
 
         private void OnEnable()
         {
@@ -45,6 +46,11 @@ namespace Tidepool.Runtime
 
         private void HandleStepCompleted(Vector3Int cell)
         {
+            if (encounterActive)
+            {
+                return;
+            }
+
             if (seagrassTilemap == null || !seagrassTilemap.HasTile(cell))
             {
                 return;
@@ -75,6 +81,7 @@ namespace Tidepool.Runtime
             }
 
             drySeagrassSteps = 0;
+            encounterActive = true;
             EncounterContext.CurrentSpecies = species;
             EncounterContext.CurrentZone = currentZone;
             GameSaveService.Instance?.MarkSeen(species.Id);
@@ -158,6 +165,8 @@ namespace Tidepool.Runtime
 
         private void HandleEncounterFinished(bool caught)
         {
+            encounterActive = false;
+            EncounterContext.CurrentSpecies = null;
             remainingGraceSteps = graceStepsAfterEncounter;
             player?.SetInputEnabled(true);
         }
