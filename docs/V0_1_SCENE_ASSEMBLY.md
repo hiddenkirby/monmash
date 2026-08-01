@@ -57,4 +57,4 @@
   - species database
   - slot prefab
   - grid root
-  - detail image/name/current/habitat/field-note/times-seen/nickname fields
+  - detail image/name/current/habitat/caught date and location/field-note/times-seen/nickname fields
