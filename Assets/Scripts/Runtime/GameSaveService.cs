@@ -115,7 +115,9 @@ namespace Tidepool.Runtime
                 nickname = species.DisplayName,
                 caughtAtUtc = DateTime.UtcNow.ToString("O", CultureInfo.InvariantCulture),
                 caughtInZone = zone,
-                timesSeen = 1
+                timesSeen = 1,
+                level = CaughtTideling.MinLevel,
+                levelProgress = 0
             });
 
             Save();
@@ -139,6 +141,18 @@ namespace Tidepool.Runtime
                 0,
                 Mathf.Min(CaughtTideling.NicknameCharacterLimit, trimmedNickname.Length));
             Save();
+        }
+
+        public bool RecordGentleProgress(string speciesId, int progressPoints)
+        {
+            CaughtTideling caught = FindCaught(speciesId);
+            bool changed = TidelingLevelProgression.AddProgress(caught, progressPoints);
+            if (changed)
+            {
+                Save();
+            }
+
+            return changed;
         }
 
         public bool HasSeen(string speciesId)
@@ -215,6 +229,11 @@ namespace Tidepool.Runtime
             if (Data.seenSpeciesIds == null)
             {
                 Data.seenSpeciesIds = new List<string>();
+            }
+
+            for (int i = 0; i < Data.caught.Count; i++)
+            {
+                TidelingLevelProgression.Normalize(Data.caught[i]);
             }
         }
 
