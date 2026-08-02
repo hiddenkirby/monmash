@@ -4,11 +4,12 @@ Every non-code asset that ships with the game belongs here before it is committe
 
 ## Current Committed Asset Inventory
 
-As of 2026-08-01, no shippable art, audio, video, font, or other runtime media assets are committed in this repository.
+As of 2026-08-02, the repository includes a small CC0 prototype tile/UI subset and no creature art, audio, video, font, or other runtime media assets.
 
 | Asset | Type | Source | License | Tool/Model | Date | Prompt or Notes | Reviewed |
 |---|---|---|---|---|---|---|---|
-| None currently committed | Runtime media assets | N/A | N/A | N/A | 2026-08-01 | Repository currently contains code, docs, Unity package metadata, and project settings only. | Yes |
+| `Assets/Art/Tiles/KenneyRpgBase/*` | Tile and obstacle sprites | Kenney RPG Base, https://kenney.nl/assets/rpg-base | Creative Commons CC0, license file included at `Assets/Art/Tiles/KenneyRpgBase/License.txt` | N/A | 2026-08-02 | Curated subset for grass/seagrass-like terrain, sand, shallow water edges, shrubs, fence, and crate obstacles. | Yes - reviewed for protected visual trade dress; selected neutral environment props only. |
+| `Assets/Art/UI/KenneyUiPack/*` | UI sprites | Kenney UI Pack, https://kenney.nl/assets/ui-pack | Creative Commons CC0, license file included at `Assets/Art/UI/KenneyUiPack/License.txt` | N/A | 2026-08-02 | Curated green controls for buttons, square icon buttons, calm-bar slider parts, input field, and divider. | Yes - reviewed for protected visual trade dress; no red/white capture sphere or genre-specific copied UI. |
 
 ## Shared Creature Style Prompt
 
@@ -29,4 +30,5 @@ Add rows here before committing any new shippable non-code asset.
 
 - 2026-08-01: Reviewed committed repository contents for shippable non-code assets. No creature art, tile art, UI art, audio, video, fonts, or other runtime media assets are currently present, so there are no copied designs or protected trade dress to compare.
 - 2026-08-01: Reviewed manifest and project documentation for banned protected-franchise terms or near-miss names intended for release UI/store copy. No release-facing asset prompts or store copy with banned terms or near-miss names are present in this manifest.
+- 2026-08-02: Reviewed imported Kenney tile/UI subset. Assets are generic CC0 environmental tiles, foliage/wood obstacles, and green UI controls; no protected-franchise character art, capture-device trade dress, copied battle UI layout, or protected iconography was introduced.
 - Future AI prompts must not include protected franchise names, existing character names, living artist names, or near-miss references. Log exact prompts in the table above when assets are added.
