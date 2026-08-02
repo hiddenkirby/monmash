@@ -85,7 +85,7 @@ namespace Tidepool.UI
             }
 
             SetText(detailNameText, isCaught ? FormatCaughtName(species, caught) : "?");
-            SetText(detailCurrentText, isCaught ? species.Current.ToString() : "Unknown");
+            SetText(detailCurrentText, isCaught ? TidelingCurrentRules.GetDisplayName(species.Current) : "Unknown");
             SetText(detailHabitatText, isCaught ? FormatHabitats(species.HabitatZones) : "Unknown");
             SetText(detailCaughtText, isCaught ? FormatCatchDetails(caught) : "Not found yet");
             SetText(detailFieldNoteText, isCaught ? species.FieldNote : "Keep looking in the seagrass.");
