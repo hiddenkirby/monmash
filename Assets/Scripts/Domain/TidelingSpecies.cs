@@ -13,6 +13,8 @@ namespace Tidepool.Domain
         [SerializeField] private Sprite sprite;
         [SerializeField, TextArea(2, 5)] private string fieldNote;
         [SerializeField] private ZoneId[] habitatZones = Array.Empty<ZoneId>();
+        [SerializeField] private ContestMove firstContestMove;
+        [SerializeField] private ContestMove secondContestMove;
         [SerializeField, Range(0.1f, 0.75f)] private float catchZoneWidth = 0.35f;
         [SerializeField, Min(0.1f)] private float catchMarkerSpeed = 0.65f;
 
@@ -23,8 +25,20 @@ namespace Tidepool.Domain
         public Sprite Sprite => sprite;
         public string FieldNote => fieldNote;
         public ZoneId[] HabitatZones => habitatZones;
+        public ContestMove FirstContestMove => firstContestMove;
+        public ContestMove SecondContestMove => secondContestMove;
         public float CatchZoneWidth => catchZoneWidth;
         public float CatchMarkerSpeed => catchMarkerSpeed;
+
+        public ContestMove GetContestMove(int index)
+        {
+            if (index == 0)
+            {
+                return firstContestMove;
+            }
+
+            return index == 1 ? secondContestMove : null;
+        }
 
         public bool LivesIn(ZoneId zone)
         {
@@ -55,6 +69,8 @@ namespace Tidepool.Domain
             current = speciesCurrent;
             rarity = speciesRarity;
             habitatZones = speciesHabitats;
+            firstContestMove = null;
+            secondContestMove = null;
             fieldNote = speciesFieldNote;
             catchZoneWidth = speciesCatchZoneWidth;
             catchMarkerSpeed = speciesCatchMarkerSpeed;
@@ -62,4 +78,3 @@ namespace Tidepool.Domain
 #endif
     }
 }
-
