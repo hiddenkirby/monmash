@@ -4,12 +4,16 @@ Every non-code asset that ships with the game belongs here before it is committe
 
 ## Current Committed Asset Inventory
 
-As of 2026-08-02, the repository includes a small CC0 prototype tile/UI subset and no creature art, audio, video, font, or other runtime media assets.
+As of 2026-08-03, the repository includes a small CC0 prototype tile/UI subset, a small original procedural audio set, and no creature art, video, font, or other runtime media assets.
 
 | Asset | Type | Source | License | Tool/Model | Date | Prompt or Notes | Reviewed |
 |---|---|---|---|---|---|---|---|
 | `Assets/Art/Tiles/KenneyRpgBase/*` | Tile and obstacle sprites | Kenney RPG Base, https://kenney.nl/assets/rpg-base | Creative Commons CC0, license file included at `Assets/Art/Tiles/KenneyRpgBase/License.txt` | N/A | 2026-08-02 | Curated subset for grass/seagrass-like terrain, sand, shallow water edges, shrubs, fence, and crate obstacles. | Yes - reviewed for protected visual trade dress; selected neutral environment props only. |
 | `Assets/Art/UI/KenneyUiPack/*` | UI sprites | Kenney UI Pack, https://kenney.nl/assets/ui-pack | Creative Commons CC0, license file included at `Assets/Art/UI/KenneyUiPack/License.txt` | N/A | 2026-08-02 | Curated green controls for buttons, square icon buttons, calm-bar slider parts, input field, and divider. | Yes - reviewed for protected visual trade dress; no red/white capture sphere or genre-specific copied UI. |
+| `Assets/Audio/ambient_loop.wav` | Ambient audio loop | Original procedural synthesis generated in-repo | Original Tidepool project asset | `scripts/generate-minimal-audio-assets.py`, Python `wave`/`math` synthesis | 2026-08-03 | Eight-second soft periodic water-tone bed intended to loop cleanly; no external samples. | Yes - reviewed for absence of recognizable protected motifs or borrowed commercial sounds. |
+| `Assets/Audio/catch_chime.wav` | Catch chime | Original procedural synthesis generated in-repo | Original Tidepool project asset | `scripts/generate-minimal-audio-assets.py`, Python `wave`/`math` synthesis | 2026-08-03 | Short ascending bell-like triad for successful catches; no external samples. | Yes - reviewed for absence of recognizable protected motifs or borrowed commercial sounds. |
+| `Assets/Audio/escape_note.wav` | Escape note | Original procedural synthesis generated in-repo | Original Tidepool project asset | `scripts/generate-minimal-audio-assets.py`, Python `wave`/`math` synthesis | 2026-08-03 | Short warm descending tone for the friendly `It slipped away!` outcome; no external samples. | Yes - reviewed for absence of recognizable protected motifs or borrowed commercial sounds. |
+| `Assets/Audio/ui_tap.wav` | UI tap sound | Original procedural synthesis generated in-repo | Original Tidepool project asset | `scripts/generate-minimal-audio-assets.py`, Python `wave`/`math` synthesis | 2026-08-03 | Quiet percussive UI tap; no external samples. | Yes - reviewed for absence of recognizable protected motifs or borrowed commercial sounds. |
 
 ## Shared Creature Style Prompt
 
@@ -32,4 +36,5 @@ Add rows here before committing any new shippable non-code asset.
 - 2026-08-01: Reviewed manifest and project documentation for banned protected-franchise terms or near-miss names intended for release UI/store copy. No release-facing asset prompts or store copy with banned terms or near-miss names are present in this manifest.
 - 2026-08-02: Reviewed imported Kenney tile/UI subset. Assets are generic CC0 environmental tiles, foliage/wood obstacles, and green UI controls; no protected-franchise character art, capture-device trade dress, copied battle UI layout, or protected iconography was introduced.
 - 2026-08-03: Ran the current public-release asset audit in `docs/PUBLIC_RELEASE_ASSET_AUDIT.md`. The committed candidate still contains only the Kenney CC0 tile/UI subsets plus placeholder `.gitkeep` files for creatures/audio; no AI-generated player-facing assets, audio, video, fonts, or unresolved provenance items are committed.
+- 2026-08-03: Reviewed original procedural audio set. The files are generated from simple sine-wave synthesis with no external samples, no protected melodies, no borrowed commercial sounds, and no recognizable protected motifs.
 - Future AI prompts must not include protected franchise names, existing character names, living artist names, or near-miss references. Log exact prompts in the table above when assets are added.
