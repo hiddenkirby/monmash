@@ -21,6 +21,7 @@ namespace Tidepool.UI
         [SerializeField] private Text detailCaughtText;
         [SerializeField] private Text detailLevelText;
         [SerializeField] private Text detailGrowthText;
+        [SerializeField] private Text detailMovesText;
         [SerializeField] private Text detailFieldNoteText;
         [SerializeField] private Text detailTimesSeenText;
         [SerializeField] private InputField nicknameInput;
@@ -96,6 +97,7 @@ namespace Tidepool.UI
             SetText(detailCaughtText, isCaught ? FormatCatchDetails(caught) : "Not found yet");
             SetText(detailLevelText, isCaught ? FormatLevelDetails(caught) : "Unknown");
             SetText(detailGrowthText, isCaught ? FormatGrowthDetails(caught) : "Keep looking to learn more.");
+            SetText(detailMovesText, isCaught ? FormatMoveDetails(species, caught.level) : "Unknown");
             SetText(detailFieldNoteText, isCaught ? species.FieldNote : "Keep looking in the seagrass.");
             SetText(detailTimesSeenText, isCaught ? $"Seen {caught.timesSeen}" : "Not found yet");
 
@@ -182,6 +184,31 @@ namespace Tidepool.UI
             }
 
             return $"{remainingProgress} friendly moments until next growth";
+        }
+
+        private static string FormatMoveDetails(TidelingSpecies species, int level)
+        {
+            if (species == null)
+            {
+                return "Moves are still being discovered.";
+            }
+
+            string details = string.Empty;
+            for (int i = 0; i < 2; i++)
+            {
+                ContestMove move = species.GetContestMove(i);
+                if (move == null)
+                {
+                    continue;
+                }
+
+                string moveText = species.IsContestMoveUnlocked(i, level)
+                    ? move.DisplayName
+                    : $"{move.DisplayName} at level {species.GetContestMoveUnlockLevel(i)}";
+                details = string.IsNullOrEmpty(details) ? moveText : details + ", " + moveText;
+            }
+
+            return string.IsNullOrEmpty(details) ? "Moves are still being discovered." : details;
         }
 
         private static string FormatHabitats(ZoneId[] habitats)
