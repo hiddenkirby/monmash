@@ -47,6 +47,10 @@ The first implementation should be deterministic and inspectable:
 Contests must never remove caught Tidelings, journal entries, nicknames, seen-species progress,
 or saved player position. A lost contest is just a cue to try again or leave.
 
+Use `ContestParticipantState` for temporary contest-only rest state. A tuckered-out Tideling
+rests for a small number of contest rounds, then becomes available again; this state is not part
+of `SaveData` and must not remove or rewrite collection progress.
+
 Use gentle copy such as:
 
 - `Try another round?`
