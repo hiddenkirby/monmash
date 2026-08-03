@@ -19,6 +19,8 @@ namespace Tidepool.UI
         [SerializeField] private Text detailCurrentText;
         [SerializeField] private Text detailHabitatText;
         [SerializeField] private Text detailCaughtText;
+        [SerializeField] private Text detailLevelText;
+        [SerializeField] private Text detailGrowthText;
         [SerializeField] private Text detailFieldNoteText;
         [SerializeField] private Text detailTimesSeenText;
         [SerializeField] private InputField nicknameInput;
@@ -75,6 +77,10 @@ namespace Tidepool.UI
             selectedSpecies = species;
             CaughtTideling caught = GameSaveService.Instance?.FindCaught(species.Id);
             bool isCaught = caught != null;
+            if (isCaught)
+            {
+                TidelingLevelProgression.Normalize(caught);
+            }
 
             if (detailImage != null)
             {
@@ -88,6 +94,8 @@ namespace Tidepool.UI
             SetText(detailCurrentText, isCaught ? TidelingCurrentRules.GetDisplayName(species.Current) : "Unknown");
             SetText(detailHabitatText, isCaught ? FormatHabitats(species.HabitatZones) : "Unknown");
             SetText(detailCaughtText, isCaught ? FormatCatchDetails(caught) : "Not found yet");
+            SetText(detailLevelText, isCaught ? FormatLevelDetails(caught) : "Unknown");
+            SetText(detailGrowthText, isCaught ? FormatGrowthDetails(caught) : "Keep looking to learn more.");
             SetText(detailFieldNoteText, isCaught ? species.FieldNote : "Keep looking in the seagrass.");
             SetText(detailTimesSeenText, isCaught ? $"Seen {caught.timesSeen}" : "Not found yet");
 
@@ -153,6 +161,27 @@ namespace Tidepool.UI
             }
 
             return $"Caught in {location}";
+        }
+
+        private static string FormatLevelDetails(CaughtTideling caught)
+        {
+            return $"Level {caught.level}";
+        }
+
+        private static string FormatGrowthDetails(CaughtTideling caught)
+        {
+            if (caught.level >= CaughtTideling.MaxLevel)
+            {
+                return "Fully grown";
+            }
+
+            int remainingProgress = TidelingLevelProgression.ProgressPerLevel - caught.levelProgress;
+            if (remainingProgress <= 1)
+            {
+                return "Almost ready to grow";
+            }
+
+            return $"{remainingProgress} friendly moments until next growth";
         }
 
         private static string FormatHabitats(ZoneId[] habitats)

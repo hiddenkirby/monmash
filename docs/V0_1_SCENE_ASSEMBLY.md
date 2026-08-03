@@ -62,5 +62,5 @@
   - species database
   - slot prefab
   - grid root
-  - detail image/name/current/habitat/caught date and location/field-note/times-seen/nickname fields
+  - detail image/name/current/habitat/caught date and location/level/growth/field-note/times-seen/nickname fields
 - Wire the nickname submit button or input submit event to `JournalController.SaveNickname`.
