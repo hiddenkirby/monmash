@@ -40,3 +40,6 @@ Before calling a release candidate ready:
 3. Launch Tidepool.
 4. Walk, trigger an encounter, catch or let a Tideling go, open the journal, rename a caught Tideling, force-quit, relaunch, and confirm save data remains.
 5. Confirm no sign-in, warning, retry, spinner, network permission, or notification prompt appears.
+
+Record the release-facing privacy posture and airplane-mode result in
+`docs/PRIVACY_RELEASE_NOTES.md` before platform submission.
