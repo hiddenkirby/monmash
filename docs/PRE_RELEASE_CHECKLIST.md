@@ -21,3 +21,10 @@ Use this checklist before tagging a playable build.
 - AI-generated assets include tool, model, date, prompt, and review status.
 - Third-party assets include source, license, date, and path.
 - `scripts/verify-lfs.sh` passes before committing binary assets.
+
+## IP Safety
+
+- `scripts/verify-ip-safety-guardrails.sh` passes.
+- `docs/IP_SAFETY_CHECKLIST.md` has been reviewed for store copy, screenshots, and release-facing text.
+- Store copy uses Tidepool's own fiction and vocabulary.
+- Screenshots avoid protected visual trade dress, copied UI layouts, and excluded capture/riding mechanics.
