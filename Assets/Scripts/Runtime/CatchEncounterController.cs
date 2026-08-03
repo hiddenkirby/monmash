@@ -16,6 +16,10 @@ namespace Tidepool.Runtime
         [SerializeField] private Image[] jarPips = new Image[3];
         [SerializeField] private Text resultText;
         [SerializeField] private Button letGoButton;
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip catchChimeClip;
+        [SerializeField] private AudioClip escapeNoteClip;
+        [SerializeField] private AudioClip uiTapClip;
         [SerializeField, Min(0f)] private float escapeResultSeconds = 0.8f;
 
         private TidelingSpecies species;
@@ -42,6 +46,7 @@ namespace Tidepool.Runtime
             creatureImage.sprite = species.Sprite;
             creatureImage.enabled = species.Sprite != null;
             resultText.text = string.Empty;
+            audioSource ??= GetComponent<AudioSource>();
             letGoButton.onClick.AddListener(LetGo);
             RefreshPips();
             LayoutSteadyZone();
@@ -73,6 +78,8 @@ namespace Tidepool.Runtime
             float zoneMax = 0.5f + zoneWidth * 0.5f;
             bool hit = markerPosition >= zoneMin && markerPosition <= zoneMax;
 
+            PlayClip(uiTapClip);
+
             if (hit)
             {
                 hits += 1;
@@ -81,6 +88,7 @@ namespace Tidepool.Runtime
 
                 if (hits >= 3)
                 {
+                    PlayClip(catchChimeClip);
                     GameSaveService.Instance?.RecordCatch(species, EncounterContext.CurrentZone);
                     Finish(true);
                 }
@@ -95,6 +103,7 @@ namespace Tidepool.Runtime
 
                 if (misses >= 3)
                 {
+                    PlayClip(escapeNoteClip);
                     Finish(false, escapeResultSeconds);
                 }
             }
@@ -104,6 +113,7 @@ namespace Tidepool.Runtime
         {
             if (!finished)
             {
+                PlayClip(uiTapClip);
                 resultText.text = "Back to the water.";
                 Finish(false);
             }
@@ -144,6 +154,22 @@ namespace Tidepool.Runtime
                     jarPips[i].enabled = i < hits;
                 }
             }
+        }
+
+        private void PlayClip(AudioClip clip)
+        {
+            if (clip == null)
+            {
+                return;
+            }
+
+            if (audioSource != null)
+            {
+                audioSource.PlayOneShot(clip);
+                return;
+            }
+
+            AudioSource.PlayClipAtPoint(clip, Vector3.zero);
         }
 
         private void Finish(bool caught)

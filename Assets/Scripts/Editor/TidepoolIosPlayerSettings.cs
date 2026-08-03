@@ -11,6 +11,7 @@ namespace Tidepool.Editor
         private const string ProductName = "Tidepool";
         private const string BundleIdentifier = "com.rkirby.tidepool";
         private const string MinimumIosVersion = "15.0";
+        private const string AppIconPath = "Assets/Art/UI/app_icon_glass_jar.png";
         private const int Arm64Architecture = 1;
 
         [MenuItem("Tools/Tidepool/Apply iPad iOS Player Settings")]
@@ -28,6 +29,7 @@ namespace Tidepool.Editor
             PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.iOS, ScriptingImplementation.IL2CPP);
             PlayerSettings.SetArchitecture(NamedBuildTarget.iOS, Arm64Architecture);
+            ApplyAppIcon();
             AssetDatabase.SaveAssets();
 
             Debug.Log("Applied Tidepool iPad iOS Player Settings.");
@@ -75,6 +77,7 @@ namespace Tidepool.Editor
                 failures,
                 PlayerSettings.GetArchitecture(NamedBuildTarget.iOS) != Arm64Architecture,
                 "iOS architecture must be ARM64.");
+            AddFailureIf(failures, !HasAppIconAssigned(), $"iOS app icon must be assigned from {AppIconPath}.");
 
             if (failures.Count == 0)
             {
@@ -92,6 +95,54 @@ namespace Tidepool.Editor
             {
                 failures.Add(message);
             }
+        }
+
+        private static void ApplyAppIcon()
+        {
+            Texture2D appIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AppIconPath);
+            if (appIcon == null)
+            {
+                Debug.LogWarning($"Tidepool app icon asset not found at {AppIconPath}.");
+                return;
+            }
+
+            Texture2D[] icons = PlayerSettings.GetIconsForTargetGroup(BuildTargetGroup.iOS, IconKind.Application);
+            if (icons.Length == 0)
+            {
+                icons = new[] { appIcon };
+            }
+
+            for (int i = 0; i < icons.Length; i++)
+            {
+                icons[i] = appIcon;
+            }
+
+            PlayerSettings.SetIconsForTargetGroup(BuildTargetGroup.iOS, icons, IconKind.Application);
+        }
+
+        private static bool HasAppIconAssigned()
+        {
+            Texture2D appIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AppIconPath);
+            if (appIcon == null)
+            {
+                return false;
+            }
+
+            Texture2D[] icons = PlayerSettings.GetIconsForTargetGroup(BuildTargetGroup.iOS, IconKind.Application);
+            if (icons.Length == 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < icons.Length; i++)
+            {
+                if (icons[i] != appIcon)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
