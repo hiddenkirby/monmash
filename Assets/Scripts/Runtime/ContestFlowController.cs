@@ -31,12 +31,16 @@ namespace Tidepool.Runtime
 
         private TidelingSpecies playerSpecies;
         private TidelingSpecies visitingSpecies;
+        private ContestParticipantState playerState;
+        private ContestParticipantState visitingState;
         private bool contestFinished;
 
         private void Start()
         {
             playerSpecies = ContestContext.PlayerSpecies == null ? fallbackPlayerSpecies : ContestContext.PlayerSpecies;
             visitingSpecies = ContestContext.VisitingSpecies == null ? fallbackVisitingSpecies : ContestContext.VisitingSpecies;
+            playerState = ContestParticipantState.ForSpecies(playerSpecies);
+            visitingState = ContestParticipantState.ForSpecies(visitingSpecies);
 
             BindCreature(playerSpecies, playerImage, playerNameText);
             BindCreature(visitingSpecies, visitingImage, visitingNameText);
@@ -72,8 +76,13 @@ namespace Tidepool.Runtime
         public void Retry()
         {
             contestFinished = false;
-            SetMoveButtonsInteractable(true);
-            SetResultText("Pick a friendly move.");
+            bool playerRested = playerState?.AdvanceRest() ?? false;
+            bool visitingRested = visitingState?.AdvanceRest() ?? false;
+
+            SetMoveButtonsInteractable(CanPlayerChooseMove());
+            SetResultText(playerRested || visitingRested
+                ? "Everyone is ready again. Pick a friendly move."
+                : "Pick a friendly move.");
 
             if (retryButton != null)
             {
@@ -104,6 +113,13 @@ namespace Tidepool.Runtime
                 return;
             }
 
+            if (!CanPlayerChooseMove())
+            {
+                SetResultText("They need a little rest. Try another round?");
+                FinishRound();
+                return;
+            }
+
             ContestMove playerMove = playerSpecies.GetContestMove(moveIndex);
             ContestMove visitingMove = ChooseVisitingMove();
             if (playerMove == null || visitingMove == null)
@@ -119,10 +135,12 @@ namespace Tidepool.Runtime
 
             if (playerScore > visitingScore)
             {
+                visitingState?.MarkTuckeredOut();
                 SetResultText($"{playerMove.DisplayName} sparkles through. {visitingName} is ready for another round.");
             }
             else if (visitingScore > playerScore)
             {
+                playerState?.MarkTuckeredOut();
                 SetResultText($"{visitingName} uses {visitingMove.DisplayName}. Try another round?");
             }
             else
@@ -175,6 +193,11 @@ namespace Tidepool.Runtime
         {
             SetButtonInteractable(firstMoveButton, interactable && playerSpecies?.FirstContestMove != null);
             SetButtonInteractable(secondMoveButton, interactable && playerSpecies?.SecondContestMove != null);
+        }
+
+        private bool CanPlayerChooseMove()
+        {
+            return playerState == null || playerState.CanChooseMove;
         }
 
         private static void BindCreature(TidelingSpecies species, Image image, Text nameText)
