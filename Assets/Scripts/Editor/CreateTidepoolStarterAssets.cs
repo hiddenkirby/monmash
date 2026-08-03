@@ -10,6 +10,7 @@ namespace Tidepool.Editor
     {
         private const string SpeciesFolder = "Assets/Data/Species";
         private const string DatabasePath = "Assets/Data/Databases/SpeciesDatabase.asset";
+        private const string CreatureSpriteFolder = "Assets/Art/Creatures";
 
         [MenuItem("Tools/Tidepool/Create Starter Species Assets")]
         public static void CreateStarterSpeciesAssets()
@@ -39,6 +40,7 @@ namespace Tidepool.Editor
                     seed.FieldNote,
                     seed.CatchZoneWidth,
                     seed.CatchMarkerSpeed);
+                AssignSprite(species, seed.Id);
                 EditorUtility.SetDirty(species);
                 createdSpecies.Add(species);
             }
@@ -62,6 +64,25 @@ namespace Tidepool.Editor
             EditorUtility.SetDirty(database);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+        }
+
+        private static void AssignSprite(TidelingSpecies species, string speciesId)
+        {
+            string spritePath = $"{CreatureSpriteFolder}/{speciesId}.png";
+            TextureImporter importer = AssetImporter.GetAtPath(spritePath) as TextureImporter;
+            if (importer != null && importer.textureType != TextureImporterType.Sprite)
+            {
+                importer.textureType = TextureImporterType.Sprite;
+                importer.spriteImportMode = SpriteImportMode.Single;
+                importer.alphaIsTransparency = true;
+                importer.mipmapEnabled = false;
+                importer.SaveAndReimport();
+            }
+
+            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
+            SerializedObject serializedSpecies = new SerializedObject(species);
+            serializedSpecies.FindProperty("sprite").objectReferenceValue = sprite;
+            serializedSpecies.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static void EnsureFolder(string path)
@@ -126,4 +147,3 @@ namespace Tidepool.Editor
         }
     }
 }
-

@@ -11,14 +11,18 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 96e429b03e0f4a5ebee78f24380b8641, type: 3}
   m_Name: tanglemaw
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   id: tanglemaw
   displayName: Tanglemaw
   current: 2
   rarity: 2
-  sprite: {fileID: 0}
-  fieldNote: A curious octopus that would rather inspect the jar than sit inside it.
-  habitatZones:
-  - 1
+  sprite: {fileID: 21300000, guid: 6cbd07ccde84d475eb323bad92e5091b, type: 3}
+  fieldNote: A curious octopus that would rather inspect the jar than sit inside
+    it.
+  habitatZones: 01000000
+  firstContestMove: {fileID: 0}
+  firstContestMoveUnlockLevel: 1
+  secondContestMove: {fileID: 0}
+  secondContestMoveUnlockLevel: 3
   catchZoneWidth: 0.24
   catchMarkerSpeed: 0.88

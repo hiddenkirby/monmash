@@ -11,14 +11,17 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 96e429b03e0f4a5ebee78f24380b8641, type: 3}
   m_Name: blip
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   id: blip
   displayName: Blip
   current: 0
   rarity: 0
-  sprite: {fileID: 0}
+  sprite: {fileID: 21300000, guid: dae9e1b023ac34a64a72b9c02e369a65, type: 3}
   fieldNote: A thumb-sized darting fish that always seems to be late for something.
-  habitatZones:
-  - 0
+  habitatZones: 00000000
+  firstContestMove: {fileID: 0}
+  firstContestMoveUnlockLevel: 1
+  secondContestMove: {fileID: 0}
+  secondContestMoveUnlockLevel: 3
   catchZoneWidth: 0.4
   catchMarkerSpeed: 0.55
