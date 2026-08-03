@@ -12,6 +12,10 @@ namespace Tidepool.Editor
     public static class CreateV01CatchEncounterScene
     {
         private const string ScenePath = "Assets/Scenes/CatchEncounter.unity";
+        private const string AmbientLoopPath = "Assets/Audio/ambient_loop.wav";
+        private const string CatchChimePath = "Assets/Audio/catch_chime.wav";
+        private const string EscapeNotePath = "Assets/Audio/escape_note.wav";
+        private const string UiTapPath = "Assets/Audio/ui_tap.wav";
 
         [MenuItem("Tools/Tidepool/Create v0.1 CatchEncounter Scene")]
         public static void CreateCatchEncounterScene()
@@ -22,6 +26,21 @@ namespace Tidepool.Editor
 
             GameObject controllerObject = new GameObject("CatchEncounterController");
             CatchEncounterController controller = controllerObject.AddComponent<CatchEncounterController>();
+            AudioSource controllerAudioSource = controllerObject.AddComponent<AudioSource>();
+            controllerAudioSource.playOnAwake = false;
+            controllerAudioSource.spatialBlend = 0f;
+
+            AudioClip ambientLoop = AssetDatabase.LoadAssetAtPath<AudioClip>(AmbientLoopPath);
+            if (ambientLoop != null)
+            {
+                GameObject ambientObject = new GameObject("AmbientLoopAudio");
+                AudioSource ambientSource = ambientObject.AddComponent<AudioSource>();
+                ambientSource.clip = ambientLoop;
+                ambientSource.loop = true;
+                ambientSource.playOnAwake = true;
+                ambientSource.volume = 0.2f;
+                ambientSource.spatialBlend = 0f;
+            }
 
             Canvas canvas = CreateCanvas();
             RectTransform safeArea = CreateRect("SafeArea", canvas.transform);
@@ -83,6 +102,10 @@ namespace Tidepool.Editor
 
             serializedController.FindProperty("resultText").objectReferenceValue = resultText;
             serializedController.FindProperty("letGoButton").objectReferenceValue = letGoButton;
+            serializedController.FindProperty("audioSource").objectReferenceValue = controllerAudioSource;
+            serializedController.FindProperty("catchChimeClip").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(CatchChimePath);
+            serializedController.FindProperty("escapeNoteClip").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(EscapeNotePath);
+            serializedController.FindProperty("uiTapClip").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(UiTapPath);
             serializedController.ApplyModifiedProperties();
 
             EditorSceneManager.SaveScene(scene, ScenePath);
