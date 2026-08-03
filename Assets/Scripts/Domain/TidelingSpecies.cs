@@ -14,7 +14,11 @@ namespace Tidepool.Domain
         [SerializeField, TextArea(2, 5)] private string fieldNote;
         [SerializeField] private ZoneId[] habitatZones = Array.Empty<ZoneId>();
         [SerializeField] private ContestMove firstContestMove;
+        [SerializeField, Range(CaughtTideling.MinLevel, CaughtTideling.MaxLevel)]
+        private int firstContestMoveUnlockLevel = CaughtTideling.MinLevel;
         [SerializeField] private ContestMove secondContestMove;
+        [SerializeField, Range(CaughtTideling.MinLevel, CaughtTideling.MaxLevel)]
+        private int secondContestMoveUnlockLevel = 3;
         [SerializeField, Range(0.1f, 0.75f)] private float catchZoneWidth = 0.35f;
         [SerializeField, Min(0.1f)] private float catchMarkerSpeed = 0.65f;
 
@@ -26,7 +30,9 @@ namespace Tidepool.Domain
         public string FieldNote => fieldNote;
         public ZoneId[] HabitatZones => habitatZones;
         public ContestMove FirstContestMove => firstContestMove;
+        public int FirstContestMoveUnlockLevel => firstContestMoveUnlockLevel;
         public ContestMove SecondContestMove => secondContestMove;
+        public int SecondContestMoveUnlockLevel => secondContestMoveUnlockLevel;
         public float CatchZoneWidth => catchZoneWidth;
         public float CatchMarkerSpeed => catchMarkerSpeed;
 
@@ -38,6 +44,44 @@ namespace Tidepool.Domain
             }
 
             return index == 1 ? secondContestMove : null;
+        }
+
+        public int GetContestMoveUnlockLevel(int index)
+        {
+            if (index == 0)
+            {
+                return ClampUnlockLevel(firstContestMoveUnlockLevel);
+            }
+
+            return index == 1
+                ? ClampUnlockLevel(secondContestMoveUnlockLevel)
+                : CaughtTideling.MaxLevel;
+        }
+
+        public ContestMove GetUnlockedContestMove(int index, int level)
+        {
+            return IsContestMoveUnlocked(index, level) ? GetContestMove(index) : null;
+        }
+
+        public bool IsContestMoveUnlocked(int index, int level)
+        {
+            return GetContestMove(index) != null && level >= GetContestMoveUnlockLevel(index);
+        }
+
+        public int CountUnlockedContestMoves(int level)
+        {
+            int count = 0;
+            if (IsContestMoveUnlocked(0, level))
+            {
+                count += 1;
+            }
+
+            if (IsContestMoveUnlocked(1, level))
+            {
+                count += 1;
+            }
+
+            return count;
         }
 
         public bool LivesIn(ZoneId zone)
@@ -70,11 +114,23 @@ namespace Tidepool.Domain
             rarity = speciesRarity;
             habitatZones = speciesHabitats;
             firstContestMove = null;
+            firstContestMoveUnlockLevel = CaughtTideling.MinLevel;
             secondContestMove = null;
+            secondContestMoveUnlockLevel = 3;
             fieldNote = speciesFieldNote;
             catchZoneWidth = speciesCatchZoneWidth;
             catchMarkerSpeed = speciesCatchMarkerSpeed;
         }
 #endif
+
+        private static int ClampUnlockLevel(int unlockLevel)
+        {
+            if (unlockLevel < CaughtTideling.MinLevel)
+            {
+                return CaughtTideling.MinLevel;
+            }
+
+            return unlockLevel > CaughtTideling.MaxLevel ? CaughtTideling.MaxLevel : unlockLevel;
+        }
     }
 }

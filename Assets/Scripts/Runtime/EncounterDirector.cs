@@ -65,7 +65,7 @@ namespace Tidepool.Runtime
 
             drySeagrassSteps += 1;
             bool shouldForceEncounter = drySeagrassSteps >= pitySteps;
-            bool rolledEncounter = Random.value < encounterChance;
+            bool rolledEncounter = UnityEngine.Random.value < encounterChance;
 
             if (shouldForceEncounter || rolledEncounter)
             {
@@ -115,7 +115,7 @@ namespace Tidepool.Runtime
                 }
             }
 
-            return matches.Count == 0 ? null : matches[Random.Range(0, matches.Count)];
+            return matches.Count == 0 ? null : matches[UnityEngine.Random.Range(0, matches.Count)];
         }
 
         private TidelingSpecies PickOldBarnabyIfUnlocked()
@@ -144,7 +144,7 @@ namespace Tidepool.Runtime
 
         private static TidelingRarity RollRarity()
         {
-            float roll = Random.value;
+            float roll = UnityEngine.Random.value;
             if (roll < 0.60f)
             {
                 return TidelingRarity.Common;
