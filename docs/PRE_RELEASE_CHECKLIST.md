@@ -6,8 +6,10 @@ Use this checklist before tagging a playable build.
 
 - `scripts/verify-no-network-guardrails.sh` passes.
 - No analytics, ads, IAP, accounts, notifications, crash SDKs, telemetry, multiplayer, or online services are present.
+- `docs/PRIVACY_RELEASE_NOTES.md` matches the final build and package manifest.
 - A clean iPad build works in airplane mode.
 - Airplane-mode play covers walking, encounters, catching or letting go, journal open, nickname edit, force-quit, relaunch, and save persistence.
+- Platform privacy disclosure answers are copied from the verified privacy notes, not from an earlier draft.
 
 ## iPad Build
 
