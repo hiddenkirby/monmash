@@ -11,14 +11,17 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 96e429b03e0f4a5ebee78f24380b8641, type: 3}
   m_Name: gullwing
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   id: gullwing
   displayName: Gullwing
   current: 0
   rarity: 2
-  sprite: {fileID: 0}
+  sprite: {fileID: 21300000, guid: 94785c2948f4a45bcbfa027f200cc489, type: 3}
   fieldNote: A flying fish that flashes silver at the edge of daylight.
-  habitatZones:
-  - 1
+  habitatZones: 01000000
+  firstContestMove: {fileID: 0}
+  firstContestMoveUnlockLevel: 1
+  secondContestMove: {fileID: 0}
+  secondContestMoveUnlockLevel: 3
   catchZoneWidth: 0.24
   catchMarkerSpeed: 0.88

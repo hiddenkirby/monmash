@@ -11,14 +11,17 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 96e429b03e0f4a5ebee78f24380b8641, type: 3}
   m_Name: wobbet
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   id: wobbet
   displayName: Wobbet
   current: 2
   rarity: 0
-  sprite: {fileID: 0}
+  sprite: {fileID: 21300000, guid: b88973d66a5054f2990ac9878d75267e, type: 3}
   fieldNote: A round jelly that drifts calmly until it bumps into something interesting.
-  habitatZones:
-  - 1
+  habitatZones: 01000000
+  firstContestMove: {fileID: 0}
+  firstContestMoveUnlockLevel: 1
+  secondContestMove: {fileID: 0}
+  secondContestMoveUnlockLevel: 3
   catchZoneWidth: 0.38
   catchMarkerSpeed: 0.58

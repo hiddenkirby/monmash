@@ -11,14 +11,17 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 96e429b03e0f4a5ebee78f24380b8641, type: 3}
   m_Name: thistlecoat
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   id: thistlecoat
   displayName: Thistlecoat
   current: 1
   rarity: 1
-  sprite: {fileID: 0}
+  sprite: {fileID: 21300000, guid: 3b6687fb99736482ba4915fd1f6a6b98, type: 3}
   fieldNote: A careful urchin whose spines lie flat when it decides to trust you.
-  habitatZones:
-  - 1
+  habitatZones: 01000000
+  firstContestMove: {fileID: 0}
+  firstContestMoveUnlockLevel: 1
+  secondContestMove: {fileID: 0}
+  secondContestMoveUnlockLevel: 3
   catchZoneWidth: 0.3
   catchMarkerSpeed: 0.72
