@@ -47,6 +47,7 @@ namespace Tidepool.Runtime
             creatureImage.enabled = species.Sprite != null;
             resultText.text = string.Empty;
             audioSource ??= GetComponent<AudioSource>();
+            TidepoolSettingsService.ApplyGlobalAudio();
             letGoButton.onClick.AddListener(LetGo);
             RefreshPips();
             LayoutSteadyZone();
@@ -163,6 +164,7 @@ namespace Tidepool.Runtime
                 return;
             }
 
+            TidepoolSettingsService.ApplyGlobalAudio();
             if (audioSource != null)
             {
                 audioSource.PlayOneShot(clip);

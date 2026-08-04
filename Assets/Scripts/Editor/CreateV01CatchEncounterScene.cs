@@ -86,6 +86,7 @@ namespace Tidepool.Editor
             resultText.color = new Color(0.08f, 0.18f, 0.22f);
 
             Button letGoButton = CreateButton("LetGoButton", safeArea, "Let it go", new Vector2(0f, -340f), new Vector2(220f, 96f));
+            SettingsController settingsController = CreateSettingsControls(safeArea);
 
             SerializedObject serializedController = new SerializedObject(controller);
             serializedController.FindProperty("creatureImage").objectReferenceValue = creatureImage;
@@ -108,6 +109,12 @@ namespace Tidepool.Editor
             serializedController.FindProperty("uiTapClip").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(UiTapPath);
             serializedController.ApplyModifiedProperties();
 
+            SerializedObject serializedSettings = new SerializedObject(settingsController);
+            serializedSettings.FindProperty("muteToggle").objectReferenceValue = safeArea.Find("SettingsPanel/MuteToggle")?.GetComponent<Toggle>();
+            serializedSettings.FindProperty("volumeSlider").objectReferenceValue = safeArea.Find("SettingsPanel/VolumeSlider")?.GetComponent<Slider>();
+            serializedSettings.FindProperty("volumeValueText").objectReferenceValue = safeArea.Find("SettingsPanel/VolumeValue")?.GetComponent<Text>();
+            serializedSettings.ApplyModifiedProperties();
+
             EditorSceneManager.SaveScene(scene, ScenePath);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -128,6 +135,27 @@ namespace Tidepool.Editor
             return canvas;
         }
 
+        private static SettingsController CreateSettingsControls(Transform parent)
+        {
+            Image panel = CreateImage("SettingsPanel", parent, new Color(0.08f, 0.22f, 0.24f, 0.90f), new Vector2(302f, 250f), new Vector2(360f, 184f));
+
+            Text label = CreateText("SettingsLabel", panel.transform, "Audio", 22, TextAnchor.MiddleLeft, new Vector2(-116f, 48f), new Vector2(108f, 36f));
+            label.color = Color.white;
+
+            Toggle muteToggle = CreateToggle("MuteToggle", panel.transform, new Vector2(92f, 48f), new Vector2(132f, 88f));
+            Text muteLabel = CreateText("Label", muteToggle.transform, "Mute", 20, TextAnchor.MiddleLeft, new Vector2(30f, 0f), new Vector2(76f, 44f));
+            muteLabel.color = Color.white;
+
+            Slider volumeSlider = CreateSlider("VolumeSlider", panel.transform, new Vector2(-42f, -48f), new Vector2(220f, 88f));
+            Text volumeValue = CreateText("VolumeValue", panel.transform, "100%", 20, TextAnchor.MiddleRight, new Vector2(124f, -48f), new Vector2(82f, 44f));
+            volumeValue.color = Color.white;
+
+            SettingsController controller = panel.gameObject.AddComponent<SettingsController>();
+            muteToggle.isOn = false;
+            volumeSlider.value = 1f;
+            return controller;
+        }
+
         private static Button CreateButton(string name, Transform parent, string label, Vector2 anchoredPosition, Vector2 size)
         {
             Image image = CreateImage(name, parent, new Color(0.12f, 0.44f, 0.50f), anchoredPosition, size);
@@ -137,6 +165,59 @@ namespace Tidepool.Editor
             Text text = CreateText("Label", image.transform, label, 30, TextAnchor.MiddleCenter, Vector2.zero, size);
             text.color = Color.white;
             return button;
+        }
+
+        private static Toggle CreateToggle(string name, Transform parent, Vector2 anchoredPosition, Vector2 size)
+        {
+            RectTransform root = CreateRect(name, parent);
+            root.anchoredPosition = anchoredPosition;
+            root.sizeDelta = size;
+
+            Image background = CreateImage("Background", root, new Color(0.87f, 0.96f, 0.88f), new Vector2(-40f, 0f), new Vector2(44f, 44f));
+            Image checkmark = CreateImage("Checkmark", background.transform, new Color(0.12f, 0.44f, 0.50f), Vector2.zero, new Vector2(28f, 28f));
+
+            Toggle toggle = root.gameObject.AddComponent<Toggle>();
+            toggle.targetGraphic = background;
+            toggle.graphic = checkmark;
+            return toggle;
+        }
+
+        private static Slider CreateSlider(string name, Transform parent, Vector2 anchoredPosition, Vector2 size)
+        {
+            RectTransform root = CreateRect(name, parent);
+            root.anchoredPosition = anchoredPosition;
+            root.sizeDelta = size;
+
+            Image background = CreateImage("Background", root, new Color(0.35f, 0.58f, 0.62f), Vector2.zero, size);
+            RectTransform fillArea = CreateRect("Fill Area", root);
+            fillArea.anchorMin = Vector2.zero;
+            fillArea.anchorMax = Vector2.one;
+            fillArea.offsetMin = new Vector2(4f, 4f);
+            fillArea.offsetMax = new Vector2(-4f, -4f);
+
+            Image fill = CreateImage("Fill", fillArea, new Color(0.87f, 0.96f, 0.88f), Vector2.zero, Vector2.zero);
+            fill.rectTransform.anchorMin = Vector2.zero;
+            fill.rectTransform.anchorMax = Vector2.one;
+            fill.rectTransform.offsetMin = Vector2.zero;
+            fill.rectTransform.offsetMax = Vector2.zero;
+
+            RectTransform handleArea = CreateRect("Handle Slide Area", root);
+            handleArea.anchorMin = Vector2.zero;
+            handleArea.anchorMax = Vector2.one;
+            handleArea.offsetMin = new Vector2(4f, -6f);
+            handleArea.offsetMax = new Vector2(-4f, 6f);
+
+            Image handle = CreateImage("Handle", handleArea, Color.white, Vector2.zero, new Vector2(44f, 76f));
+
+            Slider slider = root.gameObject.AddComponent<Slider>();
+            slider.targetGraphic = background;
+            slider.fillRect = fill.rectTransform;
+            slider.handleRect = handle.rectTransform;
+            slider.direction = Slider.Direction.LeftToRight;
+            slider.minValue = 0f;
+            slider.maxValue = 1f;
+            slider.value = 1f;
+            return slider;
         }
 
         private static Image CreateImage(string name, Transform parent, Color color, Vector2 anchoredPosition, Vector2 size)

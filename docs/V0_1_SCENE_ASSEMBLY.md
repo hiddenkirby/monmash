@@ -53,6 +53,7 @@
   - three jar pip images
   - result text
   - let-go button
+  - settings panel mute toggle, volume slider, and volume value text
 
 ## Journal
 
