@@ -13,6 +13,8 @@ namespace Tidepool.Domain
         [SerializeField] private Sprite sprite;
         [SerializeField, TextArea(2, 5)] private string fieldNote;
         [SerializeField] private ZoneId[] habitatZones = Array.Empty<ZoneId>();
+        [SerializeField] private EncounterAvailability encounterAvailability = EncounterAvailability.Always;
+        [SerializeField] private string availabilityHint;
         [SerializeField] private ContestMove firstContestMove;
         [SerializeField, Range(CaughtTideling.MinLevel, CaughtTideling.MaxLevel)]
         private int firstContestMoveUnlockLevel = CaughtTideling.MinLevel;
@@ -29,6 +31,8 @@ namespace Tidepool.Domain
         public Sprite Sprite => sprite;
         public string FieldNote => fieldNote;
         public ZoneId[] HabitatZones => habitatZones;
+        public EncounterAvailability EncounterAvailability => encounterAvailability;
+        public string AvailabilityHint => availabilityHint;
         public ContestMove FirstContestMove => firstContestMove;
         public int FirstContestMoveUnlockLevel => firstContestMoveUnlockLevel;
         public ContestMove SecondContestMove => secondContestMove;
@@ -104,6 +108,8 @@ namespace Tidepool.Domain
             TidelingCurrent speciesCurrent,
             TidelingRarity speciesRarity,
             ZoneId[] speciesHabitats,
+            EncounterAvailability speciesEncounterAvailability,
+            string speciesAvailabilityHint,
             string speciesFieldNote,
             float speciesCatchZoneWidth,
             float speciesCatchMarkerSpeed)
@@ -113,6 +119,8 @@ namespace Tidepool.Domain
             current = speciesCurrent;
             rarity = speciesRarity;
             habitatZones = speciesHabitats;
+            encounterAvailability = speciesEncounterAvailability;
+            availabilityHint = speciesAvailabilityHint;
             firstContestMove = null;
             firstContestMoveUnlockLevel = CaughtTideling.MinLevel;
             secondContestMove = null;

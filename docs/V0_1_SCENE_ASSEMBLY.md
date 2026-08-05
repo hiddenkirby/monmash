@@ -33,6 +33,8 @@
     - `TidepoolShallows` for the Shallows area
     - `SeagrassMeadow` for the Meadow area
   - catch scene name: `CatchEncounter`
+  - in-game daylight cycle defaults unless a later playtest needs faster/slower
+    conditional encounters
 - If Shallows and Meadow are built as one continuous scene, use one `EncounterDirector`
   per encounter zone until a later zone-volume system exists; each director should point
   at the seagrass tilemap for its own zone and set its `currentZone` accordingly.
@@ -65,3 +67,7 @@
   - grid root
   - detail image/name/current/habitat/caught date and location/level/growth/moves/field-note/times-seen/nickname fields
 - Wire the nickname submit button or input submit event to `JournalController.SaveNickname`.
+- Conditional encounter hints are appended to the existing habitat text, so no
+  separate Journal field is required for v0.4 availability rules.
+
+See `docs/DAY_NIGHT_RULES.md` before tuning conditional encounter timing.

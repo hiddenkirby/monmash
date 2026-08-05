@@ -37,6 +37,8 @@ namespace Tidepool.Editor
                     seed.Current,
                     seed.Rarity,
                     seed.Habitats,
+                    seed.Availability,
+                    seed.AvailabilityHint,
                     seed.FieldNote,
                     seed.CatchZoneWidth,
                     seed.CatchMarkerSpeed);
@@ -99,19 +101,19 @@ namespace Tidepool.Editor
 
         private static readonly SpeciesSeed[] Seeds =
         {
-            new SpeciesSeed("blip", "Blip", TidelingCurrent.Current, TidelingRarity.Common, new[] { ZoneId.TidepoolShallows }, "A thumb-sized darting fish that always seems to be late for something.", 0.40f, 0.55f),
-            new SpeciesSeed("nubbin", "Nubbin", TidelingCurrent.Stone, TidelingRarity.Common, new[] { ZoneId.TidepoolShallows }, "A hermit crab wearing a pebble that is much too big, but clearly treasured.", 0.40f, 0.55f),
-            new SpeciesSeed("frillick", "Frillick", TidelingCurrent.Coral, TidelingRarity.Common, new[] { ZoneId.TidepoolShallows }, "A ruffled sea slug that moves like a ribbon settling through water.", 0.40f, 0.55f),
-            new SpeciesSeed("sputter", "Sputter", TidelingCurrent.Glow, TidelingRarity.Common, new[] { ZoneId.TidepoolShallows }, "A blinking little plankton cluster that travels as one shy sparkle.", 0.40f, 0.55f),
-            new SpeciesSeed("wobbet", "Wobbet", TidelingCurrent.Tide, TidelingRarity.Common, new[] { ZoneId.SeagrassMeadow }, "A round jelly that drifts calmly until it bumps into something interesting.", 0.38f, 0.58f),
-            new SpeciesSeed("clackaw", "Clackaw", TidelingCurrent.Stone, TidelingRarity.Uncommon, new[] { ZoneId.SeagrassMeadow }, "A small shrimp with one enormous claw and a very serious snap.", 0.30f, 0.72f),
-            new SpeciesSeed("sweepfin", "Sweepfin", TidelingCurrent.Current, TidelingRarity.Uncommon, new[] { ZoneId.SeagrassMeadow }, "A palm-sized ray that glides just below the surface like a leaf on wind.", 0.30f, 0.72f),
-            new SpeciesSeed("mossback", "Mossback", TidelingCurrent.Coral, TidelingRarity.Uncommon, new[] { ZoneId.SeagrassMeadow }, "A tiny turtle carrying a soft green garden on its shell.", 0.30f, 0.72f),
-            new SpeciesSeed("lumen", "Lumen", TidelingCurrent.Glow, TidelingRarity.Uncommon, new[] { ZoneId.SeagrassMeadow }, "A lanternfish whose light dims whenever it feels shy.", 0.30f, 0.72f),
-            new SpeciesSeed("thistlecoat", "Thistlecoat", TidelingCurrent.Coral, TidelingRarity.Uncommon, new[] { ZoneId.SeagrassMeadow }, "A careful urchin whose spines lie flat when it decides to trust you.", 0.30f, 0.72f),
-            new SpeciesSeed("gullwing", "Gullwing", TidelingCurrent.Current, TidelingRarity.Rare, new[] { ZoneId.SeagrassMeadow }, "A flying fish that flashes silver at the edge of daylight.", 0.24f, 0.88f),
-            new SpeciesSeed("tanglemaw", "Tanglemaw", TidelingCurrent.Tide, TidelingRarity.Rare, new[] { ZoneId.SeagrassMeadow }, "A curious octopus that would rather inspect the jar than sit inside it.", 0.24f, 0.88f),
-            new SpeciesSeed("old-barnaby", "Old Barnaby", TidelingCurrent.Stone, TidelingRarity.Secret, new[] { ZoneId.TidepoolShallows }, "An ancient barnacled shape that seems to know every quiet pool by name.", 0.22f, 0.92f)
+            new SpeciesSeed("blip", "Blip", TidelingCurrent.Current, TidelingRarity.Common, new[] { ZoneId.TidepoolShallows }, EncounterAvailability.Always, string.Empty, "A thumb-sized darting fish that always seems to be late for something.", 0.40f, 0.55f),
+            new SpeciesSeed("nubbin", "Nubbin", TidelingCurrent.Stone, TidelingRarity.Common, new[] { ZoneId.TidepoolShallows }, EncounterAvailability.Always, string.Empty, "A hermit crab wearing a pebble that is much too big, but clearly treasured.", 0.40f, 0.55f),
+            new SpeciesSeed("frillick", "Frillick", TidelingCurrent.Coral, TidelingRarity.Common, new[] { ZoneId.TidepoolShallows }, EncounterAvailability.Always, string.Empty, "A ruffled sea slug that moves like a ribbon settling through water.", 0.40f, 0.55f),
+            new SpeciesSeed("sputter", "Sputter", TidelingCurrent.Glow, TidelingRarity.Common, new[] { ZoneId.TidepoolShallows }, EncounterAvailability.Always, string.Empty, "A blinking little plankton cluster that travels as one shy sparkle.", 0.40f, 0.55f),
+            new SpeciesSeed("wobbet", "Wobbet", TidelingCurrent.Tide, TidelingRarity.Common, new[] { ZoneId.SeagrassMeadow }, EncounterAvailability.Always, string.Empty, "A round jelly that drifts calmly until it bumps into something interesting.", 0.38f, 0.58f),
+            new SpeciesSeed("clackaw", "Clackaw", TidelingCurrent.Stone, TidelingRarity.Uncommon, new[] { ZoneId.SeagrassMeadow }, EncounterAvailability.Always, string.Empty, "A small shrimp with one enormous claw and a very serious snap.", 0.30f, 0.72f),
+            new SpeciesSeed("sweepfin", "Sweepfin", TidelingCurrent.Current, TidelingRarity.Uncommon, new[] { ZoneId.SeagrassMeadow }, EncounterAvailability.Always, string.Empty, "A palm-sized ray that glides just below the surface like a leaf on wind.", 0.30f, 0.72f),
+            new SpeciesSeed("mossback", "Mossback", TidelingCurrent.Coral, TidelingRarity.Uncommon, new[] { ZoneId.SeagrassMeadow }, EncounterAvailability.Always, string.Empty, "A tiny turtle carrying a soft green garden on its shell.", 0.30f, 0.72f),
+            new SpeciesSeed("lumen", "Lumen", TidelingCurrent.Glow, TidelingRarity.Uncommon, new[] { ZoneId.SeagrassMeadow }, EncounterAvailability.Always, string.Empty, "A lanternfish whose light dims whenever it feels shy.", 0.30f, 0.72f),
+            new SpeciesSeed("thistlecoat", "Thistlecoat", TidelingCurrent.Coral, TidelingRarity.Uncommon, new[] { ZoneId.SeagrassMeadow }, EncounterAvailability.Always, string.Empty, "A careful urchin whose spines lie flat when it decides to trust you.", 0.30f, 0.72f),
+            new SpeciesSeed("gullwing", "Gullwing", TidelingCurrent.Current, TidelingRarity.Rare, new[] { ZoneId.SeagrassMeadow }, EncounterAvailability.LastHourOfDaylight, "Look near the end of the daylight cycle.", "A flying fish that flashes silver at the edge of daylight.", 0.24f, 0.88f),
+            new SpeciesSeed("tanglemaw", "Tanglemaw", TidelingCurrent.Tide, TidelingRarity.Rare, new[] { ZoneId.SeagrassMeadow }, EncounterAvailability.Always, string.Empty, "A curious octopus that would rather inspect the jar than sit inside it.", 0.24f, 0.88f),
+            new SpeciesSeed("old-barnaby", "Old Barnaby", TidelingCurrent.Stone, TidelingRarity.Secret, new[] { ZoneId.TidepoolShallows }, EncounterAvailability.Always, string.Empty, "An ancient barnacled shape that seems to know every quiet pool by name.", 0.22f, 0.92f)
         };
 
         private readonly struct SpeciesSeed
@@ -121,6 +123,8 @@ namespace Tidepool.Editor
             public readonly TidelingCurrent Current;
             public readonly TidelingRarity Rarity;
             public readonly ZoneId[] Habitats;
+            public readonly EncounterAvailability Availability;
+            public readonly string AvailabilityHint;
             public readonly string FieldNote;
             public readonly float CatchZoneWidth;
             public readonly float CatchMarkerSpeed;
@@ -131,6 +135,8 @@ namespace Tidepool.Editor
                 TidelingCurrent current,
                 TidelingRarity rarity,
                 ZoneId[] habitats,
+                EncounterAvailability availability,
+                string availabilityHint,
                 string fieldNote,
                 float catchZoneWidth,
                 float catchMarkerSpeed)
@@ -140,6 +146,8 @@ namespace Tidepool.Editor
                 Current = current;
                 Rarity = rarity;
                 Habitats = habitats;
+                Availability = availability;
+                AvailabilityHint = availabilityHint;
                 FieldNote = fieldNote;
                 CatchZoneWidth = catchZoneWidth;
                 CatchMarkerSpeed = catchMarkerSpeed;
