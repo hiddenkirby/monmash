@@ -17,6 +17,7 @@ namespace Tidepool.UI
         [SerializeField] private Image detailImage;
         [SerializeField] private Text detailNameText;
         [SerializeField] private Text detailCurrentText;
+        [SerializeField] private Image detailCurrentIcon;
         [SerializeField] private Text detailHabitatText;
         [SerializeField] private Text detailCaughtText;
         [SerializeField] private Text detailLevelText;
@@ -92,7 +93,7 @@ namespace Tidepool.UI
             }
 
             SetText(detailNameText, isCaught ? FormatCaughtName(species, caught) : "?");
-            SetText(detailCurrentText, isCaught ? TidelingCurrentRules.GetDisplayName(species.Current) : "Unknown");
+            ApplyCurrentDetail(species, isCaught);
             SetText(detailHabitatText, isCaught ? FormatHabitats(species.HabitatZones) : "Unknown");
             SetText(detailCaughtText, isCaught ? FormatCatchDetails(caught) : "Not found yet");
             SetText(detailLevelText, isCaught ? FormatLevelDetails(caught) : "Unknown");
@@ -148,6 +149,33 @@ namespace Tidepool.UI
             }
 
             return string.IsNullOrWhiteSpace(species.DisplayName) ? "Tideling" : species.DisplayName;
+        }
+
+        private void ApplyCurrentDetail(TidelingSpecies species, bool isCaught)
+        {
+            if (!isCaught)
+            {
+                SetText(detailCurrentText, "Unknown");
+                if (detailCurrentIcon != null)
+                {
+                    detailCurrentIcon.enabled = false;
+                }
+
+                return;
+            }
+
+            SetText(detailCurrentText, FormatCurrentDetails(species.Current));
+            if (detailCurrentIcon != null)
+            {
+                detailCurrentIcon.enabled = true;
+                detailCurrentIcon.color = TidelingCurrentRules.GetDisplayColor(species.Current);
+                detailCurrentIcon.preserveAspect = true;
+            }
+        }
+
+        private static string FormatCurrentDetails(TidelingCurrent current)
+        {
+            return $"{TidelingCurrentRules.GetIconName(current)} - {TidelingCurrentRules.GetDisplayName(current)}";
         }
 
         private static string FormatCatchDetails(CaughtTideling caught)
