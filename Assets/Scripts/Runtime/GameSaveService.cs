@@ -155,6 +155,35 @@ namespace Tidepool.Runtime
             return changed;
         }
 
+        public bool RememberGrowthForm(string speciesId, string formId)
+        {
+            CaughtTideling caught = FindCaught(speciesId);
+            bool changed = TidelingGrowthForms.Remember(caught, formId);
+            if (changed)
+            {
+                Save();
+            }
+
+            return changed;
+        }
+
+        public bool SelectGrowthForm(string speciesId, string formId)
+        {
+            CaughtTideling caught = FindCaught(speciesId);
+            bool changed = TidelingGrowthForms.SelectRemembered(caught, formId);
+            if (changed)
+            {
+                Save();
+            }
+
+            return changed;
+        }
+
+        public bool SelectOriginalGrowthForm(string speciesId)
+        {
+            return SelectGrowthForm(speciesId, TidelingGrowthForms.OriginalFormId);
+        }
+
         public bool HasSeen(string speciesId)
         {
             if (string.IsNullOrWhiteSpace(speciesId) || Data == null || Data.seenSpeciesIds == null)
@@ -234,6 +263,7 @@ namespace Tidepool.Runtime
             for (int i = 0; i < Data.caught.Count; i++)
             {
                 TidelingLevelProgression.Normalize(Data.caught[i]);
+                TidelingGrowthForms.Normalize(Data.caught[i]);
             }
         }
 
