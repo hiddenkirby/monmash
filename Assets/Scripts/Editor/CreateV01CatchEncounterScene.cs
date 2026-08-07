@@ -16,6 +16,9 @@ namespace Tidepool.Editor
         private const string CatchChimePath = "Assets/Audio/catch_chime.wav";
         private const string EscapeNotePath = "Assets/Audio/escape_note.wav";
         private const string UiTapPath = "Assets/Audio/ui_tap.wav";
+        private const float ReferenceHalfWidth = 512f;
+        private const float ReferenceHalfHeight = 384f;
+        private const float SafeAreaMargin = 16f;
 
         [MenuItem("Tools/Tidepool/Create v0.1 CatchEncounter Scene")]
         public static void CreateCatchEncounterScene()
@@ -82,10 +85,10 @@ namespace Tidepool.Editor
                 pips[i] = CreateImage($"JarPip{i + 1}", safeArea, new Color(0.18f, 0.48f, 0.68f), new Vector2(-48f + i * 48f, -218f), new Vector2(30f, 30f));
             }
 
-            Text resultText = CreateText("ResultText", safeArea, string.Empty, 28, TextAnchor.MiddleCenter, new Vector2(0f, -272f), new Vector2(640f, 48f));
+            Text resultText = CreateText("ResultText", safeArea, string.Empty, 28, TextAnchor.MiddleCenter, new Vector2(0f, -254f), new Vector2(640f, 48f));
             resultText.color = new Color(0.08f, 0.18f, 0.22f);
 
-            Button letGoButton = CreateButton("LetGoButton", safeArea, "Let it go", new Vector2(0f, -340f), new Vector2(220f, 96f));
+            Button letGoButton = CreateButton("LetGoButton", safeArea, "Let it go", new Vector2(0f, -ReferenceHalfHeight + SafeAreaMargin + 48f), new Vector2(220f, 96f));
             SettingsController settingsController = CreateSettingsControls(safeArea);
 
             SerializedObject serializedController = new SerializedObject(controller);
@@ -137,17 +140,17 @@ namespace Tidepool.Editor
 
         private static SettingsController CreateSettingsControls(Transform parent)
         {
-            Image panel = CreateImage("SettingsPanel", parent, new Color(0.08f, 0.22f, 0.24f, 0.90f), new Vector2(302f, 250f), new Vector2(360f, 184f));
+            Image panel = CreateImage("SettingsPanel", parent, new Color(0.08f, 0.22f, 0.24f, 0.90f), new Vector2(ReferenceHalfWidth - SafeAreaMargin - 165f, ReferenceHalfHeight - SafeAreaMargin - 80f), new Vector2(330f, 160f));
 
-            Text label = CreateText("SettingsLabel", panel.transform, "Audio", 22, TextAnchor.MiddleLeft, new Vector2(-116f, 48f), new Vector2(108f, 36f));
+            Text label = CreateText("SettingsLabel", panel.transform, "Audio", 22, TextAnchor.MiddleLeft, new Vector2(-104f, 40f), new Vector2(96f, 36f));
             label.color = Color.white;
 
-            Toggle muteToggle = CreateToggle("MuteToggle", panel.transform, new Vector2(92f, 48f), new Vector2(132f, 88f));
-            Text muteLabel = CreateText("Label", muteToggle.transform, "Mute", 20, TextAnchor.MiddleLeft, new Vector2(30f, 0f), new Vector2(76f, 44f));
+            Toggle muteToggle = CreateToggle("MuteToggle", panel.transform, new Vector2(82f, 40f), new Vector2(120f, 88f));
+            Text muteLabel = CreateText("Label", muteToggle.transform, "Mute", 20, TextAnchor.MiddleLeft, new Vector2(28f, 0f), new Vector2(72f, 44f));
             muteLabel.color = Color.white;
 
-            Slider volumeSlider = CreateSlider("VolumeSlider", panel.transform, new Vector2(-42f, -48f), new Vector2(220f, 88f));
-            Text volumeValue = CreateText("VolumeValue", panel.transform, "100%", 20, TextAnchor.MiddleRight, new Vector2(124f, -48f), new Vector2(82f, 44f));
+            Slider volumeSlider = CreateSlider("VolumeSlider", panel.transform, new Vector2(-44f, -40f), new Vector2(204f, 88f));
+            Text volumeValue = CreateText("VolumeValue", panel.transform, "100%", 20, TextAnchor.MiddleRight, new Vector2(114f, -40f), new Vector2(74f, 44f));
             volumeValue.color = Color.white;
 
             SettingsController controller = panel.gameObject.AddComponent<SettingsController>();
