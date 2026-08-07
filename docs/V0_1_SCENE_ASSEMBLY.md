@@ -43,6 +43,8 @@
 
 - Add a Canvas using Scale With Screen Size, reference `1024 x 768`, match `0.5`.
 - Add `SafeAreaFitter` to the safe-area root RectTransform.
+- Keep the `Let it go` button and audio settings controls fully inside the safe-area root,
+  with at least 16pt of reference-resolution margin from the bottom/top/right edges.
 - Add `CatchEncounterController`.
 - Wire:
   - creature image
