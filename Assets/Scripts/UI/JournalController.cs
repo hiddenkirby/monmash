@@ -94,7 +94,7 @@ namespace Tidepool.UI
 
             SetText(detailNameText, isCaught ? FormatCaughtName(species, caught) : "?");
             ApplyCurrentDetail(species, isCaught);
-            SetText(detailHabitatText, isCaught ? FormatHabitats(species.HabitatZones) : "Unknown");
+            SetText(detailHabitatText, isCaught ? FormatHabitatsAndAvailability(species) : "Unknown");
             SetText(detailCaughtText, isCaught ? FormatCatchDetails(caught) : "Not found yet");
             SetText(detailLevelText, isCaught ? FormatLevelDetails(caught) : "Unknown");
             SetText(detailGrowthText, isCaught ? FormatGrowthDetails(caught) : "Keep looking to learn more.");
@@ -253,6 +253,17 @@ namespace Tidepool.UI
             }
 
             return text;
+        }
+
+        private static string FormatHabitatsAndAvailability(TidelingSpecies species)
+        {
+            string habitats = FormatHabitats(species.HabitatZones);
+            if (string.IsNullOrWhiteSpace(species.AvailabilityHint))
+            {
+                return habitats;
+            }
+
+            return $"{habitats} - {species.AvailabilityHint}";
         }
 
         private static string FormatZone(ZoneId zone)
