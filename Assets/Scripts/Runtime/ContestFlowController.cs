@@ -136,7 +136,7 @@ namespace Tidepool.Runtime
             if (playerScore > visitingScore)
             {
                 visitingState?.MarkTuckeredOut();
-                SetResultText($"{playerMove.DisplayName} sparkles through. {visitingName} is ready for another round.");
+                SetResultText($"{playerMove.DisplayName} sparkles through. {visitingName} takes a little rest.");
             }
             else if (visitingScore > playerScore)
             {
