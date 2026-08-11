@@ -20,6 +20,8 @@ namespace Tidepool.Runtime
         [SerializeField] private int graceStepsAfterEncounter = 3;
         [SerializeField] private int pitySteps = 25;
         [SerializeField] private int oldBarnabyCaughtSpeciesThreshold = 10;
+        [SerializeField, Min(60f)] private float inGameDaylightCycleSeconds = 480f;
+        [SerializeField, Range(10f, 240f)] private float lastHourOfDaylightSeconds = 60f;
 
         private int remainingGraceSteps;
         private int drySeagrassSteps;
@@ -163,13 +165,40 @@ namespace Tidepool.Runtime
                 TidelingSpecies candidate = allSpecies[i];
                 if (IsNormalEncounterSpecies(candidate)
                     && candidate.Rarity == rarity
-                    && candidate.LivesIn(currentZone))
+                    && candidate.LivesIn(currentZone)
+                    && IsAvailableNow(candidate))
                 {
                     matches.Add(candidate);
                 }
             }
 
             return matches;
+        }
+
+        private bool IsAvailableNow(TidelingSpecies species)
+        {
+            if (species == null)
+            {
+                return false;
+            }
+
+            switch (species.EncounterAvailability)
+            {
+                case EncounterAvailability.Always:
+                    return true;
+                case EncounterAvailability.LastHourOfDaylight:
+                    return IsInLastHourOfDaylight();
+                default:
+                    return true;
+            }
+        }
+
+        private bool IsInLastHourOfDaylight()
+        {
+            float cycleLength = Mathf.Max(60f, inGameDaylightCycleSeconds);
+            float windowSeconds = Mathf.Clamp(lastHourOfDaylightSeconds, 10f, cycleLength);
+            float cycleTime = Mathf.Repeat(Time.timeSinceLevelLoad, cycleLength);
+            return cycleLength - cycleTime <= windowSeconds;
         }
 
         private static TidelingRarity[] GetFallbackRarities(TidelingRarity rolledRarity)

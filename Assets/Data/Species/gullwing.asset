@@ -19,6 +19,8 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 94785c2948f4a45bcbfa027f200cc489, type: 3}
   fieldNote: A flying fish that flashes silver at the edge of daylight.
   habitatZones: 01000000
+  encounterAvailability: 1
+  availabilityHint: Look near the end of the daylight cycle.
   firstContestMove: {fileID: 0}
   firstContestMoveUnlockLevel: 1
   secondContestMove: {fileID: 0}
