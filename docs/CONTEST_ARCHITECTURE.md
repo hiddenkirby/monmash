@@ -17,6 +17,20 @@ The scene should receive already-selected Tidelings from the overworld or journa
 should not search every scene object for save data or species data at runtime; callers provide
 the matchup context and the scene reports only the result.
 
+## Editor Assembly Helper
+
+Run `Tools/Tidepool/Create v0.2 Contest Scene` in Unity to create `Assets/Scenes/Contest.unity`.
+The generated scene includes:
+
+- A safe-area-aware Canvas using `1024 x 768` reference resolution and match `0.5`.
+- Player and visiting Tideling image/name views.
+- Two 96pt move buttons wired to `ContestFlowController`.
+- Retry and Back buttons wired to the controller's retry/exit flow.
+
+After generation, inspect the scene in Unity, assign fallback species for prototype testing if
+needed, then verify compile, Play Mode flow, iPad safe area, and touch targets before closing
+contest issues.
+
 ## Data Model
 
 `ContestMove` is a ScriptableObject so move copy and tuning can be edited without changing
