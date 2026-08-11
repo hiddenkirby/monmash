@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Tidepool.Domain
 {
@@ -16,5 +17,7 @@ namespace Tidepool.Domain
         public int timesSeen;
         public int level = MinLevel;
         public int levelProgress;
+        public string activeGrowthFormId = TidelingGrowthForms.OriginalFormId;
+        public List<string> rememberedGrowthFormIds = new List<string>();
     }
 }
