@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Tidepool.Domain;
 using Tidepool.Runtime;
@@ -22,6 +23,9 @@ namespace Tidepool.UI
         [SerializeField] private Text detailCaughtText;
         [SerializeField] private Text detailLevelText;
         [SerializeField] private Text detailGrowthText;
+        [SerializeField] private Text detailGrowthMemoryText;
+        [SerializeField] private Dropdown growthFormDropdown;
+        [SerializeField] private Button selectOriginalGrowthFormButton;
         [SerializeField] private Text detailMovesText;
         [SerializeField] private Text detailFieldNoteText;
         [SerializeField] private Text detailTimesSeenText;
@@ -82,6 +86,7 @@ namespace Tidepool.UI
             if (isCaught)
             {
                 TidelingLevelProgression.Normalize(caught);
+                TidelingGrowthForms.Normalize(caught);
             }
 
             if (detailImage != null)
@@ -98,6 +103,8 @@ namespace Tidepool.UI
             SetText(detailCaughtText, isCaught ? FormatCatchDetails(caught) : "Not found yet");
             SetText(detailLevelText, isCaught ? FormatLevelDetails(caught) : "Unknown");
             SetText(detailGrowthText, isCaught ? FormatGrowthDetails(caught) : "Keep looking to learn more.");
+            SetText(detailGrowthMemoryText, isCaught ? FormatGrowthMemoryDetails(caught) : "Unknown");
+            ConfigureGrowthFormControls(caught, isCaught);
             SetText(detailMovesText, isCaught ? FormatMoveDetails(species, caught.level) : "Unknown");
             SetText(detailFieldNoteText, isCaught ? species.FieldNote : "Keep looking in the seagrass.");
             SetText(detailTimesSeenText, isCaught ? $"Seen {caught.timesSeen}" : "Not found yet");
@@ -122,12 +129,90 @@ namespace Tidepool.UI
             PopulateGrid();
         }
 
+        public void SelectGrowthFormFromDropdown()
+        {
+            if (selectedSpecies == null || growthFormDropdown == null)
+            {
+                return;
+            }
+
+            CaughtTideling caught = GameSaveService.Instance?.FindCaught(selectedSpecies.Id);
+            if (caught == null)
+            {
+                return;
+            }
+
+            string formId = GetGrowthFormIdAtIndex(caught, growthFormDropdown.value);
+            GameSaveService.Instance?.SelectGrowthForm(selectedSpecies.Id, formId);
+            SelectSpecies(selectedSpecies);
+        }
+
+        public void SelectOriginalGrowthForm()
+        {
+            if (selectedSpecies == null)
+            {
+                return;
+            }
+
+            GameSaveService.Instance?.SelectOriginalGrowthForm(selectedSpecies.Id);
+            SelectSpecies(selectedSpecies);
+        }
+
         private void ConfigureNicknameInput()
         {
             if (nicknameInput != null)
             {
                 nicknameInput.characterLimit = CaughtTideling.NicknameCharacterLimit;
             }
+        }
+
+        private void ConfigureGrowthFormControls(CaughtTideling caught, bool isCaught)
+        {
+            if (growthFormDropdown != null)
+            {
+                growthFormDropdown.onValueChanged.RemoveAllListeners();
+                growthFormDropdown.ClearOptions();
+
+                if (isCaught && caught != null)
+                {
+                    TidelingGrowthForms.Normalize(caught);
+                    growthFormDropdown.AddOptions(BuildGrowthFormOptions(caught));
+                    growthFormDropdown.value = FindActiveGrowthFormIndex(caught);
+                    growthFormDropdown.interactable = CountGrowthFormChoices(caught) > 1;
+                    growthFormDropdown.onValueChanged.AddListener(_ => SelectGrowthFormFromDropdown());
+                }
+                else
+                {
+                    growthFormDropdown.AddOptions(new List<string> { "Unknown" });
+                    growthFormDropdown.value = 0;
+                    growthFormDropdown.interactable = false;
+                }
+            }
+
+            if (selectOriginalGrowthFormButton != null)
+            {
+                selectOriginalGrowthFormButton.onClick.RemoveAllListeners();
+                selectOriginalGrowthFormButton.onClick.AddListener(SelectOriginalGrowthForm);
+                selectOriginalGrowthFormButton.interactable = isCaught
+                    && caught != null
+                    && !TidelingGrowthForms.IsOriginal(caught.activeGrowthFormId);
+            }
+        }
+
+        private static List<string> BuildGrowthFormOptions(CaughtTideling caught)
+        {
+            List<string> options = new List<string> { "Original form" };
+            if (caught?.rememberedGrowthFormIds == null)
+            {
+                return options;
+            }
+
+            for (int i = 0; i < caught.rememberedGrowthFormIds.Count; i++)
+            {
+                options.Add(FormatGrowthFormChoice(caught.rememberedGrowthFormIds[i]));
+            }
+
+            return options;
         }
 
         private static string FormatCaughtName(TidelingSpecies species, CaughtTideling caught)
@@ -212,6 +297,75 @@ namespace Tidepool.UI
             }
 
             return $"{remainingProgress} friendly moments until next growth";
+        }
+
+        private static string FormatGrowthMemoryDetails(CaughtTideling caught)
+        {
+            TidelingGrowthForms.Normalize(caught);
+            int rememberedCount = caught.rememberedGrowthFormIds.Count;
+            if (TidelingGrowthForms.IsOriginal(caught.activeGrowthFormId))
+            {
+                if (rememberedCount == 0)
+                {
+                    return "Original form";
+                }
+
+                return rememberedCount == 1
+                    ? "Original form selected. 1 memory available."
+                    : $"Original form selected. {rememberedCount} memories available.";
+            }
+
+            return $"Remembering {FormatGrowthFormId(caught.activeGrowthFormId)}. Original form is still here.";
+        }
+
+        private static string FormatGrowthFormChoice(string formId)
+        {
+            return TidelingGrowthForms.IsOriginal(formId)
+                ? "Original form"
+                : $"{FormatGrowthFormId(formId)} memory";
+        }
+
+        private static string FormatGrowthFormId(string formId)
+        {
+            string normalized = string.IsNullOrWhiteSpace(formId) ? "original" : formId.Trim();
+            normalized = normalized.Replace('_', ' ').Replace('-', ' ');
+            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(normalized);
+        }
+
+        private static int CountGrowthFormChoices(CaughtTideling caught)
+        {
+            return 1 + (caught?.rememberedGrowthFormIds == null ? 0 : caught.rememberedGrowthFormIds.Count);
+        }
+
+        private static int FindActiveGrowthFormIndex(CaughtTideling caught)
+        {
+            if (caught == null || TidelingGrowthForms.IsOriginal(caught.activeGrowthFormId))
+            {
+                return 0;
+            }
+
+            for (int i = 0; i < caught.rememberedGrowthFormIds.Count; i++)
+            {
+                if (string.Equals(caught.rememberedGrowthFormIds[i], caught.activeGrowthFormId, StringComparison.OrdinalIgnoreCase))
+                {
+                    return i + 1;
+                }
+            }
+
+            return 0;
+        }
+
+        private static string GetGrowthFormIdAtIndex(CaughtTideling caught, int index)
+        {
+            if (caught == null || index <= 0 || caught.rememberedGrowthFormIds == null)
+            {
+                return TidelingGrowthForms.OriginalFormId;
+            }
+
+            int rememberedIndex = index - 1;
+            return rememberedIndex < caught.rememberedGrowthFormIds.Count
+                ? caught.rememberedGrowthFormIds[rememberedIndex]
+                : TidelingGrowthForms.OriginalFormId;
         }
 
         private static string FormatMoveDetails(TidelingSpecies species, int level)

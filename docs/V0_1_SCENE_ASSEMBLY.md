@@ -67,8 +67,14 @@
   - species database
   - slot prefab
   - grid root
-  - detail image/name/current icon/current text/habitat/caught date and location/level/growth/moves/field-note/times-seen/nickname fields
+  - detail image/name/current icon/current text/habitat/caught date and location/level/growth/growth memory/moves/field-note/times-seen/nickname fields
+  - optional growth-form dropdown to `JournalController.growthFormDropdown`
+  - optional original-form button to `JournalController.selectOriginalGrowthFormButton`
 - Wire the nickname submit button or input submit event to `JournalController.SaveNickname`.
+- Wire the growth-form dropdown value-changed event to
+  `JournalController.SelectGrowthFormFromDropdown` if not relying on the controller's source-side listener.
+- Wire the original-form button click event to `JournalController.SelectOriginalGrowthForm` if not
+  relying on the controller's source-side listener.
 - Conditional encounter hints are appended to the existing habitat text, so no
   separate Journal field is required for v0.4 availability rules.
 
