@@ -2,7 +2,7 @@
 
 Follow this before spending time on gameplay.
 
-1. Install Unity 6.3 LTS with iOS Build Support.
+1. Install Unity 6.5.6 (6000.5.6f1) with iOS Build Support.
 2. Install/update Xcode.
 3. Open this repo in Unity Hub.
 4. Create or open `Assets/Scenes/Boot.unity`.
