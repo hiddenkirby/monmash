@@ -202,7 +202,7 @@ The collection screen and the actual reward.
 
 | Layer | Choice | Why |
 |---|---|---|
-| Engine | **Unity 6.3 LTS (6000.3.x)** | Current LTS, supported to Dec 2027. Unity 6.0 LTS support ends Oct 2026 — don't start there. |
+| Engine | **Unity 6.5.6 (6000.5.6f1)** | Project-standard editor version for the current prototype. Keep the repository on one Unity patch version to avoid package and ProjectSettings churn. |
 | Template | **2D (URP)** | Correct 2D defaults out of the box |
 | Language | C# | |
 | Target | **iOS 15+, iPad, landscape** | Unity supports iOS 13+; 15 is a safe floor |

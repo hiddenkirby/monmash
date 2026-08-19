@@ -12,7 +12,7 @@ This is aggressive but achievable *only* if the build pipeline is proven before 
 
 Two downloads, both in the background, both before you do anything else:
 
-1. **Unity Hub** → install → sign in → install **Unity 6.3 LTS (6000.3.x)** with these modules checked:
+1. **Unity Hub** → install → sign in → install **Unity 6.5.6 (6000.5.6f1)** with these modules checked:
    - **iOS Build Support** ← the one that matters
    - Visual Studio / your editor of choice
    - *Skip* Android, WebGL, Windows, Linux. They're gigabytes you don't need today.

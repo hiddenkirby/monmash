@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 96e429b03e0f4a5ebee78f24380b8641, type: 3}
   m_Name: nubbin
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier:
   id: nubbin
   displayName: Nubbin
   current: 4
@@ -19,6 +19,8 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 8701a80e9b35245298aed596ffa627db, type: 3}
   fieldNote: A hermit crab wearing a pebble that is much too big, but clearly treasured.
   habitatZones: 00000000
+  encounterAvailability: 0
+  availabilityHint:
   firstContestMove: {fileID: 0}
   firstContestMoveUnlockLevel: 1
   secondContestMove: {fileID: 0}
