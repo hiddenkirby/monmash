@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 96e429b03e0f4a5ebee78f24380b8641, type: 3}
   m_Name: tanglemaw
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier:
   id: tanglemaw
   displayName: Tanglemaw
   current: 2
@@ -20,6 +20,8 @@ MonoBehaviour:
   fieldNote: A curious octopus that would rather inspect the jar than sit inside
     it.
   habitatZones: 01000000
+  encounterAvailability: 0
+  availabilityHint:
   firstContestMove: {fileID: 0}
   firstContestMoveUnlockLevel: 1
   secondContestMove: {fileID: 0}
