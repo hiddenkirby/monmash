@@ -4,6 +4,7 @@ using Tidepool.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
@@ -14,6 +15,7 @@ namespace Tidepool.Editor
     {
         private const string ScenePath = "Assets/Scenes/Overworld.unity";
         private const string TileAssetFolder = "Assets/Data/Tiles";
+        private const string PlayerSpritePath = "Assets/Art/Creatures/blip.png";
         private const int MinX = -12;
         private const int MaxX = 15;
         private const int MinY = -8;
@@ -53,6 +55,10 @@ namespace Tidepool.Editor
 
             GameObject playerObject = new GameObject("Player");
             playerObject.transform.position = playerSpawn.transform.position;
+            SpriteRenderer playerRenderer = playerObject.AddComponent<SpriteRenderer>();
+            playerRenderer.sprite = LoadSprite(PlayerSpritePath);
+            playerRenderer.sortingOrder = 3;
+            playerObject.transform.localScale = new Vector3(0.32f, 0.32f, 1f);
             PlayerGridMover playerMover = playerObject.AddComponent<PlayerGridMover>();
             WirePlayerMover(playerMover, grid, playerObject.transform, ground, obstacles);
 
@@ -76,6 +82,7 @@ namespace Tidepool.Editor
             safeArea.offsetMax = Vector2.zero;
             safeArea.gameObject.AddComponent<SafeAreaFitter>();
             CreateFirstRunGuidance(safeArea);
+            CreateEventSystem();
 
             EditorSceneManager.SaveScene(scene, ScenePath);
             AssetDatabase.SaveAssets();
@@ -105,6 +112,13 @@ namespace Tidepool.Editor
 
             canvasObject.AddComponent<GraphicRaycaster>();
             return canvas;
+        }
+
+        private static void CreateEventSystem()
+        {
+            GameObject eventSystemObject = new GameObject("EventSystem");
+            eventSystemObject.AddComponent<EventSystem>();
+            eventSystemObject.AddComponent<StandaloneInputModule>();
         }
 
         private static void CreateFirstRunGuidance(RectTransform safeArea)
@@ -265,10 +279,61 @@ namespace Tidepool.Editor
                 AssetDatabase.CreateAsset(tile, tilePath);
             }
 
-            tile.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
+            Sprite sprite = LoadSprite(spritePath, 64f);
+            if (sprite != null)
+            {
+                tile.sprite = sprite;
+            }
+            else if (tile.sprite == null)
+            {
+                Debug.LogWarning($"Tile {name} has no sprite. Expected one at {spritePath}.");
+            }
+
             tile.colliderType = Tile.ColliderType.None;
             EditorUtility.SetDirty(tile);
             return tile;
+        }
+
+        private static Sprite LoadSprite(string spritePath, float pixelsPerUnit = 0f)
+        {
+            TextureImporter importer = AssetImporter.GetAtPath(spritePath) as TextureImporter;
+            if (importer != null)
+            {
+                bool changed = importer.textureType != TextureImporterType.Sprite
+                    || importer.spriteImportMode != SpriteImportMode.Single
+                    || (pixelsPerUnit > 0f && importer.spritePixelsPerUnit != pixelsPerUnit);
+
+                if (changed)
+                {
+                    importer.textureType = TextureImporterType.Sprite;
+                    importer.spriteImportMode = SpriteImportMode.Single;
+                    if (pixelsPerUnit > 0f)
+                    {
+                        importer.spritePixelsPerUnit = pixelsPerUnit;
+                    }
+
+                    importer.mipmapEnabled = false;
+                    importer.SaveAndReimport();
+                }
+            }
+
+            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
+            if (sprite != null)
+            {
+                return sprite;
+            }
+
+            Object[] assets = AssetDatabase.LoadAllAssetsAtPath(spritePath);
+            for (int i = 0; i < assets.Length; i++)
+            {
+                if (assets[i] is Sprite assetSprite)
+                {
+                    return assetSprite;
+                }
+            }
+
+            Debug.LogWarning($"Could not load tile sprite at {spritePath}.");
+            return null;
         }
 
         private static void EnsureFolder(string path)
