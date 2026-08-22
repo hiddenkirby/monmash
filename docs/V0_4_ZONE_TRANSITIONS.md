@@ -31,9 +31,11 @@ When the player enters the trigger, the component:
 
 ## Remaining Unity Work
 
-- Paint distinct Kelp Curtain and Rocky Shelf terrain in the Editor.
-- Create encounter tilemaps or zone-specific encounter regions for the new habitats.
-- Assign species habitat data for any new zone encounter pools. `EncounterDirector` already
+- Paint distinct Kelp Curtain and Rocky Shelf terrain in the Editor. The overworld scene
+  generator now extends the map to include all four zones with kelp, rock, and dark water
+  tiles, and places transition triggers at the zone boundaries.
+- Assign species habitat data for any new zone encounter pools. The starter assets now
+  assign several species to Kelp Curtain and Rocky Shelf. `EncounterDirector` already
   filters by `TidelingSpecies.HabitatZones` and its serialized `currentZone`.
 - Log new art, tile, UI, or audio assets in `Assets/ASSET_MANIFEST.md`.
 - Verify that Shallows and Meadow still load, transition, save, and encounter correctly.

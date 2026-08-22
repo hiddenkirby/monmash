@@ -18,9 +18,11 @@ namespace Tidepool.Editor
         private const string PlayerSpritePath = "Assets/Art/Creatures/blip.png";
         private const string SpeciesDatabasePath = "Assets/Data/Databases/SpeciesDatabase.asset";
         private const int MinX = -12;
-        private const int MaxX = 15;
+        private const int MaxX = 26;
         private const int MinY = -8;
         private const int MaxY = 8;
+        private const int MeadowEndX = 12;
+        private const int KelpEndX = 19;
 
         [MenuItem("Tools/Tidepool/Create v0.1 Overworld Scene")]
         public static void CreateOverworldScene()
@@ -37,6 +39,9 @@ namespace Tidepool.Editor
             TileBase seagrass = CreateTile("grass_tufts", "Assets/Art/Tiles/KenneyRpgBase/grass_tufts.png");
             TileBase shrub = CreateTile("shrub_green", "Assets/Art/Tiles/KenneyRpgBase/shrub_green.png");
             TileBase crate = CreateTile("crate_large", "Assets/Art/Tiles/KenneyRpgBase/crate_large.png");
+            TileBase kelp = CreateTile("kelp_tall", "Assets/Art/Tiles/KenneyRpgBase/kelp_tall.png");
+            TileBase rock = CreateTile("rock_mossy", "Assets/Art/Tiles/KenneyRpgBase/rock_mossy.png");
+            TileBase darkWater = CreateTile("water_dark", "Assets/Art/Tiles/KenneyRpgBase/water_dark.png");
 
             GameObject gridObject = new GameObject("Grid");
             Grid grid = gridObject.AddComponent<Grid>();
@@ -47,7 +52,7 @@ namespace Tidepool.Editor
             Tilemap seagrassMap = CreateTilemap(gridObject.transform, "Seagrass", 1);
             obstacles.gameObject.AddComponent<TilemapCollider2D>();
 
-            PaintGround(ground, sand, water, grass);
+            PaintGround(ground, sand, water, grass, kelp, rock, darkWater);
             PaintObstacles(obstacles, shrub, crate);
             PaintSeagrass(seagrassMap, seagrass);
 
@@ -75,6 +80,10 @@ namespace Tidepool.Editor
             CameraFollow2D cameraFollow = cameraObject.AddComponent<CameraFollow2D>();
             WireCameraFollow(cameraFollow, playerObject.transform);
 
+            SpeciesDatabase database = AssetDatabase.LoadAssetAtPath<SpeciesDatabase>(SpeciesDatabasePath);
+            CreateZoneTransitions(gridObject.transform, playerObject.transform, playerMover, grid);
+            CreateZoneEncounterDirectors(gridObject.transform, seagrassMap, playerMover, database);
+
             Canvas canvas = CreateCanvas();
             RectTransform safeArea = CreateRect("SafeArea", canvas.transform);
             safeArea.anchorMin = Vector2.zero;
@@ -83,7 +92,7 @@ namespace Tidepool.Editor
             safeArea.offsetMax = Vector2.zero;
             safeArea.gameObject.AddComponent<SafeAreaFitter>();
             CreateFirstRunGuidance(safeArea);
-            CreateContestButton(safeArea, playerMover, speciesDatabasePath);
+            CreateContestButton(safeArea, playerMover, database);
             CreateEventSystem();
 
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -135,13 +144,12 @@ namespace Tidepool.Editor
             WireFirstRunGuidance(guidance, panel.gameObject, label, dismissButton);
         }
 
-        private static void CreateContestButton(RectTransform safeArea, PlayerGridMover playerMover, string speciesDatabasePath)
+        private static void CreateContestButton(RectTransform safeArea, PlayerGridMover playerMover, SpeciesDatabase database)
         {
             Button contestButton = CreateButton("ContestButton", safeArea, "Contest", new Vector2(-412f, -300f), new Vector2(180f, 96f));
             contestButton.transform.SetAsFirstSibling();
 
             ContestTrigger trigger = contestButton.gameObject.AddComponent<ContestTrigger>();
-            SpeciesDatabase database = AssetDatabase.LoadAssetAtPath<SpeciesDatabase>(speciesDatabasePath);
 
             SerializedObject serializedTrigger = new SerializedObject(trigger);
             serializedTrigger.FindProperty("speciesDatabase").objectReferenceValue = database;
@@ -150,6 +158,70 @@ namespace Tidepool.Editor
             serializedTrigger.FindProperty("visitingSpeciesId").stringValue = "wobbet";
             serializedTrigger.FindProperty("contestSceneName").stringValue = "Contest";
             serializedTrigger.ApplyModifiedProperties();
+        }
+
+        private static void CreateZoneTransitions(Transform gridTransform, Transform playerRoot, PlayerGridMover playerMover, Grid grid)
+        {
+            CreateZoneTransition("ShallowsToMeadowTransition", gridTransform, playerRoot, playerMover, grid,
+                new Vector3(MeadowEndX - 1, 0, 0), ZoneId.SeagrassMeadow);
+            CreateZoneTransition("MeadowToKelpTransition", gridTransform, playerRoot, playerMover, grid,
+                new Vector3(KelpEndX - 1, 0, 0), ZoneId.KelpCurtain);
+            CreateZoneTransition("KelpToRockyTransition", gridTransform, playerRoot, playerMover, grid,
+                new Vector3(MaxX - 1, 0, 0), ZoneId.RockyShelf);
+        }
+
+        private static void CreateZoneTransition(string name, Transform gridTransform, Transform playerRoot,
+            PlayerGridMover playerMover, Grid grid, Vector3 triggerPosition, ZoneId destinationZone)
+        {
+            GameObject triggerObj = new GameObject(name);
+            triggerObj.transform.SetParent(gridTransform);
+            triggerObj.transform.position = triggerPosition;
+
+            BoxCollider2D collider = triggerObj.AddComponent<BoxCollider2D>();
+            collider.isTrigger = true;
+            collider.size = new Vector2(2f, 16f);
+
+            ZoneTransitionTrigger trigger = triggerObj.AddComponent<ZoneTransitionTrigger>();
+            SerializedObject serializedTrigger = new SerializedObject(trigger);
+            serializedTrigger.FindProperty("destinationZone").enumValueIndex = (int)destinationZone;
+            serializedTrigger.FindProperty("playerRoot").objectReferenceValue = playerRoot;
+            serializedTrigger.FindProperty("playerMover").objectReferenceValue = playerMover;
+            serializedTrigger.FindProperty("grid").objectReferenceValue = grid;
+            serializedTrigger.ApplyModifiedProperties();
+        }
+
+        private static void CreateZoneEncounterDirectors(Transform gridTransform, Tilemap seagrassMap,
+            PlayerGridMover playerMover, SpeciesDatabase database)
+        {
+            if (database == null)
+            {
+                return;
+            }
+
+            CreateZoneEncounterDirector(gridTransform, "ShallowsEncounterDirector", seagrassMap,
+                playerMover, database, ZoneId.TidepoolShallows);
+            CreateZoneEncounterDirector(gridTransform, "MeadowEncounterDirector", seagrassMap,
+                playerMover, database, ZoneId.SeagrassMeadow);
+            CreateZoneEncounterDirector(gridTransform, "KelpEncounterDirector", seagrassMap,
+                playerMover, database, ZoneId.KelpCurtain);
+            CreateZoneEncounterDirector(gridTransform, "RockyEncounterDirector", seagrassMap,
+                playerMover, database, ZoneId.RockyShelf);
+        }
+
+        private static void CreateZoneEncounterDirector(Transform gridTransform, string name, Tilemap seagrassMap,
+            PlayerGridMover playerMover, SpeciesDatabase database, ZoneId zone)
+        {
+            GameObject directorObj = new GameObject(name);
+            directorObj.transform.SetParent(gridTransform);
+
+            EncounterDirector director = directorObj.AddComponent<EncounterDirector>();
+            SerializedObject serializedDirector = new SerializedObject(director);
+            serializedDirector.FindProperty("player").objectReferenceValue = playerMover;
+            serializedDirector.FindProperty("seagrassTilemap").objectReferenceValue = seagrassMap;
+            serializedDirector.FindProperty("speciesDatabase").objectReferenceValue = database;
+            serializedDirector.FindProperty("currentZone").enumValueIndex = (int)zone;
+            serializedDirector.FindProperty("catchSceneName").stringValue = "CatchEncounter";
+            serializedDirector.ApplyModifiedProperties();
         }
 
         private static Button CreateButton(string name, Transform parent, string label, Vector2 anchoredPosition, Vector2 size)
@@ -231,15 +303,31 @@ namespace Tidepool.Editor
             serializedGuidance.ApplyModifiedProperties();
         }
 
-        private static void PaintGround(Tilemap ground, TileBase sand, TileBase water, TileBase grass)
+        private static void PaintGround(Tilemap ground, TileBase sand, TileBase water, TileBase grass, TileBase kelp, TileBase rock, TileBase darkWater)
         {
             for (int x = MinX; x <= MaxX; x++)
             {
                 for (int y = MinY; y <= MaxY; y++)
                 {
-                    bool isShallows = x < 1;
-                    bool isPoolTile = isShallows && ((x + y) % 5 == 0 || y <= -6 || y >= 7);
-                    TileBase tile = isShallows ? (isPoolTile ? water : sand) : grass;
+                    TileBase tile;
+                    if (x < 1)
+                    {
+                        bool isPoolTile = (x + y) % 5 == 0 || y <= -6 || y >= 7;
+                        tile = isPoolTile ? water : sand;
+                    }
+                    else if (x <= MeadowEndX)
+                    {
+                        tile = grass;
+                    }
+                    else if (x <= KelpEndX)
+                    {
+                        tile = (x + y) % 4 == 0 ? darkWater : kelp;
+                    }
+                    else
+                    {
+                        tile = (x + y) % 3 == 0 ? rock : sand;
+                    }
+
                     ground.SetTile(new Vector3Int(x, y, 0), tile);
                 }
             }
@@ -276,11 +364,33 @@ namespace Tidepool.Editor
 
         private static void PaintSeagrass(Tilemap seagrassMap, TileBase seagrass)
         {
-            for (int x = 3; x <= 12; x++)
+            for (int x = 3; x <= MeadowEndX; x++)
             {
                 for (int y = -5; y <= 5; y++)
                 {
                     if ((x + y) % 2 == 0)
+                    {
+                        seagrassMap.SetTile(new Vector3Int(x, y, 0), seagrass);
+                    }
+                }
+            }
+
+            for (int x = MeadowEndX + 1; x <= KelpEndX; x++)
+            {
+                for (int y = -5; y <= 5; y++)
+                {
+                    if ((x + y) % 3 == 0)
+                    {
+                        seagrassMap.SetTile(new Vector3Int(x, y, 0), seagrass);
+                    }
+                }
+            }
+
+            for (int x = KelpEndX + 1; x <= MaxX; x++)
+            {
+                for (int y = -5; y <= 5; y++)
+                {
+                    if ((x + y) % 4 == 0)
                     {
                         seagrassMap.SetTile(new Vector3Int(x, y, 0), seagrass);
                     }
