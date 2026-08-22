@@ -1,6 +1,6 @@
 # Roadmap
 
-## v0.1 - It Catches
+## v0.1 - It Catches (SHIPPED — tagged `v0.1`)
 
 - Two zones: Tidepool Shallows and Seagrass Meadow.
 - Tap-to-move on a grid.
@@ -27,4 +27,3 @@
 - Kelp Curtain and Rocky Shelf.
 - Growing-up forms.
 - Day/night rules.
-
