@@ -6,9 +6,18 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/Boot.unity
+    guid: 0c786000ffbec4fd58c4b18a3070337c
+  - enabled: 1
     path: Assets/Scenes/Overworld.unity
     guid: e251411f5b5724f509a94efa01ca4083
   - enabled: 1
     path: Assets/Scenes/CatchEncounter.unity
     guid: ede4b98e2ce7f4363baf6a9b8714d36e
+  - enabled: 1
+    path: Assets/Scenes/Journal.unity
+    guid: ae176485704e24ea5bfd4fb9a2ea0bd6
+  - enabled: 1
+    path: Assets/Scenes/Contest.unity
+    guid: 592941890b6da4ade8e7fd29e0287510
   m_configObjects: {}
