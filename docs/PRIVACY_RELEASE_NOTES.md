@@ -16,24 +16,32 @@ submission.
 
 ## Current Package Posture
 
-`Packages/manifest.json` should remain limited to Unity engine, 2D, URP, UI,
-TextMeshPro, tilemap, audio, image, JSON, and physics modules.
+`Packages/manifest.json` contains only Unity engine, 2D, URP, UI, tilemap, audio,
+image, JSON, and physics modules. No third-party SDKs, no analytics, no ads, no
+crash reporting, no authentication, no cloud services.
 
 Unity includes `com.unity.modules.unitywebrequest` in the engine baseline. Tidepool
 must not call `UnityWebRequest` or any other outbound network API unless a future
-issue explicitly changes the no-network requirement.
+issue explicitly changes the no-network requirement. Verified: no game or editor
+code calls `UnityWebRequest`, `System.Net`, `HttpClient`, or `WebClient`.
 
-Run this before release and after package changes:
+## Guardrail Verification Results
+
+Run these before release and after package changes:
 
 ```sh
 scripts/verify-no-network-guardrails.sh
+scripts/verify-ip-safety-guardrails.sh
+scripts/verify-lfs.sh
 ```
 
-Expected result:
+Last verified results (current main branch):
 
-```text
-No banned network SDK packages or source API usage found.
-```
+| Script | Result |
+|---|---|
+| verify-no-network-guardrails.sh | No banned network SDK packages or source API usage found |
+| verify-ip-safety-guardrails.sh | No protected-franchise terms found in release-facing scan paths |
+| verify-lfs.sh | Git LFS is installed, initialized, and tracking Tidepool binary asset patterns |
 
 ## Apple Privacy Disclosure Draft
 
