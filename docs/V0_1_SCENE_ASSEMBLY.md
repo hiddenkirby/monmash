@@ -40,6 +40,14 @@
   at the seagrass tilemap for its own zone and set its `currentZone` accordingly.
 - Add `FirstRunGuidanceController` to a safe-area UI panel for the first-run line:
   `Tap to walk. Look in the seagrass.`
+- Add a `ContestTrigger` to a safe-area UI button (e.g. "Contest") wired to:
+  - `speciesDatabase`
+  - `playerSpeciesId` (e.g. `blip`)
+  - `visitingSpeciesId` (e.g. `wobbet`)
+  - `contestSceneName` (`Contest`)
+  - `playerMover` (the same `PlayerGridMover` used by `EncounterDirector`)
+- The overworld scene generator (`Tools/Tidepool/Create v0.1 Overworld Scene`)
+  creates the Contest button and wires it automatically.
 
 ## CatchEncounter
 

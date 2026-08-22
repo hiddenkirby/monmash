@@ -16,6 +16,7 @@ namespace Tidepool.Editor
         private const string ScenePath = "Assets/Scenes/Overworld.unity";
         private const string TileAssetFolder = "Assets/Data/Tiles";
         private const string PlayerSpritePath = "Assets/Art/Creatures/blip.png";
+        private const string SpeciesDatabasePath = "Assets/Data/Databases/SpeciesDatabase.asset";
         private const int MinX = -12;
         private const int MaxX = 15;
         private const int MinY = -8;
@@ -82,6 +83,7 @@ namespace Tidepool.Editor
             safeArea.offsetMax = Vector2.zero;
             safeArea.gameObject.AddComponent<SafeAreaFitter>();
             CreateFirstRunGuidance(safeArea);
+            CreateContestButton(safeArea, playerMover, speciesDatabasePath);
             CreateEventSystem();
 
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -131,6 +133,23 @@ namespace Tidepool.Editor
 
             Button dismissButton = CreateButton("DismissButton", panel.transform, "OK", new Vector2(292f, 0f), new Vector2(112f, 88f));
             WireFirstRunGuidance(guidance, panel.gameObject, label, dismissButton);
+        }
+
+        private static void CreateContestButton(RectTransform safeArea, PlayerGridMover playerMover, string speciesDatabasePath)
+        {
+            Button contestButton = CreateButton("ContestButton", safeArea, "Contest", new Vector2(-412f, -300f), new Vector2(180f, 96f));
+            contestButton.transform.SetAsFirstSibling();
+
+            ContestTrigger trigger = contestButton.gameObject.AddComponent<ContestTrigger>();
+            SpeciesDatabase database = AssetDatabase.LoadAssetAtPath<SpeciesDatabase>(speciesDatabasePath);
+
+            SerializedObject serializedTrigger = new SerializedObject(trigger);
+            serializedTrigger.FindProperty("speciesDatabase").objectReferenceValue = database;
+            serializedTrigger.FindProperty("playerMover").objectReferenceValue = playerMover;
+            serializedTrigger.FindProperty("playerSpeciesId").stringValue = "blip";
+            serializedTrigger.FindProperty("visitingSpeciesId").stringValue = "wobbet";
+            serializedTrigger.FindProperty("contestSceneName").stringValue = "Contest";
+            serializedTrigger.ApplyModifiedProperties();
         }
 
         private static Button CreateButton(string name, Transform parent, string label, Vector2 anchoredPosition, Vector2 size)

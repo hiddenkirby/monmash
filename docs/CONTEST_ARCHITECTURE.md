@@ -31,6 +31,32 @@ After generation, inspect the scene in Unity, assign fallback species for protot
 needed, then verify compile, Play Mode flow, iPad safe area, and touch targets before closing
 contest issues.
 
+## Contest Move Assets
+
+Run `Tools/Tidepool/Create Contest Move Assets` to generate 10 `ContestMove` ScriptableObject
+assets (two per Current) in `Assets/Data/ContestMoves/` and wire them to all 13 species. Each
+species gets two moves themed by its Current with gentle power values of 2-3. The generator is
+idempotent — re-running it updates existing assets in place.
+
+Run this after `Create Starter Species Assets` and before testing the contest flow.
+
+## Contest Trigger
+
+`ContestTrigger` is a runtime component placed on a UI button in the Overworld scene. It:
+- Populates `ContestContext` with player and visiting species from the `SpeciesDatabase`.
+- Disables player movement via `PlayerGridMover.SetInputEnabled(false)`.
+- Loads the Contest scene additively.
+
+The overworld scene generator creates and wires the Contest button automatically. To trigger a
+contest manually, call `ContestTrigger.StartContest()` from a button click or other input.
+
+## Contest Return Flow
+
+`ContestFlowController.ExitContest` raises `ContestEvents.RaiseContestFinished()` before
+unloading the scene. `ContestTrigger` listens for this event, clears `ContestContext`, and
+re-enables player movement. This mirrors the `EncounterEvents` pattern used by the catch
+mini-game.
+
 ## Data Model
 
 `ContestMove` is a ScriptableObject so move copy and tuning can be edited without changing
