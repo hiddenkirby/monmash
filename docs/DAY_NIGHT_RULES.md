@@ -24,3 +24,11 @@ daylight cycle.
 If playtesting makes this feel too hard to find, tune
 `EncounterDirector.lastHourOfDaylightSeconds` in the scene before changing the
 species data.
+
+## Pity Timer Safety
+
+The 25-step pity timer guarantees an encounter with an available species, not just
+any species. If the rolled rarity matches only conditional species that are not
+currently available, the pity fallback searches all normal species in the current
+zone that are available right now, regardless of rarity. This prevents a dry spell
+from forcing an encounter with a species that cannot appear.
