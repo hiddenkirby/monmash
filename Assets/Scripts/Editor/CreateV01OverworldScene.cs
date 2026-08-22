@@ -152,6 +152,7 @@ namespace Tidepool.Editor
             contestButton.transform.SetAsFirstSibling();
 
             ContestTrigger trigger = contestButton.gameObject.AddComponent<ContestTrigger>();
+            contestButton.onClick.AddListener(trigger.StartContest);
 
             SerializedObject serializedTrigger = new SerializedObject(trigger);
             serializedTrigger.FindProperty("speciesDatabase").objectReferenceValue = database;
