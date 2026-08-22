@@ -167,13 +167,14 @@ namespace Tidepool.Editor
         {
             Button journalButton = CreateButton("JournalButton", safeArea, "Journal", new Vector2(-200f, -300f), new Vector2(180f, 96f));
             journalButton.transform.SetAsFirstSibling();
-            UnityEditor.Events.UnityEventTools.AddPersistentListener(journalButton.onClick, () => OpenJournalScene(playerMover));
-        }
 
-        private static void OpenJournalScene(PlayerGridMover playerMover)
-        {
-            playerMover.SetInputEnabled(false);
-            SceneManager.LoadScene("Journal", LoadSceneMode.Additive);
+            JournalTrigger trigger = journalButton.gameObject.AddComponent<JournalTrigger>();
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(journalButton.onClick, trigger.OpenJournal);
+
+            SerializedObject serializedTrigger = new SerializedObject(trigger);
+            serializedTrigger.FindProperty("playerMover").objectReferenceValue = playerMover;
+            serializedTrigger.FindProperty("journalSceneName").stringValue = "Journal";
+            serializedTrigger.ApplyModifiedProperties();
         }
 
         private static void CreateZoneTransitions(Transform gridTransform, Transform playerRoot, PlayerGridMover playerMover, Grid grid)
