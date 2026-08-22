@@ -10,8 +10,19 @@ Before editing, read:
 
 1. `AGENTS.md`
 2. `PRD.md`
-3. `WEEKEND-PLAN.md`
-4. Relevant docs in `docs/`
+3. `WEEKEND-PLAN.md` (historical — v0.1 shipped; descope ladder still useful)
+4. `docs/ROADMAP.md`
+5. The relevant docs in `docs/` for your task:
+   - `UNITY_IOS_PIPELINE.md` — build/player settings
+   - `V0_1_SCENE_ASSEMBLY.md` — Boot/Overworld/CatchEncounter/Journal scene wiring
+   - `CONTEST_ARCHITECTURE.md` — v0.2 contest loop and `ContestFlowController`
+   - `GROWING_UP_FORMS.md` — v0.4 growth-form save memory and journal hooks
+   - `DAY_NIGHT_RULES.md` — conditional encounter timing
+   - `V0_4_ZONE_TRANSITIONS.md` — zone transitions
+   - `NO_NETWORK_GUARDRAILS.md` — package review and release gate
+   - `ASSET_PIPELINE.md` — art/audio/video import checklist
+   - `PRE_RELEASE_CHECKLIST.md` and `IP_SAFETY_CHECKLIST.md` — release gates
+   - `PUBLIC_RELEASE_ASSET_AUDIT.md` and `PRIVACY_RELEASE_NOTES.md` — release posture
 
 ## Core Rules
 
@@ -39,7 +50,7 @@ Do not start battles, levels, growth systems, day/night, or public-release work 
 
 ## Unity Notes
 
-- Target Unity 6.3 LTS, 2D URP, iOS 15+, landscape iPad.
+- Target Unity 6.5.6 (6000.5.6f1), 2D URP, iOS 15+, landscape iPad.
 - Keep scene structure aligned with `Boot`, `Overworld`, `CatchEncounter`, and `Journal`.
 - Use safe-area fitting for UI.
 - Keep touch targets at least 88pt.
