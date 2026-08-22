@@ -14,8 +14,10 @@ namespace Tidepool.Runtime
         [Header("Creature views")]
         [SerializeField] private Image playerImage;
         [SerializeField] private Text playerNameText;
+        [SerializeField] private Text playerStatusText;
         [SerializeField] private Image visitingImage;
         [SerializeField] private Text visitingNameText;
+        [SerializeField] private Text visitingStatusText;
 
         [Header("Move controls")]
         [SerializeField] private Button firstMoveButton;
@@ -61,6 +63,7 @@ namespace Tidepool.Runtime
             SetResultText(playerSpecies == null || visitingSpecies == null
                 ? "Contest friends are still getting ready."
                 : "Pick a friendly move.");
+            RefreshTuckeredVisuals();
         }
 
         public void ChooseFirstMove()
@@ -83,6 +86,7 @@ namespace Tidepool.Runtime
             SetResultText(playerRested || visitingRested
                 ? "Everyone is ready again. Pick a friendly move."
                 : "Pick a friendly move.");
+            RefreshTuckeredVisuals();
 
             if (retryButton != null)
             {
@@ -137,12 +141,12 @@ namespace Tidepool.Runtime
             if (playerScore > visitingScore)
             {
                 visitingState?.MarkTuckeredOut();
-                SetResultText($"{playerMove.DisplayName} sparkles through. {visitingName} takes a little rest.");
+                SetResultText($"{playerMove.DisplayName} sparkles through. {visitingName} naps a little. Try another round?");
             }
             else if (visitingScore > playerScore)
             {
                 playerState?.MarkTuckeredOut();
-                SetResultText($"{visitingName} uses {visitingMove.DisplayName}. Try another round?");
+                SetResultText($"{visitingName} uses {visitingMove.DisplayName}. Your Tideling needs a quick nap. Try another round?");
             }
             else
             {
@@ -183,6 +187,7 @@ namespace Tidepool.Runtime
         {
             contestFinished = true;
             SetMoveButtonsInteractable(false);
+            RefreshTuckeredVisuals();
 
             if (retryButton != null)
             {
@@ -199,6 +204,25 @@ namespace Tidepool.Runtime
         private bool CanPlayerChooseMove()
         {
             return playerState == null || playerState.CanChooseMove;
+        }
+
+        private void RefreshTuckeredVisuals()
+        {
+            UpdateTuckeredDisplay(playerImage, playerStatusText, playerState);
+            UpdateTuckeredDisplay(visitingImage, visitingStatusText, visitingState);
+        }
+
+        private static void UpdateTuckeredDisplay(Image image, Text statusText, ContestParticipantState state)
+        {
+            bool tuckeredOut = state != null && state.IsTuckeredOut;
+            SetText(statusText, tuckeredOut ? "napping..." : string.Empty);
+
+            if (image != null)
+            {
+                image.color = tuckeredOut
+                    ? new Color(0.5f, 0.5f, 0.5f, 0.6f)
+                    : Color.white;
+            }
         }
 
         private static void BindCreature(TidelingSpecies species, Image image, Text nameText)

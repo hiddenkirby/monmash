@@ -42,12 +42,16 @@ namespace Tidepool.Editor
             playerImage.preserveAspect = true;
             Text playerName = CreateText("PlayerName", playerPanel.transform, "Tideling", 30, TextAnchor.MiddleCenter, new Vector2(0f, -106f), new Vector2(300f, 56f));
             playerName.color = Color.white;
+            Text playerStatus = CreateText("PlayerStatus", playerPanel.transform, string.Empty, 22, TextAnchor.MiddleCenter, new Vector2(0f, -160f), new Vector2(300f, 40f));
+            playerStatus.color = new Color(0.5f, 0.5f, 0.5f);
 
             Image visitingPanel = CreatePanel("VisitingTideling", safeArea, new Vector2(270f, 132f));
             Image visitingImage = CreateImage("VisitingImage", visitingPanel.transform, Color.white, new Vector2(0f, 42f), new Vector2(210f, 210f));
             visitingImage.preserveAspect = true;
             Text visitingName = CreateText("VisitingName", visitingPanel.transform, "Tideling", 30, TextAnchor.MiddleCenter, new Vector2(0f, -106f), new Vector2(300f, 56f));
             visitingName.color = Color.white;
+            Text visitingStatus = CreateText("VisitingStatus", visitingPanel.transform, string.Empty, 22, TextAnchor.MiddleCenter, new Vector2(0f, -160f), new Vector2(300f, 40f));
+            visitingStatus.color = new Color(0.5f, 0.5f, 0.5f);
 
             Text resultText = CreateText("ResultText", safeArea, "Pick a friendly move.", 30, TextAnchor.MiddleCenter, new Vector2(0f, -92f), new Vector2(720f, 80f));
             resultText.color = new Color(0.08f, 0.18f, 0.22f);
@@ -64,8 +68,10 @@ namespace Tidepool.Editor
             SerializedObject serializedController = new SerializedObject(controller);
             serializedController.FindProperty("playerImage").objectReferenceValue = playerImage;
             serializedController.FindProperty("playerNameText").objectReferenceValue = playerName;
+            serializedController.FindProperty("playerStatusText").objectReferenceValue = playerStatus;
             serializedController.FindProperty("visitingImage").objectReferenceValue = visitingImage;
             serializedController.FindProperty("visitingNameText").objectReferenceValue = visitingName;
+            serializedController.FindProperty("visitingStatusText").objectReferenceValue = visitingStatus;
             serializedController.FindProperty("firstMoveButton").objectReferenceValue = firstMoveButton;
             serializedController.FindProperty("firstMoveButtonText").objectReferenceValue = firstMoveLabel;
             serializedController.FindProperty("secondMoveButton").objectReferenceValue = secondMoveButton;

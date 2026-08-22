@@ -90,8 +90,12 @@ or saved player position. A lost contest is just a cue to try again or leave.
 Use `ContestParticipantState` for temporary contest-only rest state. A tuckered-out Tideling
 rests for a small number of contest rounds, then becomes available again; this state is not part
 of `SaveData` and must not remove or rewrite collection progress.
+
 The first controller integration marks the lower-scoring Tideling tuckered out for one retry
-cycle, then advances that rest when the player taps retry.
+cycle, then advances that rest when the player taps retry. While a Tideling is tuckered out,
+its creature image dims to 50% opacity and a `napping...` status label appears below its name.
+Move buttons disable while the player's Tideling is resting. Retry clears the rest state and
+restores the visuals.
 
 Use gentle copy such as:
 
