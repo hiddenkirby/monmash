@@ -152,7 +152,7 @@ namespace Tidepool.Editor
             contestButton.transform.SetAsFirstSibling();
 
             ContestTrigger trigger = contestButton.gameObject.AddComponent<ContestTrigger>();
-            contestButton.onClick.AddListener(trigger.StartContest);
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(contestButton.onClick, trigger.StartContest);
 
             SerializedObject serializedTrigger = new SerializedObject(trigger);
             serializedTrigger.FindProperty("speciesDatabase").objectReferenceValue = database;
@@ -167,11 +167,13 @@ namespace Tidepool.Editor
         {
             Button journalButton = CreateButton("JournalButton", safeArea, "Journal", new Vector2(-200f, -300f), new Vector2(180f, 96f));
             journalButton.transform.SetAsFirstSibling();
-            journalButton.onClick.AddListener(() =>
-            {
-                playerMover.SetInputEnabled(false);
-                SceneManager.LoadScene("Journal", LoadSceneMode.Additive);
-            });
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(journalButton.onClick, () => OpenJournalScene(playerMover));
+        }
+
+        private static void OpenJournalScene(PlayerGridMover playerMover)
+        {
+            playerMover.SetInputEnabled(false);
+            SceneManager.LoadScene("Journal", LoadSceneMode.Additive);
         }
 
         private static void CreateZoneTransitions(Transform gridTransform, Transform playerRoot, PlayerGridMover playerMover, Grid grid)
