@@ -30,6 +30,8 @@ namespace Tidepool.Runtime
         [SerializeField] private Button retryButton;
         [SerializeField] private Button exitButton;
         [SerializeField] private string exitSceneName = "Overworld";
+        [SerializeField, Min(0)] private int progressPointsPerRound = 1;
+        [SerializeField, Min(0)] private int progressPointsForWin = 2;
 
         private TidelingSpecies playerSpecies;
         private TidelingSpecies visitingSpecies;
@@ -43,11 +45,14 @@ namespace Tidepool.Runtime
             visitingSpecies = ContestContext.VisitingSpecies == null ? fallbackVisitingSpecies : ContestContext.VisitingSpecies;
             playerState = ContestParticipantState.ForSpecies(playerSpecies);
             visitingState = ContestParticipantState.ForSpecies(visitingSpecies);
+            int playerLevel = ResolvePlayerLevel();
 
             BindCreature(playerSpecies, playerImage, playerNameText);
             BindCreature(visitingSpecies, visitingImage, visitingNameText);
-            BindMoveButton(firstMoveButton, firstMoveButtonText, playerSpecies?.FirstContestMove, ChooseFirstMove);
-            BindMoveButton(secondMoveButton, secondMoveButtonText, playerSpecies?.SecondContestMove, ChooseSecondMove);
+            BindMoveButton(firstMoveButton, firstMoveButtonText,
+                playerSpecies?.GetUnlockedContestMove(0, playerLevel), ChooseFirstMove);
+            BindMoveButton(secondMoveButton, secondMoveButtonText,
+                playerSpecies?.GetUnlockedContestMove(1, playerLevel), ChooseSecondMove);
 
             if (retryButton != null)
             {
@@ -81,8 +86,10 @@ namespace Tidepool.Runtime
             contestFinished = false;
             bool playerRested = playerState?.AdvanceRest() ?? false;
             bool visitingRested = visitingState?.AdvanceRest() ?? false;
+            int playerLevel = ResolvePlayerLevel();
 
             SetMoveButtonsInteractable(CanPlayerChooseMove());
+            RebindMoveButtons(playerLevel);
             SetResultText(playerRested || visitingRested
                 ? "Everyone is ready again. Pick a friendly move."
                 : "Pick a friendly move.");
@@ -125,7 +132,8 @@ namespace Tidepool.Runtime
                 return;
             }
 
-            ContestMove playerMove = playerSpecies.GetContestMove(moveIndex);
+            int playerLevel = ResolvePlayerLevel();
+            ContestMove playerMove = playerSpecies.GetUnlockedContestMove(moveIndex, playerLevel);
             ContestMove visitingMove = ChooseVisitingMove();
             if (playerMove == null || visitingMove == null)
             {
@@ -141,15 +149,18 @@ namespace Tidepool.Runtime
             if (playerScore > visitingScore)
             {
                 visitingState?.MarkTuckeredOut();
+                AwardProgress(progressPointsForWin);
                 SetResultText($"{playerMove.DisplayName} sparkles through. {visitingName} naps a little. Try another round?");
             }
             else if (visitingScore > playerScore)
             {
                 playerState?.MarkTuckeredOut();
+                AwardProgress(progressPointsPerRound);
                 SetResultText($"{visitingName} uses {visitingMove.DisplayName}. Your Tideling needs a quick nap. Try another round?");
             }
             else
             {
+                AwardProgress(progressPointsPerRound);
                 SetResultText($"Both Tidelings take a happy breather. Try another round?");
             }
 
@@ -204,6 +215,41 @@ namespace Tidepool.Runtime
         private bool CanPlayerChooseMove()
         {
             return playerState == null || playerState.CanChooseMove;
+        }
+
+        private int ResolvePlayerLevel()
+        {
+            if (playerSpecies == null || GameSaveService.Instance == null)
+            {
+                return CaughtTideling.MinLevel;
+            }
+
+            CaughtTideling caught = GameSaveService.Instance.FindCaught(playerSpecies.Id);
+            if (caught == null)
+            {
+                return CaughtTideling.MinLevel;
+            }
+
+            TidelingLevelProgression.Normalize(caught);
+            return caught.level;
+        }
+
+        private void AwardProgress(int points)
+        {
+            if (points <= 0 || playerSpecies == null)
+            {
+                return;
+            }
+
+            GameSaveService.Instance?.RecordGentleProgress(playerSpecies.Id, points);
+        }
+
+        private void RebindMoveButtons(int level)
+        {
+            BindMoveButton(firstMoveButton, firstMoveButtonText,
+                playerSpecies?.GetUnlockedContestMove(0, level), ChooseFirstMove);
+            BindMoveButton(secondMoveButton, secondMoveButtonText,
+                playerSpecies?.GetUnlockedContestMove(1, level), ChooseSecondMove);
         }
 
         private void RefreshTuckeredVisuals()
