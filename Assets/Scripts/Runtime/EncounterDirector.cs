@@ -80,6 +80,11 @@ namespace Tidepool.Runtime
             TidelingSpecies species = PickSpecies();
             if (species == null)
             {
+                if (drySeagrassSteps >= pitySteps)
+                {
+                    drySeagrassSteps = 0;
+                }
+
                 return;
             }
 
@@ -117,7 +122,31 @@ namespace Tidepool.Runtime
                 }
             }
 
+            if (matches.Count == 0 && drySeagrassSteps >= pitySteps)
+            {
+                matches = FindAnyAvailableNormalSpecies();
+            }
+
             return matches.Count == 0 ? null : matches[UnityEngine.Random.Range(0, matches.Count)];
+        }
+
+        private List<TidelingSpecies> FindAnyAvailableNormalSpecies()
+        {
+            List<TidelingSpecies> matches = new List<TidelingSpecies>();
+            IReadOnlyList<TidelingSpecies> allSpecies = speciesDatabase.All;
+
+            for (int i = 0; i < allSpecies.Count; i++)
+            {
+                TidelingSpecies candidate = allSpecies[i];
+                if (IsNormalEncounterSpecies(candidate)
+                    && candidate.LivesIn(currentZone)
+                    && IsAvailableNow(candidate))
+                {
+                    matches.Add(candidate);
+                }
+            }
+
+            return matches;
         }
 
         private TidelingSpecies PickOldBarnabyIfUnlocked()
