@@ -280,7 +280,9 @@ namespace Tidepool.UI
 
         private static string FormatLevelDetails(CaughtTideling caught)
         {
-            return $"Level {caught.level}";
+            return caught.level >= CaughtTideling.MaxLevel
+                ? "Level 20 — all grown up!"
+                : $"Level {caught.level}";
         }
 
         private static string FormatGrowthDetails(CaughtTideling caught)
@@ -386,7 +388,7 @@ namespace Tidepool.UI
 
                 string moveText = species.IsContestMoveUnlocked(i, level)
                     ? move.DisplayName
-                    : $"{move.DisplayName} at level {species.GetContestMoveUnlockLevel(i)}";
+                    : $"{move.DisplayName} (unlocks at level {species.GetContestMoveUnlockLevel(i)})";
                 details = string.IsNullOrEmpty(details) ? moveText : details + ", " + moveText;
             }
 

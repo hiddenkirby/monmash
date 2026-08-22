@@ -83,6 +83,11 @@
   `JournalController.SelectGrowthFormFromDropdown` if not relying on the controller's source-side listener.
 - Wire the original-form button click event to `JournalController.SelectOriginalGrowthForm` if not
   relying on the controller's source-side listener.
+- The level field shows `Level X` (or `Level 20 — all grown up!` at max). The growth field
+  shows `Y friendly moments until next growth` (or `Almost ready to grow` / `Fully grown`).
+  The moves field lists known moves and shows `(unlocks at level N)` for locked moves.
+  Uncaught entries show `?` for the name, a black-tinted silhouette, and `Unknown` /
+  `Not found yet` / `Keep looking in the seagrass.` for detail fields.
 - Conditional encounter hints are appended to the existing habitat text, so no
   separate Journal field is required for v0.4 availability rules.
 
