@@ -93,6 +93,7 @@ namespace Tidepool.Runtime
         public void ExitContest()
         {
             ContestContext.Clear();
+            ContestEvents.RaiseContestFinished();
 
             if (SceneManager.sceneCount > 1)
             {
