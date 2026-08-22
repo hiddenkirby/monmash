@@ -23,6 +23,14 @@ Use `GameSaveService.SelectOriginalGrowthForm` to return to the original form.
 Remembering a form does not automatically replace the original form. The player chooses which
 memory is active, and choosing the original form is always allowed.
 
+## Level-Up Unlock
+
+Contests award gentle progression. When a Tideling levels up, `ContestFlowController` checks
+`growthFormUnlockLevels` (default: 5, 10, 15) and calls `RememberGrowthForm` for each threshold
+crossed. The remembered form ID is a readable placeholder (`growth-form-5`, `growth-form-10`,
+`growth-form-15`) until grown-form art and designer-facing form metadata exist. The journal
+growth-form dropdown lists these as remembered memories the player can switch between.
+
 ## Journal Source Hooks
 
 `JournalController` exposes optional wiring for the remembered-form picker:

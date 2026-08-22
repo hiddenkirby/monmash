@@ -32,6 +32,7 @@ namespace Tidepool.Runtime
         [SerializeField] private string exitSceneName = "Overworld";
         [SerializeField, Min(0)] private int progressPointsPerRound = 1;
         [SerializeField, Min(0)] private int progressPointsForWin = 2;
+        [SerializeField] private int[] growthFormUnlockLevels = { 5, 10, 15 };
 
         private TidelingSpecies playerSpecies;
         private TidelingSpecies visitingSpecies;
@@ -236,12 +237,42 @@ namespace Tidepool.Runtime
 
         private void AwardProgress(int points)
         {
-            if (points <= 0 || playerSpecies == null)
+            if (points <= 0 || playerSpecies == null || GameSaveService.Instance == null)
             {
                 return;
             }
 
-            GameSaveService.Instance?.RecordGentleProgress(playerSpecies.Id, points);
+            CaughtTideling caught = GameSaveService.Instance.FindCaught(playerSpecies.Id);
+            int previousLevel = caught == null ? CaughtTideling.MinLevel : caught.level;
+
+            GameSaveService.Instance.RecordGentleProgress(playerSpecies.Id, points);
+
+            if (caught != null)
+            {
+                int newLevel = caught.level;
+                if (newLevel > previousLevel)
+                {
+                    TryRememberGrowthFormsForLevel(previousLevel, newLevel);
+                }
+            }
+        }
+
+        private void TryRememberGrowthFormsForLevel(int previousLevel, int newLevel)
+        {
+            if (growthFormUnlockLevels == null || GameSaveService.Instance == null || playerSpecies == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < growthFormUnlockLevels.Length; i++)
+            {
+                int unlockLevel = growthFormUnlockLevels[i];
+                if (unlockLevel > previousLevel && unlockLevel <= newLevel)
+                {
+                    string formId = $"growth-form-{unlockLevel}";
+                    GameSaveService.Instance.RememberGrowthForm(playerSpecies.Id, formId);
+                }
+            }
         }
 
         private void RebindMoveButtons(int level)
