@@ -17,6 +17,13 @@ Use this checklist before tagging a playable build.
 - Xcode builds and signs the generated iOS project.
 - The app launches on the target iPad after trusting the developer certificate if needed.
 
+## Accessibility And Settings
+
+- Audio mute/volume controls exist (SettingsController with mute toggle and volume slider, persisted via TidepoolSettingsService to settings.json).
+- Current information uses icon + name + color, not color only (TidelingCurrentRules.GetIconName, GetDisplayName, GetDisplayColor; journal shows all three).
+- Core touch targets are at least 88pt (catch buttons 220x96, move buttons 300x96, mute toggle 120x88, volume slider 204x88, dismiss button 112x88, contest button 180x96).
+- Text font sizes are readable on iPad landscape (journal names 30pt, move labels 30pt, status text 22pt, result text 30pt).
+
 ## Asset Provenance
 
 - Every shipping or candidate asset is listed in `Assets/ASSET_MANIFEST.md`.
