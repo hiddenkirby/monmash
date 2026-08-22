@@ -75,7 +75,7 @@ namespace Tidepool.Editor
 
         private static T FindOrCreateComponent<T>(string objectName) where T : Component
         {
-            T existing = Object.FindFirstObjectByType<T>();
+            T existing = Object.FindAnyObjectByType<T>();
             if (existing != null)
             {
                 existing.gameObject.name = objectName;

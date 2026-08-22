@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 80537c4e0a394ee6b7d3ca3fc614590b, type: 3}
   m_Name: SpeciesDatabase
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   species:
   - {fileID: 11400000, guid: 78d0ad74c1074735b3a1e3efad38f8c6, type: 2}
   - {fileID: 11400000, guid: fe47a5987458451fbf27cccf490312a5, type: 2}
