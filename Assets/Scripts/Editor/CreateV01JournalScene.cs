@@ -137,8 +137,9 @@ namespace Tidepool.Editor
             serializedController.FindProperty("selectOriginalGrowthFormButton").objectReferenceValue = selectOriginalFormButton;
             serializedController.ApplyModifiedProperties();
 
-            saveNicknameButton.onClick.AddListener(controller.SaveNickname);
-            backButton.onClick.AddListener(() => SceneManager.LoadScene("Overworld"));
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(saveNicknameButton.onClick, controller.SaveNickname);
+            JournalBackButton backHandler = backButton.gameObject.AddComponent<JournalBackButton>();
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(backButton.onClick, backHandler.BackToOverworld);
 
             EditorSceneManager.SaveScene(scene, ScenePath);
             AssetDatabase.SaveAssets();
