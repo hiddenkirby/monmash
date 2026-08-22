@@ -45,7 +45,9 @@ namespace Tidepool.Editor
         public static bool ValidateIpadIosPlayerSettings()
         {
             List<string> failures = new List<string>();
+            bool iosBuildSupportInstalled = BuildPipeline.IsBuildTargetSupported(BuildTargetGroup.iOS, BuildTarget.iOS);
 
+            AddFailureIf(failures, !iosBuildSupportInstalled, "Unity iOS Build Support must be installed.");
             AddFailureIf(failures, PlayerSettings.companyName != CompanyName, $"Company name must be {CompanyName}.");
             AddFailureIf(failures, PlayerSettings.productName != ProductName, $"Product name must be {ProductName}.");
             AddFailureIf(
@@ -77,7 +79,10 @@ namespace Tidepool.Editor
                 failures,
                 PlayerSettings.GetArchitecture(NamedBuildTarget.iOS) != Arm64Architecture,
                 "iOS architecture must be ARM64.");
-            AddFailureIf(failures, !HasAppIconAssigned(), $"iOS app icon must be assigned from {AppIconPath}.");
+            AddFailureIf(
+                failures,
+                iosBuildSupportInstalled && !HasAppIconAssigned(),
+                $"iOS app icon must be assigned from {AppIconPath}.");
 
             if (failures.Count == 0)
             {
@@ -106,18 +111,20 @@ namespace Tidepool.Editor
                 return;
             }
 
-            Texture2D[] icons = PlayerSettings.GetIconsForTargetGroup(BuildTargetGroup.iOS, IconKind.Application);
-            if (icons.Length == 0)
+            int iconCount = GetIosApplicationIconSlotCount();
+            if (iconCount == 0)
             {
-                icons = new[] { appIcon };
+                Debug.LogWarning("Unity did not report any iOS app icon slots. Confirm iOS Build Support is installed.");
+                return;
             }
 
+            Texture2D[] icons = new Texture2D[iconCount];
             for (int i = 0; i < icons.Length; i++)
             {
                 icons[i] = appIcon;
             }
 
-            PlayerSettings.SetIconsForTargetGroup(BuildTargetGroup.iOS, icons, IconKind.Application);
+            PlayerSettings.SetIcons(NamedBuildTarget.iOS, icons, IconKind.Application);
         }
 
         private static bool HasAppIconAssigned()
@@ -128,8 +135,9 @@ namespace Tidepool.Editor
                 return false;
             }
 
-            Texture2D[] icons = PlayerSettings.GetIconsForTargetGroup(BuildTargetGroup.iOS, IconKind.Application);
-            if (icons.Length == 0)
+            int iconCount = GetIosApplicationIconSlotCount();
+            Texture2D[] icons = PlayerSettings.GetIcons(NamedBuildTarget.iOS, IconKind.Application);
+            if (iconCount == 0 || icons.Length != iconCount)
             {
                 return false;
             }
@@ -143,6 +151,12 @@ namespace Tidepool.Editor
             }
 
             return true;
+        }
+
+        private static int GetIosApplicationIconSlotCount()
+        {
+            int[] iconSizes = PlayerSettings.GetIconSizes(NamedBuildTarget.iOS, IconKind.Application);
+            return iconSizes.Length;
         }
     }
 }

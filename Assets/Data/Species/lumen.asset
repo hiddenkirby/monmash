@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 96e429b03e0f4a5ebee78f24380b8641, type: 3}
   m_Name: lumen
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   id: lumen
   displayName: Lumen
   current: 3
@@ -20,7 +20,7 @@ MonoBehaviour:
   fieldNote: A lanternfish whose light dims whenever it feels shy.
   habitatZones: 01000000
   encounterAvailability: 0
-  availabilityHint:
+  availabilityHint: 
   firstContestMove: {fileID: 0}
   firstContestMoveUnlockLevel: 1
   secondContestMove: {fileID: 0}

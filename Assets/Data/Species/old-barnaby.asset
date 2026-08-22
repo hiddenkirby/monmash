@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 96e429b03e0f4a5ebee78f24380b8641, type: 3}
   m_Name: old-barnaby
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   id: old-barnaby
   displayName: Old Barnaby
   current: 4
@@ -20,7 +20,7 @@ MonoBehaviour:
   fieldNote: An ancient barnacled shape that seems to know every quiet pool by name.
   habitatZones: 00000000
   encounterAvailability: 0
-  availabilityHint:
+  availabilityHint: 
   firstContestMove: {fileID: 0}
   firstContestMoveUnlockLevel: 1
   secondContestMove: {fileID: 0}
