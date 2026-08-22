@@ -72,6 +72,25 @@ code. Each move has:
 two move buttons for the active species. Missing move slots are allowed during prototype data
 entry and should disable or hide the corresponding button.
 
+## Move Unlock Thresholds
+
+Each contest move slot has an unlock level (`firstContestMoveUnlockLevel`,
+`secondContestMoveUnlockLevel`). `GetUnlockedContestMove(index, level)` returns the move only
+if the Tideling's level meets or exceeds the threshold; otherwise it returns null and the
+button hides. The contest controller resolves the player's level from `GameSaveService` and
+only offers unlocked moves. The journal's move detail text shows the unlock level for locked
+moves (`Gentle Splash at level 3`).
+
+## Gentle Progression
+
+Contests award gentle progression to the player's Tideling:
+- Win: `progressPointsForWin` points (default 2)
+- Loss or tie: `progressPointsPerRound` points (default 1)
+
+Progress accumulates via `TidelingLevelProgression.AddProgress` (3 points per level, max level
+20). Progression is deterministic, save-safe, and never removes progress. The journal displays
+the current level and growth progress (`Level X`, `Y friendly moments until next growth`).
+
 ## Resolution
 
 The first implementation should be deterministic and inspectable:
