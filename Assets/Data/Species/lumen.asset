@@ -18,12 +18,12 @@ MonoBehaviour:
   rarity: 1
   sprite: {fileID: 21300000, guid: 596cf1fad4f0e4a698563cfea72a2284, type: 3}
   fieldNote: A lanternfish whose light dims whenever it feels shy.
-  habitatZones: 01000000
+  habitatZones: 0100000002000000
   encounterAvailability: 0
   availabilityHint: 
-  firstContestMove: {fileID: 0}
+  firstContestMove: {fileID: 11400000, guid: dc4fcea9f517e4665ba89ab4daeef014, type: 2}
   firstContestMoveUnlockLevel: 1
-  secondContestMove: {fileID: 0}
+  secondContestMove: {fileID: 11400000, guid: ee9d118ea610e4183a7d44b993ee54fb, type: 2}
   secondContestMoveUnlockLevel: 3
   catchZoneWidth: 0.3
   catchMarkerSpeed: 0.72

@@ -18,12 +18,12 @@ MonoBehaviour:
   rarity: 2
   sprite: {fileID: 21300000, guid: 94785c2948f4a45bcbfa027f200cc489, type: 3}
   fieldNote: A flying fish that flashes silver at the edge of daylight.
-  habitatZones: 01000000
+  habitatZones: 0100000002000000
   encounterAvailability: 1
   availabilityHint: Look near the end of the daylight cycle.
-  firstContestMove: {fileID: 0}
+  firstContestMove: {fileID: 11400000, guid: df8f8bbfa8ef84e2186d9421e7579907, type: 2}
   firstContestMoveUnlockLevel: 1
-  secondContestMove: {fileID: 0}
+  secondContestMove: {fileID: 11400000, guid: 86d8c8bc8bc4341c7abbf7b8cf3414c5, type: 2}
   secondContestMoveUnlockLevel: 3
   catchZoneWidth: 0.24
   catchMarkerSpeed: 0.88

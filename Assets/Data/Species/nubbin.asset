@@ -21,9 +21,9 @@ MonoBehaviour:
   habitatZones: 00000000
   encounterAvailability: 0
   availabilityHint: 
-  firstContestMove: {fileID: 0}
+  firstContestMove: {fileID: 11400000, guid: 22f819fa35a7240ff9f4d94a5a98feb2, type: 2}
   firstContestMoveUnlockLevel: 1
-  secondContestMove: {fileID: 0}
+  secondContestMove: {fileID: 11400000, guid: d30243398e8d94fd0b5e83a950fc4cf9, type: 2}
   secondContestMoveUnlockLevel: 3
   catchZoneWidth: 0.4
   catchMarkerSpeed: 0.55

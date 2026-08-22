@@ -1,4 +1,5 @@
 using System.IO;
+using Tidepool.Domain;
 using Tidepool.Runtime;
 using Tidepool.UI;
 using UnityEditor;
@@ -93,6 +94,7 @@ namespace Tidepool.Editor
             safeArea.gameObject.AddComponent<SafeAreaFitter>();
             CreateFirstRunGuidance(safeArea);
             CreateContestButton(safeArea, playerMover, database);
+            CreateJournalButton(safeArea, playerMover);
             CreateEventSystem();
 
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -158,6 +160,17 @@ namespace Tidepool.Editor
             serializedTrigger.FindProperty("visitingSpeciesId").stringValue = "wobbet";
             serializedTrigger.FindProperty("contestSceneName").stringValue = "Contest";
             serializedTrigger.ApplyModifiedProperties();
+        }
+
+        private static void CreateJournalButton(RectTransform safeArea, PlayerGridMover playerMover)
+        {
+            Button journalButton = CreateButton("JournalButton", safeArea, "Journal", new Vector2(-200f, -300f), new Vector2(180f, 96f));
+            journalButton.transform.SetAsFirstSibling();
+            journalButton.onClick.AddListener(() =>
+            {
+                playerMover.SetInputEnabled(false);
+                SceneManager.LoadScene("Journal", LoadSceneMode.Additive);
+            });
         }
 
         private static void CreateZoneTransitions(Transform gridTransform, Transform playerRoot, PlayerGridMover playerMover, Grid grid)

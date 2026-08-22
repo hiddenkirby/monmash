@@ -18,12 +18,12 @@ MonoBehaviour:
   rarity: 1
   sprite: {fileID: 21300000, guid: f72b63391dfca456b9e83b2f494d8bf6, type: 3}
   fieldNote: A small shrimp with one enormous claw and a very serious snap.
-  habitatZones: 01000000
+  habitatZones: 0100000003000000
   encounterAvailability: 0
   availabilityHint: 
-  firstContestMove: {fileID: 0}
+  firstContestMove: {fileID: 11400000, guid: d30243398e8d94fd0b5e83a950fc4cf9, type: 2}
   firstContestMoveUnlockLevel: 1
-  secondContestMove: {fileID: 0}
+  secondContestMove: {fileID: 11400000, guid: 22f819fa35a7240ff9f4d94a5a98feb2, type: 2}
   secondContestMoveUnlockLevel: 3
   catchZoneWidth: 0.3
   catchMarkerSpeed: 0.72
