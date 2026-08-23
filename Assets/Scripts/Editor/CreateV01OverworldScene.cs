@@ -95,6 +95,7 @@ namespace Tidepool.Editor
             CreateFirstRunGuidance(safeArea);
             CreateContestButton(safeArea, playerMover, database);
             CreateJournalButton(safeArea, playerMover);
+            CreateCharacterButton(safeArea, playerMover);
             CreateEventSystem();
 
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -174,6 +175,20 @@ namespace Tidepool.Editor
             SerializedObject serializedTrigger = new SerializedObject(trigger);
             serializedTrigger.FindProperty("playerMover").objectReferenceValue = playerMover;
             serializedTrigger.FindProperty("journalSceneName").stringValue = "Journal";
+            serializedTrigger.ApplyModifiedProperties();
+        }
+
+        private static void CreateCharacterButton(RectTransform safeArea, PlayerGridMover playerMover)
+        {
+            Button characterButton = CreateButton("CharacterButton", safeArea, "Character", new Vector2(12f, -300f), new Vector2(180f, 96f));
+            characterButton.transform.SetAsFirstSibling();
+
+            CharacterSelectTrigger trigger = characterButton.gameObject.AddComponent<CharacterSelectTrigger>();
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(characterButton.onClick, trigger.OpenCharacterSelect);
+
+            SerializedObject serializedTrigger = new SerializedObject(trigger);
+            serializedTrigger.FindProperty("playerMover").objectReferenceValue = playerMover;
+            serializedTrigger.FindProperty("characterSelectSceneName").stringValue = "CharacterSelect";
             serializedTrigger.ApplyModifiedProperties();
         }
 
