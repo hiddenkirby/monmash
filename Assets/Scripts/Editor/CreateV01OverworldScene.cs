@@ -159,7 +159,7 @@ namespace Tidepool.Editor
             serializedTrigger.FindProperty("playerMover").objectReferenceValue = playerMover;
             serializedTrigger.FindProperty("playerSpeciesId").stringValue = "blip";
             serializedTrigger.FindProperty("visitingSpeciesId").stringValue = "wobbet";
-            serializedTrigger.FindProperty("contestSceneName").stringValue = "Contest";
+            serializedTrigger.FindProperty("partySelectSceneName").stringValue = "PartySelect";
             serializedTrigger.ApplyModifiedProperties();
         }
 

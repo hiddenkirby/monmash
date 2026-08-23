@@ -9,7 +9,7 @@ namespace Tidepool.Runtime
         [SerializeField] private SpeciesDatabase speciesDatabase;
         [SerializeField] private string playerSpeciesId = "blip";
         [SerializeField] private string visitingSpeciesId = "wobbet";
-        [SerializeField] private string contestSceneName = "Contest";
+        [SerializeField] private string partySelectSceneName = "PartySelect";
         [SerializeField] private PlayerGridMover playerMover;
 
         private bool contestActive;
@@ -40,10 +40,8 @@ namespace Tidepool.Runtime
             }
 
             contestActive = true;
-            ContestContext.PlayerSpecies = playerSpecies;
-            ContestContext.VisitingSpecies = visitingSpecies;
             playerMover?.SetInputEnabled(false);
-            SceneManager.LoadScene(contestSceneName, LoadSceneMode.Additive);
+            SceneManager.LoadScene(partySelectSceneName, LoadSceneMode.Additive);
         }
 
         private void HandleContestFinished()
