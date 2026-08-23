@@ -20,6 +20,11 @@ namespace Tidepool.Runtime
 
         private void Start()
         {
+            if (playerMover == null)
+            {
+                playerMover = FindObjectOfType<PlayerGridMover>();
+            }
+
             if (titleText != null)
             {
                 titleText.text = "Pick your Tideling";
@@ -33,7 +38,7 @@ namespace Tidepool.Runtime
             }
         }
 
-        private void Close()
+        public void Close()
         {
             playerMover?.SetInputEnabled(true);
 

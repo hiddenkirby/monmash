@@ -1,5 +1,6 @@
 using System.IO;
 using Tidepool.Runtime;
+using Tidepool.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -63,6 +64,7 @@ namespace Tidepool.Editor
             serializedController.FindProperty("titleText").objectReferenceValue = titleText;
             serializedController.FindProperty("contestSceneName").stringValue = "Contest";
             serializedController.FindProperty("backButton").objectReferenceValue = backButton;
+            serializedController.FindProperty("playerMover").objectReferenceValue = null;
             serializedController.ApplyModifiedProperties();
 
             UnityEditor.Events.UnityEventTools.AddPersistentListener(backButton.onClick, controller.Close);
