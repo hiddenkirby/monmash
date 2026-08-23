@@ -20,4 +20,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Contest.unity
     guid: 592941890b6da4ade8e7fd29e0287510
+  - enabled: 1
+    path: Assets/Scenes/PartySelect.unity
+    guid: a1affca47946d431a9353c4e500a4cf5
   m_configObjects: {}
