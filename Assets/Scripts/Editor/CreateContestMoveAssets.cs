@@ -30,6 +30,7 @@ namespace Tidepool.Editor
                 serializedMove.FindProperty("id").stringValue = seed.Id;
                 serializedMove.FindProperty("displayName").stringValue = seed.DisplayName;
                 serializedMove.FindProperty("current").enumValueIndex = (int)seed.Current;
+                serializedMove.FindProperty("category").enumValueIndex = (int)seed.Category;
                 serializedMove.FindProperty("gentlePower").intValue = seed.GentlePower;
                 serializedMove.FindProperty("description").stringValue = seed.Description;
                 serializedMove.ApplyModifiedProperties();
@@ -92,24 +93,24 @@ namespace Tidepool.Editor
         private static readonly MoveSeed[] MoveSeeds =
         {
             // Current moves
-            new MoveSeed("current-splash", "Gentle Splash", TidelingCurrent.Current, 3, "A soft wash of cool water that ripples warmly."),
-            new MoveSeed("current-drift", "Drift Current", TidelingCurrent.Current, 2, "A smooth glide that carries a kind wave along."),
+            new MoveSeed("current-splash", "Gentle Splash", TidelingCurrent.Current, ContestMoveCategory.Attack, 3, "A soft wash of cool water that ripples warmly."),
+            new MoveSeed("current-drift", "Drift Current", TidelingCurrent.Current, ContestMoveCategory.Focus, 2, "A smooth glide that carries a kind wave along."),
 
             // Coral moves
-            new MoveSeed("coral-bloom", "Coral Bloom", TidelingCurrent.Coral, 3, "A warm burst of coral color that shimmers."),
-            new MoveSeed("coral-frill", "Frill Wave", TidelingCurrent.Coral, 2, "A ruffled display of soft coral fronds."),
+            new MoveSeed("coral-bloom", "Coral Bloom", TidelingCurrent.Coral, ContestMoveCategory.Attack, 3, "A warm burst of coral color that shimmers."),
+            new MoveSeed("coral-frill", "Frill Wave", TidelingCurrent.Coral, ContestMoveCategory.Defend, 2, "A ruffled display of soft coral fronds."),
 
             // Stone moves
-            new MoveSeed("stone-pebble", "Steady Pebble", TidelingCurrent.Stone, 3, "A grounded little nudge, firm and friendly."),
-            new MoveSeed("stone-clack", "Gentle Clack", TidelingCurrent.Stone, 2, "A soft click of stone on stone, reassuring."),
+            new MoveSeed("stone-pebble", "Steady Pebble", TidelingCurrent.Stone, ContestMoveCategory.Attack, 3, "A grounded little nudge, firm and friendly."),
+            new MoveSeed("stone-clack", "Gentle Clack", TidelingCurrent.Stone, ContestMoveCategory.Defend, 2, "A soft click of stone on stone, reassuring."),
 
             // Glow moves
-            new MoveSeed("glow-shimmer", "Warm Shimmer", TidelingCurrent.Glow, 3, "A gentle glow that lights up the water."),
-            new MoveSeed("glow-spark", "Soft Spark", TidelingCurrent.Glow, 2, "A tiny blink of light that says hello."),
+            new MoveSeed("glow-shimmer", "Warm Shimmer", TidelingCurrent.Glow, ContestMoveCategory.Attack, 3, "A gentle glow that lights up the water."),
+            new MoveSeed("glow-spark", "Soft Spark", TidelingCurrent.Glow, ContestMoveCategory.Focus, 2, "A tiny blink of light that says hello."),
 
             // Tide moves
-            new MoveSeed("tide-wash", "Tide Wash", TidelingCurrent.Tide, 3, "A slow, rolling wave that soothes."),
-            new MoveSeed("tide-bubble", "Bubble Drift", TidelingCurrent.Tide, 2, "A round bubble that bobs up and pops kindly.")
+            new MoveSeed("tide-wash", "Tide Wash", TidelingCurrent.Tide, ContestMoveCategory.Attack, 3, "A slow, rolling wave that soothes."),
+            new MoveSeed("tide-bubble", "Bubble Drift", TidelingCurrent.Tide, ContestMoveCategory.Defend, 2, "A round bubble that bobs up and pops kindly.")
         };
 
         private static readonly SpeciesMoveAssignment[] SpeciesAssignments =
@@ -134,14 +135,22 @@ namespace Tidepool.Editor
             public readonly string Id;
             public readonly string DisplayName;
             public readonly TidelingCurrent Current;
+            public readonly ContestMoveCategory Category;
             public readonly int GentlePower;
             public readonly string Description;
 
-            public MoveSeed(string id, string displayName, TidelingCurrent current, int gentlePower, string description)
+            public MoveSeed(
+                string id,
+                string displayName,
+                TidelingCurrent current,
+                ContestMoveCategory category,
+                int gentlePower,
+                string description)
             {
                 Id = id;
                 DisplayName = displayName;
                 Current = current;
+                Category = category;
                 GentlePower = gentlePower;
                 Description = description;
             }
