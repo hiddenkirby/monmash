@@ -61,52 +61,86 @@ namespace Tidepool.Editor
             detailPanel.anchoredPosition = new Vector2(120f, 120f);
             detailPanel.sizeDelta = new Vector2(500f, 400f);
             Image detailPanelBg = detailPanel.gameObject.AddComponent<Image>();
-            detailPanelBg.color = new Color(0.08f, 0.22f, 0.24f, 0.90f);
+            detailPanelBg.color = new Color(1f, 0.97f, 0.89f, 0.96f);
 
-            Image detailImage = CreateImage("DetailImage", detailPanel, Color.white, new Vector2(0f, 130f), new Vector2(180f, 180f));
+            ScrollRect detailScroll = detailPanel.gameObject.AddComponent<ScrollRect>();
+            detailScroll.horizontal = false;
+            detailScroll.vertical = true;
+            detailScroll.movementType = ScrollRect.MovementType.Clamped;
+
+            RectTransform detailViewport = CreateRect("DetailViewport", detailPanel);
+            detailViewport.anchorMin = Vector2.zero;
+            detailViewport.anchorMax = Vector2.one;
+            detailViewport.offsetMin = new Vector2(20f, 20f);
+            detailViewport.offsetMax = new Vector2(-20f, -20f);
+            detailViewport.gameObject.AddComponent<RectMask2D>();
+
+            RectTransform detailContent = CreateRect("DetailContent", detailViewport);
+            detailContent.anchorMin = new Vector2(0f, 1f);
+            detailContent.anchorMax = new Vector2(1f, 1f);
+            detailContent.pivot = new Vector2(0.5f, 1f);
+            detailContent.anchoredPosition = Vector2.zero;
+            detailContent.sizeDelta = new Vector2(0f, 1040f);
+            detailScroll.viewport = detailViewport;
+            detailScroll.content = detailContent;
+
+            CreateSectionHeader("IdentityHeader", detailContent, "Identity", new Vector2(0f, 484f));
+            Image detailImage = CreateImage("DetailImage", detailContent, Color.white, new Vector2(0f, 388f), new Vector2(150f, 150f));
             detailImage.preserveAspect = true;
 
-            Text detailName = CreateText("DetailName", detailPanel, "?", 30, TextAnchor.MiddleCenter, new Vector2(0f, 20f), new Vector2(480f, 48f));
-            detailName.color = Color.white;
+            Text detailName = CreateText("DetailName", detailContent, "?", 30, TextAnchor.MiddleCenter, new Vector2(0f, 300f), new Vector2(420f, 48f));
+            detailName.color = new Color(0.18f, 0.23f, 0.21f);
 
-            Text detailCurrent = CreateText("DetailCurrent", detailPanel, "Unknown", 24, TextAnchor.MiddleCenter, new Vector2(-130f, -24f), new Vector2(220f, 40f));
-            detailCurrent.color = Color.white;
+            Text detailCurrent = CreateText("DetailCurrent", detailContent, "Unknown", 24, TextAnchor.MiddleLeft, new Vector2(46f, 256f), new Vector2(300f, 40f));
+            detailCurrent.color = new Color(0.18f, 0.23f, 0.21f);
 
-            Image detailCurrentIcon = CreateImage("DetailCurrentIcon", detailPanel, Color.white, new Vector2(-250f, -24f), new Vector2(40f, 40f));
+            Image detailCurrentIcon = CreateImage("DetailCurrentIcon", detailContent, Color.white, new Vector2(-140f, 256f), new Vector2(40f, 40f));
             detailCurrentIcon.preserveAspect = true;
 
-            Text detailHabitat = CreateText("DetailHabitat", detailPanel, "Unknown", 22, TextAnchor.MiddleLeft, new Vector2(0f, -68f), new Vector2(480f, 36f));
-            detailHabitat.color = Color.white;
-
-            Text detailCaught = CreateText("DetailCaught", detailPanel, "Not found yet", 22, TextAnchor.MiddleLeft, new Vector2(0f, -104f), new Vector2(480f, 36f));
-            detailCaught.color = Color.white;
-
-            Text detailLevel = CreateText("DetailLevel", detailPanel, "Unknown", 22, TextAnchor.MiddleLeft, new Vector2(0f, -140f), new Vector2(480f, 36f));
-            detailLevel.color = Color.white;
-
-            Text detailGrowth = CreateText("DetailGrowth", detailPanel, "Keep looking to learn more.", 22, TextAnchor.MiddleLeft, new Vector2(0f, -176f), new Vector2(480f, 36f));
-            detailGrowth.color = Color.white;
-
-            Text detailGrowthMemory = CreateText("DetailGrowthMemory", detailPanel, "Unknown", 22, TextAnchor.MiddleLeft, new Vector2(0f, -212f), new Vector2(480f, 36f));
-            detailGrowthMemory.color = Color.white;
-
-            Text detailMoves = CreateText("DetailMoves", detailPanel, "Unknown", 22, TextAnchor.MiddleLeft, new Vector2(0f, -248f), new Vector2(480f, 36f));
-            detailMoves.color = Color.white;
-
-            Text detailFieldNote = CreateText("DetailFieldNote", detailPanel, "Keep looking in the seagrass.", 22, TextAnchor.MiddleLeft, new Vector2(0f, -284f), new Vector2(480f, 36f));
-            detailFieldNote.color = Color.white;
-
-            Text detailTimesSeen = CreateText("DetailTimesSeen", detailPanel, "Not found yet", 22, TextAnchor.MiddleLeft, new Vector2(0f, -320f), new Vector2(480f, 36f));
-            detailTimesSeen.color = Color.white;
-
-            InputField nicknameInput = CreateInputField("NicknameInput", detailPanel, "Nickname", new Vector2(-50f, -360f), new Vector2(300f, 56f));
+            InputField nicknameInput = CreateInputField("NicknameInput", detailContent, "Nickname", new Vector2(-58f, 200f), new Vector2(292f, 56f));
             nicknameInput.characterLimit = 12;
 
-            Button saveNicknameButton = CreateButton("SaveNicknameButton", detailPanel, "Save", new Vector2(160f, -360f), new Vector2(120f, 56f));
+            Button saveNicknameButton = CreateButton("SaveNicknameButton", detailContent, "Save", new Vector2(150f, 200f), new Vector2(112f, 56f));
 
-            Dropdown growthFormDropdown = CreateDropdown("GrowthFormDropdown", detailPanel, new Vector2(120f, -100f), new Vector2(260f, 56f));
+            Dropdown growthFormDropdown = CreateDropdown("GrowthFormDropdown", detailContent, new Vector2(86f, 132f), new Vector2(260f, 56f));
 
-            Button selectOriginalFormButton = CreateButton("SelectOriginalFormButton", detailPanel, "Original Form", new Vector2(-120f, -100f), new Vector2(160f, 56f));
+            Button selectOriginalFormButton = CreateButton("SelectOriginalFormButton", detailContent, "Original Form", new Vector2(-142f, 132f), new Vector2(160f, 56f));
+
+            CreateDivider("IdentityDivider", detailContent, new Vector2(0f, 84f));
+
+            CreateSectionHeader("HabitatHeader", detailContent, "Habitat", new Vector2(0f, 46f));
+
+            Text detailHabitat = CreateText("DetailHabitat", detailContent, "Unknown", 22, TextAnchor.MiddleLeft, new Vector2(0f, 4f), new Vector2(420f, 36f));
+            detailHabitat.color = new Color(0.18f, 0.23f, 0.21f);
+
+            Text detailCaught = CreateText("DetailCaught", detailContent, "Not found yet", 22, TextAnchor.MiddleLeft, new Vector2(0f, -32f), new Vector2(420f, 36f));
+            detailCaught.color = new Color(0.18f, 0.23f, 0.21f);
+
+            CreateDivider("HabitatDivider", detailContent, new Vector2(0f, -70f));
+
+            CreateSectionHeader("StatsHeader", detailContent, "Stats", new Vector2(0f, -108f));
+
+            Text detailLevel = CreateText("DetailLevel", detailContent, "Unknown", 22, TextAnchor.MiddleLeft, new Vector2(0f, -150f), new Vector2(420f, 36f));
+            detailLevel.color = new Color(0.18f, 0.23f, 0.21f);
+
+            Text detailGrowth = CreateText("DetailGrowth", detailContent, "Keep looking to learn more.", 22, TextAnchor.MiddleLeft, new Vector2(0f, -186f), new Vector2(420f, 36f));
+            detailGrowth.color = new Color(0.18f, 0.23f, 0.21f);
+
+            Text detailGrowthMemory = CreateText("DetailGrowthMemory", detailContent, "Unknown", 22, TextAnchor.MiddleLeft, new Vector2(0f, -222f), new Vector2(420f, 36f));
+            detailGrowthMemory.color = new Color(0.18f, 0.23f, 0.21f);
+
+            Text detailMoves = CreateText("DetailMoves", detailContent, "Unknown", 22, TextAnchor.MiddleLeft, new Vector2(0f, -258f), new Vector2(420f, 36f));
+            detailMoves.color = new Color(0.18f, 0.23f, 0.21f);
+
+            Text detailTimesSeen = CreateText("DetailTimesSeen", detailContent, "Not found yet", 22, TextAnchor.MiddleLeft, new Vector2(0f, -294f), new Vector2(420f, 36f));
+            detailTimesSeen.color = new Color(0.18f, 0.23f, 0.21f);
+
+            CreateDivider("StatsDivider", detailContent, new Vector2(0f, -332f));
+
+            CreateSectionHeader("FieldNotesHeader", detailContent, "Field Notes", new Vector2(0f, -370f));
+
+            Text detailFieldNote = CreateText("DetailFieldNote", detailContent, "Keep looking in the seagrass.", 22, TextAnchor.UpperLeft, new Vector2(0f, -438f), new Vector2(420f, 92f));
+            detailFieldNote.color = new Color(0.18f, 0.23f, 0.21f);
 
             Button backButton = CreateButton("BackButton", safeArea, "Back", new Vector2(-400f, -320f), new Vector2(160f, 88f));
 
@@ -196,6 +230,19 @@ namespace Tidepool.Editor
             GameObject eventSystemObject = new GameObject("EventSystem");
             eventSystemObject.AddComponent<EventSystem>();
             eventSystemObject.AddComponent<StandaloneInputModule>();
+        }
+
+        private static Text CreateSectionHeader(string name, Transform parent, string label, Vector2 anchoredPosition)
+        {
+            Text header = CreateText(name, parent, label, 28, TextAnchor.MiddleLeft, anchoredPosition, new Vector2(420f, 40f));
+            header.color = new Color(0.24f, 0.44f, 0.35f);
+            header.fontStyle = FontStyle.Bold;
+            return header;
+        }
+
+        private static Image CreateDivider(string name, Transform parent, Vector2 anchoredPosition)
+        {
+            return CreateImage(name, parent, new Color(0.85f, 0.68f, 0.38f, 0.55f), anchoredPosition, new Vector2(420f, 2f));
         }
 
         private static Button CreateButton(string name, Transform parent, string label, Vector2 anchoredPosition, Vector2 size)
