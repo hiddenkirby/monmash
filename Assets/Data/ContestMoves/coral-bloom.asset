@@ -15,5 +15,6 @@ MonoBehaviour:
   id: coral-bloom
   displayName: Coral Bloom
   current: 1
+  category: 0
   gentlePower: 3
   description: A warm burst of coral color that shimmers.

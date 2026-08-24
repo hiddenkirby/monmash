@@ -15,5 +15,6 @@ MonoBehaviour:
   id: coral-frill
   displayName: Frill Wave
   current: 1
+  category: 2
   gentlePower: 2
   description: A ruffled display of soft coral fronds.

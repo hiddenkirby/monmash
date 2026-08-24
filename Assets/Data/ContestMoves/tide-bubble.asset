@@ -15,5 +15,6 @@ MonoBehaviour:
   id: tide-bubble
   displayName: Bubble Drift
   current: 2
+  category: 2
   gentlePower: 2
   description: A round bubble that bobs up and pops kindly.

@@ -15,5 +15,6 @@ MonoBehaviour:
   id: tide-wash
   displayName: Tide Wash
   current: 2
+  category: 0
   gentlePower: 3
   description: A slow, rolling wave that soothes.

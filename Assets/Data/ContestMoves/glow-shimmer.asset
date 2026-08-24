@@ -15,5 +15,6 @@ MonoBehaviour:
   id: glow-shimmer
   displayName: Warm Shimmer
   current: 3
+  category: 0
   gentlePower: 3
   description: A gentle glow that lights up the water.

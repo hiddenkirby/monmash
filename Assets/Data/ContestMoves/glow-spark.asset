@@ -15,5 +15,6 @@ MonoBehaviour:
   id: glow-spark
   displayName: Soft Spark
   current: 3
+  category: 1
   gentlePower: 2
   description: A tiny blink of light that says hello.

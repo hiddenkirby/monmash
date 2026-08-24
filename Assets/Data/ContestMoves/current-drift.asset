@@ -15,5 +15,6 @@ MonoBehaviour:
   id: current-drift
   displayName: Drift Current
   current: 0
+  category: 1
   gentlePower: 2
   description: A smooth glide that carries a kind wave along.

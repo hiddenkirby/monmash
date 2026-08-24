@@ -15,5 +15,6 @@ MonoBehaviour:
   id: current-splash
   displayName: Gentle Splash
   current: 0
+  category: 0
   gentlePower: 3
   description: A soft wash of cool water that ripples warmly.

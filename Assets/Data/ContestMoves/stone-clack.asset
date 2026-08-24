@@ -15,5 +15,6 @@ MonoBehaviour:
   id: stone-clack
   displayName: Gentle Clack
   current: 4
+  category: 2
   gentlePower: 2
   description: A soft click of stone on stone, reassuring.

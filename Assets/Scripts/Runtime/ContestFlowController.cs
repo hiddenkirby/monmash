@@ -7,6 +7,8 @@ namespace Tidepool.Runtime
 {
     public class ContestFlowController : MonoBehaviour
     {
+        private const float CategoryAdvantageScoreBonus = 1000f;
+
         [Header("Prototype fallback")]
         [SerializeField] private TidelingSpecies fallbackPlayerSpecies;
         [SerializeField] private TidelingSpecies fallbackVisitingSpecies;
@@ -143,8 +145,8 @@ namespace Tidepool.Runtime
                 return;
             }
 
-            float playerScore = ScoreMove(playerMove, visitingSpecies);
-            float visitingScore = ScoreMove(visitingMove, playerSpecies);
+            float playerScore = ScoreMove(playerMove, visitingSpecies, visitingMove);
+            float visitingScore = ScoreMove(visitingMove, playerSpecies, playerMove);
             string visitingName = GetDisplayName(visitingSpecies);
 
             if (playerScore > visitingScore)
@@ -187,12 +189,24 @@ namespace Tidepool.Runtime
 
         private static float ScoreMove(ContestMove move, TidelingSpecies defender)
         {
+            return ScoreMove(move, defender, null);
+        }
+
+        private static float ScoreMove(ContestMove move, TidelingSpecies defender, ContestMove opposingMove)
+        {
             if (move == null || defender == null)
             {
                 return 0f;
             }
 
-            return move.GentlePower * TidelingCurrentRules.GetEffectivenessMultiplier(move.Current, defender.Current);
+            float score = move.GentlePower * TidelingCurrentRules.GetEffectivenessMultiplier(move.Current, defender.Current);
+            if (opposingMove == null)
+            {
+                return score;
+            }
+
+            int categoryAdvantage = ContestMove.ResolveCategoryAdvantage(move.Category, opposingMove.Category);
+            return categoryAdvantage > 0 ? score + CategoryAdvantageScoreBonus : score;
         }
 
         private void FinishRound()

@@ -15,5 +15,6 @@ MonoBehaviour:
   id: stone-pebble
   displayName: Steady Pebble
   current: 4
+  category: 0
   gentlePower: 3
   description: A grounded little nudge, firm and friendly.
