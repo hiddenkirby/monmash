@@ -53,6 +53,9 @@ namespace Tidepool.Editor
             Text visitingStatus = CreateText("VisitingStatus", visitingPanel.transform, string.Empty, 22, TextAnchor.MiddleCenter, new Vector2(0f, -160f), new Vector2(300f, 40f));
             visitingStatus.color = new Color(0.5f, 0.5f, 0.5f);
 
+            Text roundCounterText = CreateText("RoundCounterText", safeArea, "Round 1 of 3 - You 0, Visitor 0", 26, TextAnchor.MiddleCenter, new Vector2(0f, -20f), new Vector2(720f, 48f));
+            roundCounterText.color = new Color(0.08f, 0.18f, 0.22f);
+
             Text resultText = CreateText("ResultText", safeArea, "Pick a friendly move.", 30, TextAnchor.MiddleCenter, new Vector2(0f, -92f), new Vector2(720f, 80f));
             resultText.color = new Color(0.08f, 0.18f, 0.22f);
 
@@ -76,6 +79,7 @@ namespace Tidepool.Editor
             serializedController.FindProperty("firstMoveButtonText").objectReferenceValue = firstMoveLabel;
             serializedController.FindProperty("secondMoveButton").objectReferenceValue = secondMoveButton;
             serializedController.FindProperty("secondMoveButtonText").objectReferenceValue = secondMoveLabel;
+            serializedController.FindProperty("roundCounterText").objectReferenceValue = roundCounterText;
             serializedController.FindProperty("resultText").objectReferenceValue = resultText;
             serializedController.FindProperty("retryButton").objectReferenceValue = retryButton;
             serializedController.FindProperty("exitButton").objectReferenceValue = exitButton;

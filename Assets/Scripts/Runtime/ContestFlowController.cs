@@ -28,12 +28,15 @@ namespace Tidepool.Runtime
         [SerializeField] private Text secondMoveButtonText;
 
         [Header("Result controls")]
+        [SerializeField] private Text roundCounterText;
         [SerializeField] private Text resultText;
         [SerializeField] private Button retryButton;
         [SerializeField] private Button exitButton;
         [SerializeField] private string exitSceneName = "Overworld";
         [SerializeField, Min(0)] private int progressPointsPerRound = 1;
         [SerializeField, Min(0)] private int progressPointsForWin = 2;
+        [SerializeField, Min(1)] private int roundsToWinContest = 2;
+        [SerializeField, Min(1)] private int maxResolvedRounds = 3;
         [SerializeField] private int[] growthFormUnlockLevels = { 5, 10, 15 };
 
         private TidelingSpecies playerSpecies;
@@ -41,6 +44,10 @@ namespace Tidepool.Runtime
         private ContestParticipantState playerState;
         private ContestParticipantState visitingState;
         private bool contestFinished;
+        private int currentRound = 1;
+        private int resolvedRounds;
+        private int playerRoundWins;
+        private int visitingRoundWins;
 
         private void Start()
         {
@@ -71,6 +78,7 @@ namespace Tidepool.Runtime
             SetResultText(playerSpecies == null || visitingSpecies == null
                 ? "Contest friends are still getting ready."
                 : "Pick a friendly move.");
+            RefreshRoundCounter();
             RefreshTuckeredVisuals();
         }
 
@@ -86,16 +94,13 @@ namespace Tidepool.Runtime
 
         public void Retry()
         {
-            contestFinished = false;
-            bool playerRested = playerState?.AdvanceRest() ?? false;
-            bool visitingRested = visitingState?.AdvanceRest() ?? false;
+            ResetContest();
             int playerLevel = ResolvePlayerLevel();
 
             SetMoveButtonsInteractable(CanPlayerChooseMove());
             RebindMoveButtons(playerLevel);
-            SetResultText(playerRested || visitingRested
-                ? "Everyone is ready again. Pick a friendly move."
-                : "Pick a friendly move.");
+            SetResultText("Pick a friendly move.");
+            RefreshRoundCounter();
             RefreshTuckeredVisuals();
 
             if (retryButton != null)
@@ -130,8 +135,9 @@ namespace Tidepool.Runtime
 
             if (!CanPlayerChooseMove())
             {
-                SetResultText("They need a little rest. Try another round?");
-                FinishRound();
+                visitingRoundWins = roundsToWinContest;
+                resolvedRounds = Mathf.Max(resolvedRounds, 1);
+                FinishContest();
                 return;
             }
 
@@ -140,8 +146,9 @@ namespace Tidepool.Runtime
             ContestMove visitingMove = ChooseVisitingMove();
             if (playerMove == null || visitingMove == null)
             {
-                SetResultText("They need a little rest. Try another round?");
-                FinishRound();
+                visitingRoundWins = roundsToWinContest;
+                resolvedRounds = Mathf.Max(resolvedRounds, 1);
+                FinishContest();
                 return;
             }
 
@@ -152,22 +159,28 @@ namespace Tidepool.Runtime
             if (playerScore > visitingScore)
             {
                 visitingState?.MarkTuckeredOut();
-                AwardProgress(progressPointsForWin);
-                SetResultText($"{playerMove.DisplayName} sparkles through. {visitingName} naps a little. Try another round?");
+                playerRoundWins += 1;
+                SetResultText($"{playerMove.DisplayName} sparkles through. {visitingName} naps a little.");
             }
             else if (visitingScore > playerScore)
             {
                 playerState?.MarkTuckeredOut();
-                AwardProgress(progressPointsPerRound);
-                SetResultText($"{visitingName} uses {visitingMove.DisplayName}. Your Tideling needs a quick nap. Try another round?");
+                visitingRoundWins += 1;
+                SetResultText($"{visitingName} uses {visitingMove.DisplayName}. Your Tideling needs a quick nap.");
             }
             else
             {
-                AwardProgress(progressPointsPerRound);
-                SetResultText($"Both Tidelings take a happy breather. Try another round?");
+                SetResultText("Both Tidelings take a happy breather.");
             }
 
-            FinishRound();
+            resolvedRounds += 1;
+            if (HasContestResult())
+            {
+                FinishContest();
+                return;
+            }
+
+            AdvanceToNextRound();
         }
 
         private ContestMove ChooseVisitingMove()
@@ -209,16 +222,50 @@ namespace Tidepool.Runtime
             return categoryAdvantage > 0 ? score + CategoryAdvantageScoreBonus : score;
         }
 
-        private void FinishRound()
+        private bool HasContestResult()
+        {
+            return playerRoundWins >= roundsToWinContest
+                || visitingRoundWins >= roundsToWinContest
+                || resolvedRounds >= maxResolvedRounds;
+        }
+
+        private void AdvanceToNextRound()
+        {
+            currentRound = Mathf.Min(resolvedRounds + 1, maxResolvedRounds);
+            playerState?.AdvanceRest();
+            visitingState?.AdvanceRest();
+            int playerLevel = ResolvePlayerLevel();
+
+            RebindMoveButtons(playerLevel);
+            SetMoveButtonsInteractable(CanPlayerChooseMove());
+            RefreshRoundCounter();
+            RefreshTuckeredVisuals();
+        }
+
+        private void FinishContest()
         {
             contestFinished = true;
             SetMoveButtonsInteractable(false);
+            AwardContestProgress();
+            SetContestResultText();
+            RefreshRoundCounter();
             RefreshTuckeredVisuals();
 
             if (retryButton != null)
             {
                 retryButton.gameObject.SetActive(true);
             }
+        }
+
+        private void ResetContest()
+        {
+            contestFinished = false;
+            currentRound = 1;
+            resolvedRounds = 0;
+            playerRoundWins = 0;
+            visitingRoundWins = 0;
+            playerState = ContestParticipantState.ForSpecies(playerSpecies);
+            visitingState = ContestParticipantState.ForSpecies(visitingSpecies);
         }
 
         private void SetMoveButtonsInteractable(bool interactable)
@@ -269,6 +316,37 @@ namespace Tidepool.Runtime
                     TryRememberGrowthFormsForLevel(previousLevel, newLevel);
                 }
             }
+        }
+
+        private void AwardContestProgress()
+        {
+            AwardProgress(playerRoundWins > visitingRoundWins ? progressPointsForWin : progressPointsPerRound);
+        }
+
+        private void SetContestResultText()
+        {
+            if (playerRoundWins > visitingRoundWins)
+            {
+                SetResultText($"You won the friendly contest {playerRoundWins}-{visitingRoundWins}!");
+                return;
+            }
+
+            if (visitingRoundWins > playerRoundWins)
+            {
+                SetResultText($"They won this friendly contest {visitingRoundWins}-{playerRoundWins}. Try again when you like.");
+                return;
+            }
+
+            SetResultText("That was a close one. Everyone learned something.");
+        }
+
+        private void RefreshRoundCounter()
+        {
+            int visibleRound = contestFinished ? Mathf.Min(resolvedRounds, maxResolvedRounds) : currentRound;
+            string value = contestFinished
+                ? $"Contest complete - You {playerRoundWins}, Visitor {visitingRoundWins}"
+                : $"Round {visibleRound} of {maxResolvedRounds} - You {playerRoundWins}, Visitor {visitingRoundWins}";
+            SetText(roundCounterText, value);
         }
 
         private void TryRememberGrowthFormsForLevel(int previousLevel, int newLevel)
