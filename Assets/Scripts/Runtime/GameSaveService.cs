@@ -9,6 +9,8 @@ namespace Tidepool.Runtime
 {
     public class GameSaveService : MonoBehaviour
     {
+        private const int CurrentSaveSchemaVersion = 2;
+
         public static GameSaveService Instance { get; private set; }
 
         [SerializeField] private string saveFileName = "save.json";
@@ -68,6 +70,58 @@ namespace Tidepool.Runtime
         {
             Data.currentZone = zone;
             Save();
+        }
+
+        public bool HasTriggeredBeat(string beatId)
+        {
+            return ContainsId(Data?.triggeredStoryBeatIds, beatId);
+        }
+
+        public void MarkBeatTriggered(string beatId)
+        {
+            if (AddId(Data.triggeredStoryBeatIds, beatId))
+            {
+                Save();
+            }
+        }
+
+        public bool IsZoneUnlocked(ZoneId zone)
+        {
+            return Data != null
+                && Data.unlockedZoneIds != null
+                && Data.unlockedZoneIds.Contains(zone);
+        }
+
+        public void UnlockZone(ZoneId zone)
+        {
+            if (Data == null)
+            {
+                return;
+            }
+
+            if (Data.unlockedZoneIds == null)
+            {
+                Data.unlockedZoneIds = new List<ZoneId>();
+            }
+
+            if (!Data.unlockedZoneIds.Contains(zone))
+            {
+                Data.unlockedZoneIds.Add(zone);
+                Save();
+            }
+        }
+
+        public bool HasCompletedQuest(string questId)
+        {
+            return ContainsId(Data?.completedQuestIds, questId);
+        }
+
+        public void MarkQuestCompleted(string questId)
+        {
+            if (AddId(Data.completedQuestIds, questId))
+            {
+                Save();
+            }
         }
 
         public void MarkSeen(string speciesId)
@@ -250,6 +304,8 @@ namespace Tidepool.Runtime
                 return;
             }
 
+            bool unlockAllZonesForMigration = Data.schemaVersion < CurrentSaveSchemaVersion;
+
             if (Data.caught == null)
             {
                 Data.caught = new List<CaughtTideling>();
@@ -260,10 +316,77 @@ namespace Tidepool.Runtime
                 Data.seenSpeciesIds = new List<string>();
             }
 
+            if (Data.triggeredStoryBeatIds == null)
+            {
+                Data.triggeredStoryBeatIds = new List<string>();
+            }
+
+            if (Data.completedQuestIds == null)
+            {
+                Data.completedQuestIds = new List<string>();
+            }
+
+            if (Data.unlockedZoneIds == null)
+            {
+                Data.unlockedZoneIds = new List<ZoneId>();
+            }
+
+            if (unlockAllZonesForMigration)
+            {
+                UnlockAllZonesWithoutSaving();
+            }
+            else
+            {
+                UnlockZoneWithoutSaving(ZoneId.TidepoolShallows);
+                UnlockZoneWithoutSaving(ZoneId.SeagrassMeadow);
+            }
+
+            Data.schemaVersion = CurrentSaveSchemaVersion;
+
             for (int i = 0; i < Data.caught.Count; i++)
             {
                 TidelingLevelProgression.Normalize(Data.caught[i]);
                 TidelingGrowthForms.Normalize(Data.caught[i]);
+            }
+        }
+
+        private static bool ContainsId(List<string> ids, string id)
+        {
+            return !string.IsNullOrWhiteSpace(id)
+                && ids != null
+                && ids.Contains(id);
+        }
+
+        private static bool AddId(List<string> ids, string id)
+        {
+            if (string.IsNullOrWhiteSpace(id) || ids == null)
+            {
+                return false;
+            }
+
+            string trimmedId = id.Trim();
+            if (ids.Contains(trimmedId))
+            {
+                return false;
+            }
+
+            ids.Add(trimmedId);
+            return true;
+        }
+
+        private void UnlockAllZonesWithoutSaving()
+        {
+            foreach (ZoneId zone in Enum.GetValues(typeof(ZoneId)))
+            {
+                UnlockZoneWithoutSaving(zone);
+            }
+        }
+
+        private void UnlockZoneWithoutSaving(ZoneId zone)
+        {
+            if (!Data.unlockedZoneIds.Contains(zone))
+            {
+                Data.unlockedZoneIds.Add(zone);
             }
         }
 
