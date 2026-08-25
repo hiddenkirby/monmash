@@ -217,6 +217,8 @@ MonoBehaviour:
   button: {fileID: 1136264463139710968}
   creatureImage: {fileID: 1470681177866477986}
   nameText: {fileID: 7324608731746241008}
+  tapPulseScale: 1.08
+  tapPulseDurationSeconds: 0.16
 --- !u!1 &7569095237471028922
 GameObject:
   m_ObjectHideFlags: 0

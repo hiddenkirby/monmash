@@ -56,8 +56,8 @@ namespace Tidepool.Editor
             gridLayout.constraintCount = 3;
 
             RectTransform detailPanel = CreateRect("DetailPanel", safeArea);
-            detailPanel.anchoredPosition = new Vector2(120f, 120f);
-            detailPanel.sizeDelta = new Vector2(500f, 400f);
+            detailPanel.anchoredPosition = new Vector2(120f, 80f);
+            detailPanel.sizeDelta = new Vector2(500f, 320f);
             Image detailPanelBg = detailPanel.gameObject.AddComponent<Image>();
             detailPanelBg.color = new Color(1f, 0.97f, 0.89f, 0.96f);
 
@@ -103,6 +103,7 @@ namespace Tidepool.Editor
             Dropdown growthFormDropdown = CreateDropdown("GrowthFormDropdown", detailContent, new Vector2(86f, 132f), new Vector2(260f, 56f));
 
             Button selectOriginalFormButton = CreateButton("SelectOriginalFormButton", detailContent, "Original Form", new Vector2(-142f, 132f), new Vector2(160f, 56f));
+            selectOriginalFormButton.GetComponentInChildren<Text>().fontSize = 20;
 
             CreateDivider("IdentityDivider", detailContent, new Vector2(0f, 84f));
 
@@ -118,26 +119,29 @@ namespace Tidepool.Editor
 
             CreateSectionHeader("StatsHeader", detailContent, "Stats", new Vector2(0f, -108f));
 
-            Text detailLevel = CreateText("DetailLevel", detailContent, "Unknown", 22, TextAnchor.MiddleLeft, new Vector2(0f, -150f), new Vector2(420f, 36f));
+            // Level/Growth/GrowthMemory/Moves rows use a 52px-tall box (not the usual 36px)
+            // because their text can wrap to two lines (growth-memory and move-unlock
+            // sentences run long) and Unity's Text truncates vertically instead of growing.
+            Text detailLevel = CreateText("DetailLevel", detailContent, "Unknown", 22, TextAnchor.MiddleLeft, new Vector2(0f, -156f), new Vector2(420f, 52f));
             detailLevel.color = new Color(0.18f, 0.23f, 0.21f);
 
-            Text detailGrowth = CreateText("DetailGrowth", detailContent, "Keep looking to learn more.", 22, TextAnchor.MiddleLeft, new Vector2(0f, -186f), new Vector2(420f, 36f));
+            Text detailGrowth = CreateText("DetailGrowth", detailContent, "Keep looking to learn more.", 22, TextAnchor.MiddleLeft, new Vector2(0f, -212f), new Vector2(420f, 52f));
             detailGrowth.color = new Color(0.18f, 0.23f, 0.21f);
 
-            Text detailGrowthMemory = CreateText("DetailGrowthMemory", detailContent, "Unknown", 22, TextAnchor.MiddleLeft, new Vector2(0f, -222f), new Vector2(420f, 36f));
+            Text detailGrowthMemory = CreateText("DetailGrowthMemory", detailContent, "Unknown", 22, TextAnchor.MiddleLeft, new Vector2(0f, -268f), new Vector2(420f, 52f));
             detailGrowthMemory.color = new Color(0.18f, 0.23f, 0.21f);
 
-            Text detailMoves = CreateText("DetailMoves", detailContent, "Unknown", 22, TextAnchor.MiddleLeft, new Vector2(0f, -258f), new Vector2(420f, 36f));
+            Text detailMoves = CreateText("DetailMoves", detailContent, "Unknown", 22, TextAnchor.MiddleLeft, new Vector2(0f, -324f), new Vector2(420f, 52f));
             detailMoves.color = new Color(0.18f, 0.23f, 0.21f);
 
-            Text detailTimesSeen = CreateText("DetailTimesSeen", detailContent, "Not found yet", 22, TextAnchor.MiddleLeft, new Vector2(0f, -294f), new Vector2(420f, 36f));
+            Text detailTimesSeen = CreateText("DetailTimesSeen", detailContent, "Not found yet", 22, TextAnchor.MiddleLeft, new Vector2(0f, -372f), new Vector2(420f, 36f));
             detailTimesSeen.color = new Color(0.18f, 0.23f, 0.21f);
 
-            CreateDivider("StatsDivider", detailContent, new Vector2(0f, -332f));
+            CreateDivider("StatsDivider", detailContent, new Vector2(0f, -410f));
 
-            CreateSectionHeader("FieldNotesHeader", detailContent, "Field Notes", new Vector2(0f, -370f));
+            CreateSectionHeader("FieldNotesHeader", detailContent, "Field Notes", new Vector2(0f, -448f));
 
-            Text detailFieldNote = CreateText("DetailFieldNote", detailContent, "Keep looking in the seagrass.", 22, TextAnchor.UpperLeft, new Vector2(0f, -438f), new Vector2(420f, 92f));
+            Text detailFieldNote = CreateText("DetailFieldNote", detailContent, "Keep looking in the seagrass.", 22, TextAnchor.UpperLeft, new Vector2(0f, -516f), new Vector2(420f, 92f));
             detailFieldNote.color = new Color(0.18f, 0.23f, 0.21f);
 
             Button backButton = CreateButton("BackButton", safeArea, "Back", new Vector2(-400f, -320f), new Vector2(160f, 88f));
