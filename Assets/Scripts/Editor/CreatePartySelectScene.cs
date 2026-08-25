@@ -4,7 +4,6 @@ using Tidepool.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -23,7 +22,6 @@ namespace Tidepool.Editor
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             Canvas canvas = CreateCanvas();
-            CreateEventSystem();
 
             RectTransform safeArea = CreateRect("SafeArea", canvas.transform);
             safeArea.anchorMin = Vector2.zero;
@@ -87,13 +85,6 @@ namespace Tidepool.Editor
 
             canvasObject.AddComponent<GraphicRaycaster>();
             return canvas;
-        }
-
-        private static void CreateEventSystem()
-        {
-            GameObject eventSystemObject = new GameObject("EventSystem");
-            eventSystemObject.AddComponent<EventSystem>();
-            eventSystemObject.AddComponent<StandaloneInputModule>();
         }
 
         private static Button CreateButton(string name, Transform parent, string label, Vector2 anchoredPosition, Vector2 size)
