@@ -11,6 +11,7 @@ namespace Tidepool.UI
         [SerializeField] private Button button;
         [SerializeField] private Image creatureImage;
         [SerializeField] private Text nameText;
+        [SerializeField] private Image borderImage;
         [SerializeField, Min(1f)] private float tapPulseScale = 1.08f;
         [SerializeField, Min(0.01f)] private float tapPulseDurationSeconds = 0.16f;
 
@@ -44,6 +45,13 @@ namespace Tidepool.UI
             creatureImage.preserveAspect = true;
             nameText.text = isCaught && hasSpecies ? species.DisplayName : "?";
             button.interactable = hasSpecies;
+
+            if (borderImage != null)
+            {
+                borderImage.color = isCaught && hasSpecies
+                    ? TidelingRarityRules.GetDisplayColor(species.Rarity)
+                    : TidelingRarityRules.GetUndiscoveredColor();
+            }
 
             button.onClick.RemoveAllListeners();
             if (hasSpecies)
