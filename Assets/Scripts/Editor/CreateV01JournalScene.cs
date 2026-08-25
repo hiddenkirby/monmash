@@ -41,7 +41,29 @@ namespace Tidepool.Editor
             Text titleText = CreateText("JournalTitle", safeArea, "Journal", 40, TextAnchor.MiddleCenter, new Vector2(0f, 330f), new Vector2(600f, 72f));
             titleText.color = new Color(0.08f, 0.18f, 0.22f);
 
-            Text progressText = CreateText("ProgressText", safeArea, "0 of 13 found", 28, TextAnchor.MiddleCenter, new Vector2(0f, 288f), new Vector2(600f, 56f));
+            // Shell-shaped progress bar: a Stone Gray track with a Soft Kelp fill
+            // (Image.Type.Filled) that JournalController animates on population.
+            RectTransform progressBarRoot = CreateRect("ProgressBar", safeArea);
+            progressBarRoot.anchoredPosition = new Vector2(0f, 270f);
+            progressBarRoot.sizeDelta = new Vector2(420f, 36f);
+
+            Image progressBarTrack = progressBarRoot.gameObject.AddComponent<Image>();
+            progressBarTrack.color = new Color(0.435f, 0.459f, 0.431f, 0.30f);
+
+            Image progressBarFill = CreateImage("ProgressBarFill", progressBarRoot, new Color(0.243f, 0.435f, 0.353f), Vector2.zero, new Vector2(420f, 36f));
+            // Image.Type.Filled only clips a mesh when a sprite is assigned — without
+            // one it silently falls back to drawing the full rect regardless of
+            // fillAmount, so give it a plain solid-white sprite to fill against.
+            progressBarFill.sprite = Sprite.Create(
+                Texture2D.whiteTexture,
+                new Rect(0f, 0f, Texture2D.whiteTexture.width, Texture2D.whiteTexture.height),
+                new Vector2(0.5f, 0.5f));
+            progressBarFill.type = Image.Type.Filled;
+            progressBarFill.fillMethod = Image.FillMethod.Horizontal;
+            progressBarFill.fillOrigin = (int)Image.OriginHorizontal.Left;
+            progressBarFill.fillAmount = 0f;
+
+            Text progressText = CreateText("ProgressText", progressBarRoot, "0 of 13 found", 22, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(420f, 36f));
             progressText.color = new Color(0.08f, 0.18f, 0.22f);
 
             RectTransform gridRoot = CreateRect("GridRoot", safeArea);
@@ -169,6 +191,7 @@ namespace Tidepool.Editor
             serializedController.FindProperty("detailTimesSeenText").objectReferenceValue = detailTimesSeen;
             serializedController.FindProperty("nicknameInput").objectReferenceValue = nicknameInput;
             serializedController.FindProperty("progressText").objectReferenceValue = progressText;
+            serializedController.FindProperty("progressBarFill").objectReferenceValue = progressBarFill;
             serializedController.FindProperty("growthFormDropdown").objectReferenceValue = growthFormDropdown;
             serializedController.FindProperty("selectOriginalGrowthFormButton").objectReferenceValue = selectOriginalFormButton;
             serializedController.ApplyModifiedProperties();

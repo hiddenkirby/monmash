@@ -32,6 +32,8 @@ namespace Tidepool.UI
         [SerializeField] private Text detailTimesSeenText;
         [SerializeField] private InputField nicknameInput;
         [SerializeField] private Text progressText;
+        [SerializeField] private Image progressBarFill;
+        [SerializeField, Min(0.01f)] private float progressFillDurationSeconds = 0.35f;
         [SerializeField] private RectTransform detailPanel;
         [SerializeField, Min(0f)] private float detailSlideDistance = 36f;
         [SerializeField, Min(0.01f)] private float detailSlideDurationSeconds = 0.18f;
@@ -39,6 +41,7 @@ namespace Tidepool.UI
         private TidelingSpecies selectedSpecies;
         private Coroutine detailSlideRoutine;
         private Vector2 detailPanelRestingPosition;
+        private Coroutine progressFillRoutine;
 
         private void OnEnable()
         {
@@ -58,6 +61,12 @@ namespace Tidepool.UI
             if (detailPanel != null)
             {
                 detailPanel.anchoredPosition = detailPanelRestingPosition;
+            }
+
+            if (progressFillRoutine != null)
+            {
+                StopCoroutine(progressFillRoutine);
+                progressFillRoutine = null;
             }
         }
 
@@ -532,6 +541,46 @@ namespace Tidepool.UI
         private void SetProgressText(int found, int total)
         {
             SetText(progressText, $"{found} of {total} found");
+            AnimateProgressFill(total > 0 ? (float)found / total : 0f);
+        }
+
+        private void AnimateProgressFill(float target)
+        {
+            if (progressBarFill == null)
+            {
+                return;
+            }
+
+            if (progressFillRoutine != null)
+            {
+                StopCoroutine(progressFillRoutine);
+                progressFillRoutine = null;
+            }
+
+            if (!isActiveAndEnabled)
+            {
+                progressBarFill.fillAmount = target;
+                return;
+            }
+
+            progressFillRoutine = StartCoroutine(AnimateProgressFillRoutine(target));
+        }
+
+        private IEnumerator AnimateProgressFillRoutine(float target)
+        {
+            float start = progressBarFill.fillAmount;
+            float elapsed = 0f;
+
+            while (elapsed < progressFillDurationSeconds)
+            {
+                float t = Mathf.SmoothStep(0f, 1f, elapsed / progressFillDurationSeconds);
+                progressBarFill.fillAmount = Mathf.LerpUnclamped(start, target, t);
+                elapsed += Time.unscaledDeltaTime;
+                yield return null;
+            }
+
+            progressBarFill.fillAmount = target;
+            progressFillRoutine = null;
         }
 
         private static void SetText(Text target, string value)
