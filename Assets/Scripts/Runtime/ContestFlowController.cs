@@ -33,6 +33,7 @@ namespace Tidepool.Runtime
         [SerializeField] private Button retryButton;
         [SerializeField] private Button exitButton;
         [SerializeField] private string exitSceneName = "Overworld";
+        [SerializeField] private string partySelectSceneName = "PartySelect";
         [SerializeField, Min(0)] private int progressPointsPerRound = 1;
         [SerializeField, Min(0)] private int progressPointsForWin = 2;
         [SerializeField, Min(1)] private int roundsToWinContest = 2;
@@ -117,12 +118,27 @@ namespace Tidepool.Runtime
             if (SceneManager.sceneCount > 1)
             {
                 SceneManager.UnloadSceneAsync(gameObject.scene);
+                UnloadAdditiveSceneIfLoaded(partySelectSceneName);
                 return;
             }
 
             if (!string.IsNullOrWhiteSpace(exitSceneName))
             {
                 SceneManager.LoadScene(exitSceneName);
+            }
+        }
+
+        private static void UnloadAdditiveSceneIfLoaded(string sceneName)
+        {
+            if (string.IsNullOrWhiteSpace(sceneName))
+            {
+                return;
+            }
+
+            Scene scene = SceneManager.GetSceneByName(sceneName);
+            if (scene.IsValid() && scene.isLoaded)
+            {
+                SceneManager.UnloadSceneAsync(scene);
             }
         }
 
