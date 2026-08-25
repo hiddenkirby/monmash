@@ -8,6 +8,14 @@ namespace Tidepool.Runtime
     public class ContestFlowController : MonoBehaviour
     {
         private const float CategoryAdvantageScoreBonus = 1000f;
+        private static readonly TidelingCurrent[] CurrentRingOrder =
+        {
+            TidelingCurrent.Current,
+            TidelingCurrent.Coral,
+            TidelingCurrent.Stone,
+            TidelingCurrent.Glow,
+            TidelingCurrent.Tide
+        };
 
         [Header("Prototype fallback")]
         [SerializeField] private TidelingSpecies fallbackPlayerSpecies;
@@ -39,6 +47,11 @@ namespace Tidepool.Runtime
         [SerializeField, Min(1)] private int roundsToWinContest = 2;
         [SerializeField, Min(1)] private int maxResolvedRounds = 3;
         [SerializeField] private int[] growthFormUnlockLevels = { 5, 10, 15 };
+
+        [Header("Current ring")]
+        [SerializeField] private Image[] currentRingNodes;
+        [SerializeField] private Text[] currentRingLabels;
+        [SerializeField] private Text currentAdvantageText;
 
         private TidelingSpecies playerSpecies;
         private TidelingSpecies visitingSpecies;
@@ -80,6 +93,7 @@ namespace Tidepool.Runtime
                 ? "Contest friends are still getting ready."
                 : "Pick a friendly move.");
             RefreshRoundCounter();
+            RefreshCurrentRing();
             RefreshTuckeredVisuals();
         }
 
@@ -395,6 +409,89 @@ namespace Tidepool.Runtime
         {
             UpdateTuckeredDisplay(playerImage, playerStatusText, playerState);
             UpdateTuckeredDisplay(visitingImage, visitingStatusText, visitingState);
+        }
+
+        private void RefreshCurrentRing()
+        {
+            for (int i = 0; i < CurrentRingOrder.Length; i++)
+            {
+                TidelingCurrent current = CurrentRingOrder[i];
+                bool isPlayerCurrent = playerSpecies != null && playerSpecies.Current == current;
+                bool isVisitingCurrent = visitingSpecies != null && visitingSpecies.Current == current;
+                SetCurrentRingNode(i, current, isPlayerCurrent, isVisitingCurrent);
+            }
+
+            SetCurrentAdvantageText();
+        }
+
+        private void SetCurrentRingNode(int index, TidelingCurrent current, bool isPlayerCurrent, bool isVisitingCurrent)
+        {
+            Color displayColor = TidelingCurrentRules.GetDisplayColor(current);
+            if (currentRingNodes != null && index < currentRingNodes.Length && currentRingNodes[index] != null)
+            {
+                Image node = currentRingNodes[index];
+                node.color = isPlayerCurrent || isVisitingCurrent
+                    ? Color.Lerp(displayColor, Color.white, 0.25f)
+                    : new Color(displayColor.r, displayColor.g, displayColor.b, 0.35f);
+            }
+
+            if (currentRingLabels == null || index >= currentRingLabels.Length || currentRingLabels[index] == null)
+            {
+                return;
+            }
+
+            string prefix = string.Empty;
+            if (isPlayerCurrent && isVisitingCurrent)
+            {
+                prefix = "Both\n";
+            }
+            else if (isPlayerCurrent)
+            {
+                prefix = "You\n";
+            }
+            else if (isVisitingCurrent)
+            {
+                prefix = "Visitor\n";
+            }
+
+            Text label = currentRingLabels[index];
+            label.text = $"{prefix}{TidelingCurrentRules.GetDisplayName(current)}";
+            label.color = isPlayerCurrent || isVisitingCurrent ? Color.white : new Color(0.08f, 0.18f, 0.22f);
+        }
+
+        private void SetCurrentAdvantageText()
+        {
+            if (currentAdvantageText == null)
+            {
+                return;
+            }
+
+            if (playerSpecies == null || visitingSpecies == null)
+            {
+                currentAdvantageText.text = "Currents are getting ready.";
+                currentAdvantageText.color = new Color(0.08f, 0.18f, 0.22f);
+                return;
+            }
+
+            TidelingCurrent playerCurrent = playerSpecies.Current;
+            TidelingCurrent visitingCurrent = visitingSpecies.Current;
+            float playerMultiplier = TidelingCurrentRules.GetEffectivenessMultiplier(playerCurrent, visitingCurrent);
+            if (playerMultiplier > TidelingCurrentRules.NeutralMultiplier)
+            {
+                currentAdvantageText.text = $"You: {TidelingCurrentRules.GetDisplayName(playerCurrent)} -> Visitor: {TidelingCurrentRules.GetDisplayName(visitingCurrent)}";
+                currentAdvantageText.color = new Color(0.12f, 0.42f, 0.32f);
+                return;
+            }
+
+            if (playerMultiplier < TidelingCurrentRules.NeutralMultiplier)
+            {
+                currentAdvantageText.text = $"Visitor: {TidelingCurrentRules.GetDisplayName(visitingCurrent)} -> You: {TidelingCurrentRules.GetDisplayName(playerCurrent)}";
+                currentAdvantageText.color = new Color(0.55f, 0.20f, 0.22f);
+                return;
+            }
+
+            currentAdvantageText.text = "Currents are even.";
+            currentAdvantageText.color = new Color(0.08f, 0.18f, 0.22f);
         }
 
         private static void UpdateTuckeredDisplay(Image image, Text statusText, ContestParticipantState state)
