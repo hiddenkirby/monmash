@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using Tidepool.Domain;
@@ -31,13 +32,33 @@ namespace Tidepool.UI
         [SerializeField] private Text detailTimesSeenText;
         [SerializeField] private InputField nicknameInput;
         [SerializeField] private Text progressText;
+        [SerializeField] private RectTransform detailPanel;
+        [SerializeField, Min(0f)] private float detailSlideDistance = 36f;
+        [SerializeField, Min(0.01f)] private float detailSlideDurationSeconds = 0.18f;
 
         private TidelingSpecies selectedSpecies;
+        private Coroutine detailSlideRoutine;
+        private Vector2 detailPanelRestingPosition;
 
         private void OnEnable()
         {
+            CacheDetailPanel();
             ConfigureNicknameInput();
             PopulateGrid();
+        }
+
+        private void OnDisable()
+        {
+            if (detailSlideRoutine != null)
+            {
+                StopCoroutine(detailSlideRoutine);
+                detailSlideRoutine = null;
+            }
+
+            if (detailPanel != null)
+            {
+                detailPanel.anchoredPosition = detailPanelRestingPosition;
+            }
         }
 
         public void PopulateGrid()
@@ -115,6 +136,8 @@ namespace Tidepool.UI
                 nicknameInput.text = isCaught ? GetSavedName(species, caught) : string.Empty;
                 nicknameInput.interactable = isCaught;
             }
+
+            PlayDetailSlideIn();
         }
 
         public void SaveNickname()
@@ -164,6 +187,73 @@ namespace Tidepool.UI
             {
                 nicknameInput.characterLimit = CaughtTideling.NicknameCharacterLimit;
             }
+        }
+
+        private void CacheDetailPanel()
+        {
+            if (detailPanel == null)
+            {
+                detailPanel = ResolveDetailPanel();
+            }
+
+            if (detailPanel != null)
+            {
+                detailPanelRestingPosition = detailPanel.anchoredPosition;
+            }
+        }
+
+        private RectTransform ResolveDetailPanel()
+        {
+            Transform current = detailImage == null ? null : detailImage.transform;
+            while (current != null && current != transform)
+            {
+                RectTransform rectTransform = current as RectTransform;
+                if (rectTransform != null
+                    && (current.GetComponent<ScrollRect>() != null
+                        || string.Equals(current.name, "DetailPanel", StringComparison.OrdinalIgnoreCase)))
+                {
+                    return rectTransform;
+                }
+
+                current = current.parent;
+            }
+
+            return null;
+        }
+
+        private void PlayDetailSlideIn()
+        {
+            CacheDetailPanel();
+            if (detailPanel == null || !isActiveAndEnabled)
+            {
+                return;
+            }
+
+            if (detailSlideRoutine != null)
+            {
+                StopCoroutine(detailSlideRoutine);
+            }
+
+            detailSlideRoutine = StartCoroutine(SlideDetailPanel());
+        }
+
+        private IEnumerator SlideDetailPanel()
+        {
+            Vector2 from = detailPanelRestingPosition + new Vector2(detailSlideDistance, 0f);
+            Vector2 to = detailPanelRestingPosition;
+            float elapsed = 0f;
+
+            detailPanel.anchoredPosition = from;
+            while (elapsed < detailSlideDurationSeconds)
+            {
+                float t = Mathf.SmoothStep(0f, 1f, elapsed / detailSlideDurationSeconds);
+                detailPanel.anchoredPosition = Vector2.LerpUnclamped(from, to, t);
+                elapsed += Time.unscaledDeltaTime;
+                yield return null;
+            }
+
+            detailPanel.anchoredPosition = to;
+            detailSlideRoutine = null;
         }
 
         private void ConfigureGrowthFormControls(CaughtTideling caught, bool isCaught)
