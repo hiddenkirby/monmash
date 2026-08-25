@@ -38,10 +38,20 @@ namespace Tidepool.UI
         [SerializeField, Min(0f)] private float detailSlideDistance = 36f;
         [SerializeField, Min(0.01f)] private float detailSlideDurationSeconds = 0.18f;
 
+        private enum JournalSortMode
+        {
+            Name,
+            Zone,
+            Current,
+            Rarity
+        }
+
         private TidelingSpecies selectedSpecies;
         private Coroutine detailSlideRoutine;
         private Vector2 detailPanelRestingPosition;
         private Coroutine progressFillRoutine;
+        private JournalSortMode currentSort = JournalSortMode.Name;
+        private ZoneId? filterZone;
 
         private void OnEnable()
         {
@@ -83,24 +93,145 @@ namespace Tidepool.UI
                 Destroy(gridRoot.GetChild(i).gameObject);
             }
 
-            int found = 0;
             int speciesCount = speciesDatabase == null ? 0 : speciesDatabase.All.Count;
-            int slotCount = Mathf.Max(V01JournalSlotCount, speciesCount);
-            for (int i = 0; i < slotCount; i++)
+            List<TidelingSpecies> visibleSpecies = new List<TidelingSpecies>(speciesCount);
+            int found = 0;
+            for (int i = 0; i < speciesCount; i++)
             {
-                TidelingSpecies species = i < speciesCount ? speciesDatabase.All[i] : null;
-                CaughtTideling caught = species == null ? null : GameSaveService.Instance?.FindCaught(species.Id);
-                bool isCaught = caught != null;
+                TidelingSpecies species = speciesDatabase.All[i];
+                bool isCaught = GameSaveService.Instance?.FindCaught(species.Id) != null;
                 if (isCaught)
                 {
                     found += 1;
                 }
 
+                if (filterZone == null || MatchesZoneFilter(species))
+                {
+                    visibleSpecies.Add(species);
+                }
+            }
+
+            visibleSpecies.Sort(CompareBySortMode);
+
+            // Filtering intentionally shows fewer slots (only species matching the
+            // selected zone, caught or not); unfiltered always pads to the v0.1 minimum
+            // grid size so sorting alone never changes how many slots are visible.
+            int slotCount = filterZone == null ? Mathf.Max(V01JournalSlotCount, visibleSpecies.Count) : visibleSpecies.Count;
+            for (int i = 0; i < slotCount; i++)
+            {
+                TidelingSpecies species = i < visibleSpecies.Count ? visibleSpecies[i] : null;
+                CaughtTideling caught = species == null ? null : GameSaveService.Instance?.FindCaught(species.Id);
+                bool isCaught = caught != null;
+
                 JournalSlotView slot = Instantiate(slotPrefab, gridRoot);
                 slot.Bind(species, isCaught, () => SelectSpecies(species));
             }
 
-            SetProgressText(found, slotCount);
+            ResizeGridContent(slotCount);
+            SetProgressText(found, Mathf.Max(V01JournalSlotCount, speciesCount));
+        }
+
+        // The grid's ScrollRect content is given a generous fixed height at generation
+        // time so it can hold more than the v0.1 baseline; without this, scrolling to
+        // the bottom reveals empty space past the actual (often shorter, e.g. filtered)
+        // content instead of the last row.
+        private void ResizeGridContent(int slotCount)
+        {
+            RectTransform gridRect = gridRoot as RectTransform;
+            GridLayoutGroup gridLayout = gridRoot == null ? null : gridRoot.GetComponent<GridLayoutGroup>();
+            if (gridRect == null || gridLayout == null)
+            {
+                return;
+            }
+
+            int columns = Mathf.Max(1, gridLayout.constraintCount);
+            int rows = Mathf.CeilToInt(slotCount / (float)columns);
+            float height = rows <= 0
+                ? 0f
+                : rows * gridLayout.cellSize.y + Mathf.Max(0, rows - 1) * gridLayout.spacing.y;
+            gridRect.sizeDelta = new Vector2(gridRect.sizeDelta.x, height);
+        }
+
+        public void SortByName()
+        {
+            currentSort = JournalSortMode.Name;
+            PopulateGrid();
+        }
+
+        public void SortByZone()
+        {
+            currentSort = JournalSortMode.Zone;
+            PopulateGrid();
+        }
+
+        public void SortByCurrent()
+        {
+            currentSort = JournalSortMode.Current;
+            PopulateGrid();
+        }
+
+        public void SortByRarity()
+        {
+            currentSort = JournalSortMode.Rarity;
+            PopulateGrid();
+        }
+
+        public void FilterAllZones()
+        {
+            filterZone = null;
+            PopulateGrid();
+        }
+
+        public void FilterShallows()
+        {
+            filterZone = ZoneId.TidepoolShallows;
+            PopulateGrid();
+        }
+
+        public void FilterMeadow()
+        {
+            filterZone = ZoneId.SeagrassMeadow;
+            PopulateGrid();
+        }
+
+        public void FilterKelp()
+        {
+            filterZone = ZoneId.KelpCurtain;
+            PopulateGrid();
+        }
+
+        public void FilterRocky()
+        {
+            filterZone = ZoneId.RockyShelf;
+            PopulateGrid();
+        }
+
+        private bool MatchesZoneFilter(TidelingSpecies species)
+        {
+            return species.HabitatZones != null && Array.IndexOf(species.HabitatZones, filterZone.Value) >= 0;
+        }
+
+        private int CompareBySortMode(TidelingSpecies a, TidelingSpecies b)
+        {
+            switch (currentSort)
+            {
+                case JournalSortMode.Zone:
+                    return GetPrimaryZoneOrder(a).CompareTo(GetPrimaryZoneOrder(b));
+                case JournalSortMode.Current:
+                    return ((int)a.Current).CompareTo((int)b.Current);
+                case JournalSortMode.Rarity:
+                    return ((int)a.Rarity).CompareTo((int)b.Rarity);
+                case JournalSortMode.Name:
+                default:
+                    return string.Compare(a.DisplayName, b.DisplayName, StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        private static int GetPrimaryZoneOrder(TidelingSpecies species)
+        {
+            return species.HabitatZones != null && species.HabitatZones.Length > 0
+                ? (int)species.HabitatZones[0]
+                : int.MaxValue;
         }
 
         public void SelectSpecies(TidelingSpecies species)

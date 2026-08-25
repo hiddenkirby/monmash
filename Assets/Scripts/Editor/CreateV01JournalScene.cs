@@ -66,9 +66,47 @@ namespace Tidepool.Editor
             Text progressText = CreateText("ProgressText", progressBarRoot, "0 of 13 found", 22, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(420f, 36f));
             progressText.color = new Color(0.08f, 0.18f, 0.22f);
 
-            RectTransform gridRoot = CreateRect("GridRoot", safeArea);
-            gridRoot.anchoredPosition = new Vector2(-380f, 120f);
-            gridRoot.sizeDelta = new Vector2(300f, 400f);
+            // Sort row (by Name/Zone/Current/Rarity) and filter row (by zone, plus
+            // "All") sit above the grid. Space here is too tight for literal 88pt
+            // square icon buttons alongside the title/progress bar/detail panel
+            // without a broader layout pass (tracked separately as #125); these use
+            // this codebase's existing ~40-56pt secondary-button sizing instead.
+            Button sortByName = CreateSmallButton("SortByNameButton", safeArea, "Name", new Vector2(-494f, 210f), new Vector2(70f, 40f));
+            Button sortByZone = CreateSmallButton("SortByZoneButton", safeArea, "Zone", new Vector2(-418f, 210f), new Vector2(70f, 40f));
+            Button sortByCurrent = CreateSmallButton("SortByCurrentButton", safeArea, "Current", new Vector2(-342f, 210f), new Vector2(70f, 40f));
+            Button sortByRarity = CreateSmallButton("SortByRarityButton", safeArea, "Rarity", new Vector2(-266f, 210f), new Vector2(70f, 40f));
+
+            Button filterAll = CreateSmallButton("FilterAllButton", safeArea, "All", new Vector2(-500f, 160f), new Vector2(56f, 40f));
+            Button filterShallows = CreateSmallButton("FilterShallowsButton", safeArea, "Shallow", new Vector2(-444f, 160f), new Vector2(56f, 40f));
+            Button filterMeadow = CreateSmallButton("FilterMeadowButton", safeArea, "Meadow", new Vector2(-388f, 160f), new Vector2(56f, 40f));
+            Button filterKelp = CreateSmallButton("FilterKelpButton", safeArea, "Kelp", new Vector2(-332f, 160f), new Vector2(56f, 40f));
+            Button filterRocky = CreateSmallButton("FilterRockyButton", safeArea, "Rocky", new Vector2(-276f, 160f), new Vector2(56f, 40f));
+
+            RectTransform gridPanel = CreateRect("GridPanel", safeArea);
+            gridPanel.anchoredPosition = new Vector2(-380f, -40f);
+            gridPanel.sizeDelta = new Vector2(300f, 320f);
+
+            ScrollRect gridScroll = gridPanel.gameObject.AddComponent<ScrollRect>();
+            gridScroll.horizontal = false;
+            gridScroll.vertical = true;
+            gridScroll.movementType = ScrollRect.MovementType.Clamped;
+
+            RectTransform gridViewport = CreateRect("GridViewport", gridPanel);
+            gridViewport.anchorMin = Vector2.zero;
+            gridViewport.anchorMax = Vector2.one;
+            gridViewport.offsetMin = Vector2.zero;
+            gridViewport.offsetMax = Vector2.zero;
+            gridViewport.gameObject.AddComponent<RectMask2D>();
+
+            RectTransform gridRoot = CreateRect("GridRoot", gridViewport);
+            gridRoot.anchorMin = new Vector2(0f, 1f);
+            gridRoot.anchorMax = new Vector2(1f, 1f);
+            gridRoot.pivot = new Vector2(0.5f, 1f);
+            gridRoot.anchoredPosition = Vector2.zero;
+            gridRoot.sizeDelta = new Vector2(0f, 1000f);
+            gridScroll.viewport = gridViewport;
+            gridScroll.content = gridRoot;
+
             GridLayoutGroup gridLayout = gridRoot.gameObject.AddComponent<GridLayoutGroup>();
             gridLayout.cellSize = new Vector2(88f, 88f);
             gridLayout.spacing = new Vector2(8f, 8f);
@@ -200,6 +238,16 @@ namespace Tidepool.Editor
             JournalBackButton backHandler = backButton.gameObject.AddComponent<JournalBackButton>();
             UnityEditor.Events.UnityEventTools.AddPersistentListener(backButton.onClick, backHandler.BackToOverworld);
 
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(sortByName.onClick, controller.SortByName);
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(sortByZone.onClick, controller.SortByZone);
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(sortByCurrent.onClick, controller.SortByCurrent);
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(sortByRarity.onClick, controller.SortByRarity);
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(filterAll.onClick, controller.FilterAllZones);
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(filterShallows.onClick, controller.FilterShallows);
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(filterMeadow.onClick, controller.FilterMeadow);
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(filterKelp.onClick, controller.FilterKelp);
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(filterRocky.onClick, controller.FilterRocky);
+
             EditorSceneManager.SaveScene(scene, ScenePath);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -281,6 +329,20 @@ namespace Tidepool.Editor
 
             Text text = CreateText("Label", image.transform, label, 28, TextAnchor.MiddleCenter, Vector2.zero, size);
             text.color = Color.white;
+            return button;
+        }
+
+        private static Button CreateSmallButton(string name, Transform parent, string label, Vector2 anchoredPosition, Vector2 size)
+        {
+            Image image = CreateImage(name, parent, new Color(0.12f, 0.44f, 0.50f), anchoredPosition, size);
+            Button button = image.gameObject.AddComponent<Button>();
+            button.targetGraphic = image;
+
+            Text text = CreateText("Label", image.transform, label, 14, TextAnchor.MiddleCenter, Vector2.zero, size);
+            text.color = Color.white;
+            text.resizeTextForBestFit = true;
+            text.resizeTextMinSize = 9;
+            text.resizeTextMaxSize = 14;
             return button;
         }
 
