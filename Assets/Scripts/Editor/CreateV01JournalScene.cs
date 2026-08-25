@@ -188,14 +188,23 @@ namespace Tidepool.Editor
             RectTransform slotRect = slotObj.AddComponent<RectTransform>();
             slotRect.sizeDelta = new Vector2(88f, 88f);
 
+            // slotBg is the 4px rarity-trim border (colored per-slot at runtime by
+            // JournalSlotView.Bind); CardInterior is the fixed Shell Panel card face on
+            // top of it. Root stays 88x88 to keep the 88pt touch target.
             Image slotBg = slotObj.AddComponent<Image>();
-            slotBg.color = new Color(0.08f, 0.22f, 0.24f, 0.80f);
+            slotBg.color = new Color(0.44f, 0.46f, 0.43f);
 
-            Image creatureImage = CreateImage("CreatureImage", slotObj.transform, Color.black, Vector2.zero, new Vector2(72f, 72f));
+            Image cardInterior = CreateImage("CardInterior", slotObj.transform, new Color(1f, 0.969f, 0.894f, 0.96f), Vector2.zero, new Vector2(80f, 80f));
+
+            Image creatureImage = CreateImage("CreatureImage", slotObj.transform, Color.black, new Vector2(0f, 8f), new Vector2(60f, 60f));
             creatureImage.preserveAspect = true;
 
-            Text nameText = CreateText("NameText", slotObj.transform, "?", 16, TextAnchor.MiddleCenter, new Vector2(0f, -40f), new Vector2(88f, 24f));
-            nameText.color = Color.white;
+            Text nameText = CreateText("NameText", slotObj.transform, "?", 16, TextAnchor.MiddleCenter, new Vector2(0f, -32f), new Vector2(84f, 20f));
+            nameText.color = new Color(0.18f, 0.23f, 0.21f);
+            nameText.horizontalOverflow = HorizontalWrapMode.Overflow;
+            nameText.resizeTextForBestFit = true;
+            nameText.resizeTextMinSize = 10;
+            nameText.resizeTextMaxSize = 16;
 
             Button button = slotObj.AddComponent<Button>();
             button.targetGraphic = slotBg;
@@ -205,6 +214,7 @@ namespace Tidepool.Editor
             serializedSlot.FindProperty("button").objectReferenceValue = button;
             serializedSlot.FindProperty("creatureImage").objectReferenceValue = creatureImage;
             serializedSlot.FindProperty("nameText").objectReferenceValue = nameText;
+            serializedSlot.FindProperty("borderImage").objectReferenceValue = slotBg;
             serializedSlot.ApplyModifiedProperties();
 
             PrefabUtility.SaveAsPrefabAsset(slotObj, SlotPrefabPath);
