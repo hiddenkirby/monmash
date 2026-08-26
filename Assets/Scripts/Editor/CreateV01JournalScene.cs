@@ -32,7 +32,7 @@ namespace Tidepool.Editor
             safeArea.offsetMax = Vector2.zero;
             safeArea.gameObject.AddComponent<SafeAreaFitter>();
 
-            Image background = CreateImage("Background", safeArea, new Color(0.70f, 0.88f, 0.91f), Vector2.zero, new Vector2(1024f, 768f));
+            Image background = CreateImage("Background", safeArea, new Color(0.969f, 0.922f, 0.796f), Vector2.zero, new Vector2(1024f, 768f));
             background.rectTransform.anchorMin = Vector2.zero;
             background.rectTransform.anchorMax = Vector2.one;
             background.rectTransform.offsetMin = Vector2.zero;
@@ -230,6 +230,7 @@ namespace Tidepool.Editor
             serializedController.FindProperty("nicknameInput").objectReferenceValue = nicknameInput;
             serializedController.FindProperty("progressText").objectReferenceValue = progressText;
             serializedController.FindProperty("progressBarFill").objectReferenceValue = progressBarFill;
+            serializedController.FindProperty("detailPanel").objectReferenceValue = detailPanel;
             serializedController.FindProperty("growthFormDropdown").objectReferenceValue = growthFormDropdown;
             serializedController.FindProperty("selectOriginalGrowthFormButton").objectReferenceValue = selectOriginalFormButton;
             serializedController.ApplyModifiedProperties();
