@@ -17,6 +17,7 @@ namespace Tidepool.Runtime
         private bool transitionInProgress;
 
         public ZoneId DestinationZone => destinationZone;
+        public UnityEvent EnteredZone => enteredZone;
 
         public void EnterZone()
         {
