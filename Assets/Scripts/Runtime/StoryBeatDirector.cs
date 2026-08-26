@@ -136,6 +136,8 @@ namespace Tidepool.Runtime
                     return saveService.CountCaughtSpecies() >= 1;
                 case StoryBeatTriggerCondition.OnSpeciesCount:
                     return saveService.CountCaughtSpecies() >= beat.TriggerThreshold;
+                case StoryBeatTriggerCondition.OnCaughtInZoneCount:
+                    return saveService.CountCaughtSpeciesInZone(beat.TriggerZone) >= beat.TriggerThreshold;
                 case StoryBeatTriggerCondition.OnZoneEntered:
                     return saveService.Data != null && saveService.Data.currentZone == beat.TriggerZone;
                 case StoryBeatTriggerCondition.OnOldBarnaby:
