@@ -53,6 +53,10 @@ namespace Tidepool.Editor
             Text visitingStatus = CreateText("VisitingStatus", visitingPanel.transform, string.Empty, 22, TextAnchor.MiddleCenter, new Vector2(0f, -160f), new Vector2(300f, 40f));
             visitingStatus.color = new Color(0.5f, 0.5f, 0.5f);
 
+            Image telegraphBadge = CreateImage("VisitingTelegraphBadge", safeArea, new Color(1f, 0.97f, 0.89f, 0.94f), new Vector2(300f, 318f), new Vector2(216f, 56f));
+            Text visitingTelegraphText = CreateText("VisitingTelegraphText", telegraphBadge.transform, "Watching...", 18, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(204f, 48f));
+            visitingTelegraphText.color = new Color(0.08f, 0.18f, 0.22f);
+
             Image currentRingPanel = CreateImage("CurrentRingPanel", safeArea, new Color(0.95f, 0.98f, 0.94f, 0.92f), new Vector2(0f, 318f), new Vector2(360f, 104f));
             Image[] currentRingNodes = new Image[5];
             Text[] currentRingLabels = new Text[5];
@@ -90,6 +94,7 @@ namespace Tidepool.Editor
             serializedController.FindProperty("firstMoveButtonText").objectReferenceValue = firstMoveLabel;
             serializedController.FindProperty("secondMoveButton").objectReferenceValue = secondMoveButton;
             serializedController.FindProperty("secondMoveButtonText").objectReferenceValue = secondMoveLabel;
+            serializedController.FindProperty("visitingTelegraphText").objectReferenceValue = visitingTelegraphText;
             serializedController.FindProperty("roundCounterText").objectReferenceValue = roundCounterText;
             serializedController.FindProperty("resultText").objectReferenceValue = resultText;
             serializedController.FindProperty("retryButton").objectReferenceValue = retryButton;
