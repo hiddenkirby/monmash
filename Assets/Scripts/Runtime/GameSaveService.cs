@@ -16,6 +16,8 @@ namespace Tidepool.Runtime
         [SerializeField] private string saveFileName = "save.json";
 
         public SaveData Data { get; private set; } = new SaveData();
+        public event Action<TidelingSpecies, ZoneId> SpeciesCaught;
+        public event Action<ZoneId> ZoneChanged;
 
         private string SavePath => Path.Combine(Application.persistentDataPath, saveFileName);
 
@@ -70,6 +72,7 @@ namespace Tidepool.Runtime
         {
             Data.currentZone = zone;
             Save();
+            ZoneChanged?.Invoke(zone);
         }
 
         public bool HasTriggeredBeat(string beatId)
@@ -160,6 +163,7 @@ namespace Tidepool.Runtime
             {
                 existing.timesSeen += 1;
                 Save();
+                SpeciesCaught?.Invoke(species, zone);
                 return;
             }
 
@@ -175,6 +179,7 @@ namespace Tidepool.Runtime
             });
 
             Save();
+            SpeciesCaught?.Invoke(species, zone);
         }
 
         public void RenameCaught(string speciesId, string nickname)
@@ -262,6 +267,33 @@ namespace Tidepool.Runtime
                 if (caught != null
                     && !string.IsNullOrWhiteSpace(caught.speciesId)
                     && !string.Equals(caught.speciesId, excludedSpeciesId, StringComparison.OrdinalIgnoreCase))
+                {
+                    count += 1;
+                }
+            }
+
+            return count;
+        }
+
+        public int CountCaughtSpecies()
+        {
+            return CountCaughtSpeciesExcluding(null);
+        }
+
+        public int CountCaughtSpeciesInZone(ZoneId zone)
+        {
+            if (Data == null || Data.caught == null)
+            {
+                return 0;
+            }
+
+            int count = 0;
+            for (int i = 0; i < Data.caught.Count; i++)
+            {
+                CaughtTideling caught = Data.caught[i];
+                if (caught != null
+                    && !string.IsNullOrWhiteSpace(caught.speciesId)
+                    && caught.caughtInZone == zone)
                 {
                     count += 1;
                 }
