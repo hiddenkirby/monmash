@@ -82,7 +82,6 @@ namespace Tidepool.Editor
             WireCameraFollow(cameraFollow, playerObject.transform);
 
             SpeciesDatabase database = AssetDatabase.LoadAssetAtPath<SpeciesDatabase>(SpeciesDatabasePath);
-            CreateZoneTransitions(gridObject.transform, playerObject.transform, playerMover, grid);
             CreateZoneEncounterDirectors(gridObject.transform, seagrassMap, playerMover, database);
 
             Canvas canvas = CreateCanvas();
@@ -92,6 +91,8 @@ namespace Tidepool.Editor
             safeArea.offsetMin = Vector2.zero;
             safeArea.offsetMax = Vector2.zero;
             safeArea.gameObject.AddComponent<SafeAreaFitter>();
+            ZoneWelcomeBanner zoneWelcomeBanner = CreateZoneWelcomeBanner(safeArea);
+            CreateZoneTransitions(gridObject.transform, playerObject.transform, playerMover, grid, zoneWelcomeBanner);
             CreateFirstRunGuidance(safeArea);
             CreateContestButton(safeArea, playerMover, database);
             CreateJournalButton(safeArea, playerMover);
@@ -137,7 +138,7 @@ namespace Tidepool.Editor
 
         private static void CreateFirstRunGuidance(RectTransform safeArea)
         {
-            Image panel = CreateImage("FirstRunGuidancePanel", safeArea, new Color(0.10f, 0.26f, 0.28f, 0.92f), new Vector2(0f, 282f), new Vector2(720f, 104f));
+            Image panel = CreateImage("FirstRunGuidancePanel", safeArea, new Color(0.10f, 0.26f, 0.28f, 0.92f), new Vector2(0f, 188f), new Vector2(720f, 104f));
             FirstRunGuidanceController guidance = panel.gameObject.AddComponent<FirstRunGuidanceController>();
 
             Text label = CreateText("GuidanceText", panel.transform, "Tap to walk. Look in the seagrass.", 28, TextAnchor.MiddleLeft, new Vector2(-48f, 0f), new Vector2(500f, 72f));
@@ -145,6 +146,31 @@ namespace Tidepool.Editor
 
             Button dismissButton = CreateButton("DismissButton", panel.transform, "OK", new Vector2(292f, 0f), new Vector2(112f, 88f));
             WireFirstRunGuidance(guidance, panel.gameObject, label, dismissButton);
+        }
+
+        private static ZoneWelcomeBanner CreateZoneWelcomeBanner(RectTransform safeArea)
+        {
+            Image panel = CreateImage("ZoneWelcomeBanner", safeArea, new Color(0.08f, 0.22f, 0.26f, 0.88f), new Vector2(0f, -24f), new Vector2(680f, 112f));
+            RectTransform panelTransform = panel.rectTransform;
+            panelTransform.anchorMin = new Vector2(0.5f, 1f);
+            panelTransform.anchorMax = new Vector2(0.5f, 1f);
+            panelTransform.pivot = new Vector2(0.5f, 1f);
+            panel.raycastTarget = false;
+
+            CanvasGroup canvasGroup = panel.gameObject.AddComponent<CanvasGroup>();
+            canvasGroup.alpha = 0f;
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
+
+            Text zoneName = CreateText("ZoneName", panel.transform, "Tidepool Shallows", 30, TextAnchor.LowerCenter, new Vector2(0f, 16f), new Vector2(600f, 42f));
+            zoneName.color = Color.white;
+
+            Text subtitle = CreateText("ZoneSubtitle", panel.transform, "Where the water is warm and clear", 22, TextAnchor.UpperCenter, new Vector2(0f, -24f), new Vector2(600f, 40f));
+            subtitle.color = new Color(0.86f, 0.96f, 0.92f);
+
+            ZoneWelcomeBanner banner = panel.gameObject.AddComponent<ZoneWelcomeBanner>();
+            WireZoneWelcomeBanner(banner, panel.gameObject, canvasGroup, zoneName, subtitle);
+            return banner;
         }
 
         private static void CreateContestButton(RectTransform safeArea, PlayerGridMover playerMover, SpeciesDatabase database)
@@ -192,18 +218,20 @@ namespace Tidepool.Editor
             serializedTrigger.ApplyModifiedProperties();
         }
 
-        private static void CreateZoneTransitions(Transform gridTransform, Transform playerRoot, PlayerGridMover playerMover, Grid grid)
+        private static void CreateZoneTransitions(Transform gridTransform, Transform playerRoot, PlayerGridMover playerMover,
+            Grid grid, ZoneWelcomeBanner zoneWelcomeBanner)
         {
             CreateZoneTransition("ShallowsToMeadowTransition", gridTransform, playerRoot, playerMover, grid,
-                new Vector3(MeadowEndX - 1, 0, 0), ZoneId.SeagrassMeadow);
+                new Vector3(MeadowEndX - 1, 0, 0), ZoneId.SeagrassMeadow, zoneWelcomeBanner);
             CreateZoneTransition("MeadowToKelpTransition", gridTransform, playerRoot, playerMover, grid,
-                new Vector3(KelpEndX - 1, 0, 0), ZoneId.KelpCurtain);
+                new Vector3(KelpEndX - 1, 0, 0), ZoneId.KelpCurtain, zoneWelcomeBanner);
             CreateZoneTransition("KelpToRockyTransition", gridTransform, playerRoot, playerMover, grid,
-                new Vector3(MaxX - 1, 0, 0), ZoneId.RockyShelf);
+                new Vector3(MaxX - 1, 0, 0), ZoneId.RockyShelf, zoneWelcomeBanner);
         }
 
         private static void CreateZoneTransition(string name, Transform gridTransform, Transform playerRoot,
-            PlayerGridMover playerMover, Grid grid, Vector3 triggerPosition, ZoneId destinationZone)
+            PlayerGridMover playerMover, Grid grid, Vector3 triggerPosition, ZoneId destinationZone,
+            ZoneWelcomeBanner zoneWelcomeBanner)
         {
             GameObject triggerObj = new GameObject(name);
             triggerObj.transform.SetParent(gridTransform);
@@ -220,6 +248,8 @@ namespace Tidepool.Editor
             serializedTrigger.FindProperty("playerMover").objectReferenceValue = playerMover;
             serializedTrigger.FindProperty("grid").objectReferenceValue = grid;
             serializedTrigger.ApplyModifiedProperties();
+
+            WireZoneTransitionBanner(trigger, destinationZone, zoneWelcomeBanner);
         }
 
         private static void CreateZoneEncounterDirectors(Transform gridTransform, Tilemap seagrassMap,
@@ -333,6 +363,42 @@ namespace Tidepool.Editor
             serializedGuidance.FindProperty("guidanceText").objectReferenceValue = label;
             serializedGuidance.FindProperty("dismissButton").objectReferenceValue = dismissButton;
             serializedGuidance.ApplyModifiedProperties();
+        }
+
+        private static void WireZoneWelcomeBanner(ZoneWelcomeBanner banner, GameObject root, CanvasGroup canvasGroup, Text zoneName, Text subtitle)
+        {
+            SerializedObject serializedBanner = new SerializedObject(banner);
+            serializedBanner.FindProperty("bannerRoot").objectReferenceValue = root;
+            serializedBanner.FindProperty("canvasGroup").objectReferenceValue = canvasGroup;
+            serializedBanner.FindProperty("zoneNameText").objectReferenceValue = zoneName;
+            serializedBanner.FindProperty("subtitleText").objectReferenceValue = subtitle;
+            serializedBanner.FindProperty("visibleSeconds").floatValue = 2f;
+            serializedBanner.FindProperty("fadeSeconds").floatValue = 0.3f;
+            serializedBanner.ApplyModifiedProperties();
+        }
+
+        private static void WireZoneTransitionBanner(ZoneTransitionTrigger trigger, ZoneId destinationZone, ZoneWelcomeBanner banner)
+        {
+            if (banner == null)
+            {
+                return;
+            }
+
+            switch (destinationZone)
+            {
+                case ZoneId.SeagrassMeadow:
+                    UnityEditor.Events.UnityEventTools.AddPersistentListener(trigger.EnteredZone, banner.ShowSeagrassMeadow);
+                    break;
+                case ZoneId.KelpCurtain:
+                    UnityEditor.Events.UnityEventTools.AddPersistentListener(trigger.EnteredZone, banner.ShowKelpCurtain);
+                    break;
+                case ZoneId.RockyShelf:
+                    UnityEditor.Events.UnityEventTools.AddPersistentListener(trigger.EnteredZone, banner.ShowRockyShelf);
+                    break;
+                default:
+                    UnityEditor.Events.UnityEventTools.AddPersistentListener(trigger.EnteredZone, banner.ShowTidepoolShallows);
+                    break;
+            }
         }
 
         private static void PaintGround(Tilemap ground, TileBase sand, TileBase water, TileBase grass, TileBase kelp, TileBase rock, TileBase darkWater)
