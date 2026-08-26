@@ -1,3 +1,4 @@
+using System.Collections;
 using Tidepool.Domain;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -35,6 +36,10 @@ namespace Tidepool.Runtime
         [SerializeField] private Button secondMoveButton;
         [SerializeField] private Text secondMoveButtonText;
 
+        [Header("Visiting telegraph")]
+        [SerializeField] private Text visitingTelegraphText;
+        [SerializeField, Min(0.1f)] private float visitingTelegraphDurationSeconds = 1.5f;
+
         [Header("Result controls")]
         [SerializeField] private Text roundCounterText;
         [SerializeField] private Text resultText;
@@ -62,6 +67,9 @@ namespace Tidepool.Runtime
         private int resolvedRounds;
         private int playerRoundWins;
         private int visitingRoundWins;
+        private ContestMove plannedVisitingMove;
+        private Coroutine telegraphRoutine;
+        private bool waitingForTelegraph;
 
         private void Start()
         {
@@ -95,6 +103,7 @@ namespace Tidepool.Runtime
             RefreshRoundCounter();
             RefreshCurrentRing();
             RefreshTuckeredVisuals();
+            BeginRoundTelegraph(playerLevel);
         }
 
         public void ChooseFirstMove()
@@ -117,6 +126,7 @@ namespace Tidepool.Runtime
             SetResultText("Pick a friendly move.");
             RefreshRoundCounter();
             RefreshTuckeredVisuals();
+            BeginRoundTelegraph(playerLevel);
 
             if (retryButton != null)
             {
@@ -158,7 +168,7 @@ namespace Tidepool.Runtime
 
         private void ChooseMove(int moveIndex)
         {
-            if (contestFinished || playerSpecies == null || visitingSpecies == null)
+            if (waitingForTelegraph || contestFinished || playerSpecies == null || visitingSpecies == null)
             {
                 return;
             }
@@ -173,7 +183,7 @@ namespace Tidepool.Runtime
 
             int playerLevel = ResolvePlayerLevel();
             ContestMove playerMove = playerSpecies.GetUnlockedContestMove(moveIndex, playerLevel);
-            ContestMove visitingMove = ChooseVisitingMove();
+            ContestMove visitingMove = plannedVisitingMove == null ? ChooseVisitingMove() : plannedVisitingMove;
             if (playerMove == null || visitingMove == null)
             {
                 visitingRoundWins = roundsToWinContest;
@@ -267,17 +277,21 @@ namespace Tidepool.Runtime
             int playerLevel = ResolvePlayerLevel();
 
             RebindMoveButtons(playerLevel);
-            SetMoveButtonsInteractable(CanPlayerChooseMove());
             RefreshRoundCounter();
             RefreshTuckeredVisuals();
+            BeginRoundTelegraph(playerLevel);
         }
 
         private void FinishContest()
         {
             contestFinished = true;
+            StopTelegraphRoutine();
+            plannedVisitingMove = null;
+            waitingForTelegraph = false;
             SetMoveButtonsInteractable(false);
             AwardContestProgress();
             SetContestResultText();
+            SetText(visitingTelegraphText, "Contest complete.");
             RefreshRoundCounter();
             RefreshTuckeredVisuals();
 
@@ -296,6 +310,9 @@ namespace Tidepool.Runtime
             visitingRoundWins = 0;
             playerState = ContestParticipantState.ForSpecies(playerSpecies);
             visitingState = ContestParticipantState.ForSpecies(visitingSpecies);
+            plannedVisitingMove = null;
+            waitingForTelegraph = false;
+            StopTelegraphRoutine();
         }
 
         private void SetMoveButtonsInteractable(bool interactable)
@@ -411,6 +428,77 @@ namespace Tidepool.Runtime
             UpdateTuckeredDisplay(visitingImage, visitingStatusText, visitingState);
         }
 
+        private void BeginRoundTelegraph(int playerLevel)
+        {
+            StopTelegraphRoutine();
+            if (playerSpecies == null || visitingSpecies == null)
+            {
+                plannedVisitingMove = null;
+                waitingForTelegraph = false;
+                RefreshVisitingTelegraph();
+                SetMoveButtonsInteractable(false);
+                return;
+            }
+
+            plannedVisitingMove = ChooseVisitingMove();
+            RefreshVisitingTelegraph();
+
+            waitingForTelegraph = plannedVisitingMove != null && !contestFinished && CanPlayerChooseMove();
+            if (!waitingForTelegraph)
+            {
+                SetMoveButtonsInteractable(CanPlayerChooseMove());
+                return;
+            }
+
+            SetMoveButtonsInteractable(false);
+            SetResultText("Watch their friendly move.");
+            telegraphRoutine = StartCoroutine(ReleaseTelegraphAfterDelay(playerLevel));
+        }
+
+        private IEnumerator ReleaseTelegraphAfterDelay(int playerLevel)
+        {
+            yield return new WaitForSecondsRealtime(visitingTelegraphDurationSeconds);
+
+            waitingForTelegraph = false;
+            telegraphRoutine = null;
+            if (contestFinished)
+            {
+                yield break;
+            }
+
+            RebindMoveButtons(playerLevel);
+            SetMoveButtonsInteractable(CanPlayerChooseMove());
+            SetResultText("Pick a friendly move.");
+        }
+
+        private void RefreshVisitingTelegraph()
+        {
+            if (visitingTelegraphText == null)
+            {
+                return;
+            }
+
+            if (plannedVisitingMove == null || visitingSpecies == null)
+            {
+                visitingTelegraphText.text = "Visiting move is getting ready.";
+                visitingTelegraphText.color = new Color(0.08f, 0.18f, 0.22f);
+                return;
+            }
+
+            ContestMoveCategory category = plannedVisitingMove.Category;
+            visitingTelegraphText.text = $"{GetDisplayName(visitingSpecies)} is {FormatCategoryVerb(category)} - {category}";
+            visitingTelegraphText.color = GetCategoryColor(category);
+        }
+
+        private void StopTelegraphRoutine()
+        {
+            if (telegraphRoutine != null)
+            {
+                StopCoroutine(telegraphRoutine);
+                telegraphRoutine = null;
+            }
+        }
+
         private void RefreshCurrentRing()
         {
             for (int i = 0; i < CurrentRingOrder.Length; i++)
@@ -504,6 +592,34 @@ namespace Tidepool.Runtime
                 image.color = tuckeredOut
                     ? new Color(0.5f, 0.5f, 0.5f, 0.6f)
                     : Color.white;
+            }
+        }
+
+        private static string FormatCategoryVerb(ContestMoveCategory category)
+        {
+            switch (category)
+            {
+                case ContestMoveCategory.Focus:
+                    return "settling into focus";
+                case ContestMoveCategory.Defend:
+                    return "tucking in gently";
+                case ContestMoveCategory.Attack:
+                default:
+                    return "making a bright splash";
+            }
+        }
+
+        private static Color GetCategoryColor(ContestMoveCategory category)
+        {
+            switch (category)
+            {
+                case ContestMoveCategory.Focus:
+                    return new Color(0.82f, 0.55f, 0.12f);
+                case ContestMoveCategory.Defend:
+                    return new Color(0.17f, 0.43f, 0.32f);
+                case ContestMoveCategory.Attack:
+                default:
+                    return new Color(0.74f, 0.28f, 0.30f);
             }
         }
 
