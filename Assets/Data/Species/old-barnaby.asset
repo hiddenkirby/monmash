@@ -17,7 +17,7 @@ MonoBehaviour:
   current: 4
   rarity: 3
   sprite: {fileID: 21300000, guid: 57e783113fcb44e77b8bf77339e3099a, type: 3}
-  fieldNote: An ancient barnacled shape that seems to know every quiet pool by name.
+  fieldNote: Old Barnaby rests where the warm shallows meet the old stones. He is patient, quiet, and older than every shell around him.
   habitatZones: 00000000
   encounterAvailability: 0
   availabilityHint: 
@@ -25,5 +25,6 @@ MonoBehaviour:
   firstContestMoveUnlockLevel: 1
   secondContestMove: {fileID: 11400000, guid: d30243398e8d94fd0b5e83a950fc4cf9, type: 2}
   secondContestMoveUnlockLevel: 3
+  visitingContestAiPattern: 1
   catchZoneWidth: 0.22
   catchMarkerSpeed: 0.92

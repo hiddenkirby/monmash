@@ -92,6 +92,13 @@ namespace Tidepool.Runtime
             encounterActive = true;
             EncounterContext.CurrentSpecies = species;
             EncounterContext.CurrentZone = currentZone;
+            EncounterContext.IsOldBarnabyEncounter = IsOldBarnaby(species);
+            EncounterContext.EncounterIntroText = EncounterContext.IsOldBarnabyEncounter
+                ? "That's... Old Barnaby. He's been here since before the tidepools had names. You found him."
+                : null;
+            EncounterContext.CatchCelebrationText = EncounterContext.IsOldBarnabyEncounter
+                ? "He chose you. The tidepools are full now."
+                : null;
             GameSaveService.Instance?.MarkSeen(species.Id);
             player?.SetInputEnabled(false);
             SceneManager.LoadScene(catchSceneName, LoadSceneMode.Additive);
@@ -252,10 +259,16 @@ namespace Tidepool.Runtime
                 && !string.Equals(species.Id, OldBarnabySpeciesId, StringComparison.OrdinalIgnoreCase);
         }
 
+        private static bool IsOldBarnaby(TidelingSpecies species)
+        {
+            return species != null
+                && string.Equals(species.Id, OldBarnabySpeciesId, StringComparison.OrdinalIgnoreCase);
+        }
+
         private void HandleEncounterFinished(bool caught)
         {
             encounterActive = false;
-            EncounterContext.CurrentSpecies = null;
+            EncounterContext.Clear();
             remainingGraceSteps = graceStepsAfterEncounter;
             player?.SetInputEnabled(true);
         }

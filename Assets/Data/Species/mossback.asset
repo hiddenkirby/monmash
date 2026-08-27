@@ -25,5 +25,6 @@ MonoBehaviour:
   firstContestMoveUnlockLevel: 1
   secondContestMove: {fileID: 11400000, guid: f06dba1da2de7456c97b47bda5576a8b, type: 2}
   secondContestMoveUnlockLevel: 3
+  visitingContestAiPattern: 1
   catchZoneWidth: 0.3
   catchMarkerSpeed: 0.72

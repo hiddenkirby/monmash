@@ -42,10 +42,43 @@ namespace Tidepool.UI
             Show(ZoneId.RockyShelf);
         }
 
+        public void ShowKelpGateLocked()
+        {
+            ShowMessage(
+                "The kelp is woven tight here.",
+                "Maybe the meadow can teach us more first.");
+        }
+
+        public void ShowRockyGateLocked()
+        {
+            ShowMessage(
+                "The rocks are still slick.",
+                "Let's learn the kelp path first.");
+        }
+
         public void Show(ZoneId zone)
         {
             ApplyCopy(zone);
+            ShowCurrentCopy();
+        }
 
+        public void ShowMessage(string title, string subtitle)
+        {
+            if (zoneNameText != null)
+            {
+                zoneNameText.text = title;
+            }
+
+            if (subtitleText != null)
+            {
+                subtitleText.text = subtitle;
+            }
+
+            ShowCurrentCopy();
+        }
+
+        private void ShowCurrentCopy()
+        {
             if (activeRoutine != null)
             {
                 StopCoroutine(activeRoutine);

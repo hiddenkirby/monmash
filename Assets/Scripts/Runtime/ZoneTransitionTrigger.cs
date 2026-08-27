@@ -12,11 +12,16 @@ namespace Tidepool.Runtime
         [SerializeField] private PlayerGridMover playerMover;
         [SerializeField] private Grid grid;
         [SerializeField] private Transform destinationSpawn;
-        [SerializeField] private UnityEvent enteredZone;
+        [SerializeField] private bool requireDestinationUnlocked;
+        [SerializeField] private ZoneId requiredCaughtZone = ZoneId.SeagrassMeadow;
+        [SerializeField, Min(0)] private int requiredCaughtSpeciesCount;
+        [SerializeField] private UnityEvent gateLocked = new UnityEvent();
+        [SerializeField] private UnityEvent enteredZone = new UnityEvent();
 
         private bool transitionInProgress;
 
         public ZoneId DestinationZone => destinationZone;
+        public UnityEvent GateLocked => gateLocked;
         public UnityEvent EnteredZone => enteredZone;
 
         public void EnterZone()
@@ -76,6 +81,12 @@ namespace Tidepool.Runtime
                 return;
             }
 
+            if (!CanEnterDestination())
+            {
+                gateLocked?.Invoke();
+                return;
+            }
+
             transitionInProgress = true;
             try
             {
@@ -101,6 +112,34 @@ namespace Tidepool.Runtime
 
                 transitionInProgress = false;
             }
+        }
+
+        private bool CanEnterDestination()
+        {
+            if (!requireDestinationUnlocked)
+            {
+                return true;
+            }
+
+            GameSaveService saveService = GameSaveService.Instance;
+            if (saveService == null)
+            {
+                return true;
+            }
+
+            if (saveService.IsZoneUnlocked(destinationZone))
+            {
+                return true;
+            }
+
+            if (requiredCaughtSpeciesCount > 0
+                && saveService.CountCaughtSpeciesInZone(requiredCaughtZone) >= requiredCaughtSpeciesCount)
+            {
+                saveService.UnlockZone(destinationZone);
+                return true;
+            }
+
+            return false;
         }
 
         private Transform ResolveTarget(Transform candidate)

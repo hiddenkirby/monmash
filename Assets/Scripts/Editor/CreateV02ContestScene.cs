@@ -80,8 +80,16 @@ namespace Tidepool.Editor
             Button secondMoveButton = CreateButton("SecondMoveButton", safeArea, "Move 2", new Vector2(190f, -220f), new Vector2(300f, 96f), new Color(0.12f, 0.44f, 0.50f), Color.white);
             Text secondMoveLabel = secondMoveButton.transform.Find("Label")?.GetComponent<Text>();
 
-            Button retryButton = CreateButton("RetryButton", safeArea, "Retry", new Vector2(-120f, -340f), new Vector2(220f, 96f), new Color(0.78f, 0.92f, 0.76f), new Color(0.06f, 0.16f, 0.18f));
-            Button exitButton = CreateButton("ExitButton", safeArea, "Back", new Vector2(120f, -340f), new Vector2(220f, 96f), new Color(0.78f, 0.92f, 0.76f), new Color(0.06f, 0.16f, 0.18f));
+            Button[] playerPartyButtons = new Button[3];
+            Image[] playerPartyImages = new Image[3];
+            Text[] playerPartyLabels = new Text[3];
+            for (int i = 0; i < playerPartyButtons.Length; i++)
+            {
+                CreatePartySlot(safeArea, i, playerPartyButtons, playerPartyImages, playerPartyLabels);
+            }
+
+            Button retryButton = CreateButton("RetryButton", safeArea, "Retry", new Vector2(-424f, -332f), new Vector2(152f, 88f), new Color(0.78f, 0.92f, 0.76f), new Color(0.06f, 0.16f, 0.18f));
+            Button exitButton = CreateButton("ExitButton", safeArea, "Back", new Vector2(424f, -332f), new Vector2(152f, 88f), new Color(0.78f, 0.92f, 0.76f), new Color(0.06f, 0.16f, 0.18f));
 
             SerializedObject serializedController = new SerializedObject(controller);
             serializedController.FindProperty("playerImage").objectReferenceValue = playerImage;
@@ -94,6 +102,9 @@ namespace Tidepool.Editor
             serializedController.FindProperty("firstMoveButtonText").objectReferenceValue = firstMoveLabel;
             serializedController.FindProperty("secondMoveButton").objectReferenceValue = secondMoveButton;
             serializedController.FindProperty("secondMoveButtonText").objectReferenceValue = secondMoveLabel;
+            SetObjectReferenceArray(serializedController.FindProperty("playerPartyButtons"), playerPartyButtons);
+            SetObjectReferenceArray(serializedController.FindProperty("playerPartyImages"), playerPartyImages);
+            SetObjectReferenceArray(serializedController.FindProperty("playerPartyLabels"), playerPartyLabels);
             serializedController.FindProperty("visitingTelegraphText").objectReferenceValue = visitingTelegraphText;
             serializedController.FindProperty("roundCounterText").objectReferenceValue = roundCounterText;
             serializedController.FindProperty("resultText").objectReferenceValue = resultText;
@@ -150,6 +161,27 @@ namespace Tidepool.Editor
 
             nodes[index] = node;
             labels[index] = text;
+        }
+
+        private static void CreatePartySlot(Transform parent, int index, Button[] buttons, Image[] images, Text[] labels)
+        {
+            float x = -220f + (index * 220f);
+            Button button = CreateButton($"PlayerPartySlot{index + 1}", parent, "Tideling", new Vector2(x, -332f), new Vector2(188f, 88f), new Color(0.95f, 0.98f, 0.94f), new Color(0.06f, 0.16f, 0.18f));
+            Image portrait = CreateImage("Portrait", button.transform, Color.white, new Vector2(-58f, 0f), new Vector2(64f, 64f));
+            portrait.preserveAspect = true;
+
+            Text label = button.transform.Find("Label")?.GetComponent<Text>();
+            if (label != null)
+            {
+                RectTransform labelRect = label.GetComponent<RectTransform>();
+                labelRect.anchoredPosition = new Vector2(32f, 0f);
+                labelRect.sizeDelta = new Vector2(112f, 76f);
+                label.fontSize = 18;
+            }
+
+            buttons[index] = button;
+            images[index] = portrait;
+            labels[index] = label;
         }
 
         private static Image CreateImage(string name, Transform parent, Color color, Vector2 anchoredPosition, Vector2 size)

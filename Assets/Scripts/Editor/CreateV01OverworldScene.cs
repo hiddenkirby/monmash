@@ -264,15 +264,19 @@ namespace Tidepool.Editor
             Grid grid, ZoneWelcomeBanner zoneWelcomeBanner)
         {
             CreateZoneTransition("ShallowsToMeadowTransition", gridTransform, playerRoot, playerMover, grid,
-                new Vector3(MeadowEndX - 1, 0, 0), ZoneId.SeagrassMeadow, zoneWelcomeBanner);
+                new Vector3(MeadowEndX - 1, 0, 0), ZoneId.SeagrassMeadow, false,
+                ZoneId.SeagrassMeadow, 0, zoneWelcomeBanner);
             CreateZoneTransition("MeadowToKelpTransition", gridTransform, playerRoot, playerMover, grid,
-                new Vector3(KelpEndX - 1, 0, 0), ZoneId.KelpCurtain, zoneWelcomeBanner);
+                new Vector3(KelpEndX - 1, 0, 0), ZoneId.KelpCurtain, true,
+                ZoneId.SeagrassMeadow, 5, zoneWelcomeBanner);
             CreateZoneTransition("KelpToRockyTransition", gridTransform, playerRoot, playerMover, grid,
-                new Vector3(MaxX - 1, 0, 0), ZoneId.RockyShelf, zoneWelcomeBanner);
+                new Vector3(MaxX - 1, 0, 0), ZoneId.RockyShelf, true,
+                ZoneId.KelpCurtain, 3, zoneWelcomeBanner);
         }
 
         private static void CreateZoneTransition(string name, Transform gridTransform, Transform playerRoot,
             PlayerGridMover playerMover, Grid grid, Vector3 triggerPosition, ZoneId destinationZone,
+            bool requireDestinationUnlocked, ZoneId requiredCaughtZone, int requiredCaughtSpeciesCount,
             ZoneWelcomeBanner zoneWelcomeBanner)
         {
             GameObject triggerObj = new GameObject(name);
@@ -289,9 +293,13 @@ namespace Tidepool.Editor
             serializedTrigger.FindProperty("playerRoot").objectReferenceValue = playerRoot;
             serializedTrigger.FindProperty("playerMover").objectReferenceValue = playerMover;
             serializedTrigger.FindProperty("grid").objectReferenceValue = grid;
+            serializedTrigger.FindProperty("requireDestinationUnlocked").boolValue = requireDestinationUnlocked;
+            serializedTrigger.FindProperty("requiredCaughtZone").enumValueIndex = (int)requiredCaughtZone;
+            serializedTrigger.FindProperty("requiredCaughtSpeciesCount").intValue = requiredCaughtSpeciesCount;
             serializedTrigger.ApplyModifiedProperties();
 
             WireZoneTransitionBanner(trigger, destinationZone, zoneWelcomeBanner);
+            WireZoneGateMessage(trigger, destinationZone, zoneWelcomeBanner);
         }
 
         private static void CreateZoneEncounterDirectors(Transform gridTransform, Tilemap seagrassMap,
@@ -459,6 +467,24 @@ namespace Tidepool.Editor
             for (int i = 0; i < texts.Length; i++)
             {
                 property.GetArrayElementAtIndex(i).objectReferenceValue = texts[i];
+            }
+        }
+
+        private static void WireZoneGateMessage(ZoneTransitionTrigger trigger, ZoneId destinationZone, ZoneWelcomeBanner banner)
+        {
+            if (banner == null)
+            {
+                return;
+            }
+
+            switch (destinationZone)
+            {
+                case ZoneId.KelpCurtain:
+                    UnityEditor.Events.UnityEventTools.AddPersistentListener(trigger.GateLocked, banner.ShowKelpGateLocked);
+                    break;
+                case ZoneId.RockyShelf:
+                    UnityEditor.Events.UnityEventTools.AddPersistentListener(trigger.GateLocked, banner.ShowRockyGateLocked);
+                    break;
             }
         }
 
