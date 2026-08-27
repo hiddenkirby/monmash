@@ -84,6 +84,8 @@ namespace Tidepool.Runtime
         private ContestMove plannedVisitingMove;
         private Coroutine telegraphRoutine;
         private bool waitingForTelegraph;
+        private ContestMoveCategory lastPlannedVisitingCategory;
+        private int consecutivePlannedVisitingCategoryCount;
 
         private void Start()
         {
@@ -287,7 +289,93 @@ namespace Tidepool.Runtime
                 return first;
             }
 
-            return ScoreMove(second, playerSpecies) > ScoreMove(first, playerSpecies) ? second : first;
+            ContestAiPattern pattern = visitingSpecies.VisitingContestAiPattern;
+            float firstWeight = GetMovePatternWeight(first, pattern);
+            float secondWeight = GetMovePatternWeight(second, pattern);
+
+            if (pattern == ContestAiPattern.Tricky)
+            {
+                firstWeight *= GetTrickyMatchupWeight(first, playerSpecies);
+                secondWeight *= GetTrickyMatchupWeight(second, playerSpecies);
+                ReduceRepeatedTrickyCategoryWeight(first, ref firstWeight);
+                ReduceRepeatedTrickyCategoryWeight(second, ref secondWeight);
+            }
+
+            ContestMove selected = PickWeightedMove(first, firstWeight, second, secondWeight);
+            RememberPlannedVisitingCategory(selected);
+            return selected;
+        }
+
+        private static float GetMovePatternWeight(ContestMove move, ContestAiPattern pattern)
+        {
+            if (move == null)
+            {
+                return 0f;
+            }
+
+            switch (pattern)
+            {
+                case ContestAiPattern.Defensive:
+                    return move.Category == ContestMoveCategory.Defend ? 0.60f
+                        : move.Category == ContestMoveCategory.Focus ? 0.25f
+                        : 0.15f;
+                case ContestAiPattern.Tricky:
+                    return 0.40f;
+                case ContestAiPattern.Aggressive:
+                default:
+                    return move.Category == ContestMoveCategory.Attack ? 0.70f
+                        : move.Category == ContestMoveCategory.Focus ? 0.20f
+                        : 0.10f;
+            }
+        }
+
+        private static float GetTrickyMatchupWeight(ContestMove move, TidelingSpecies defender)
+        {
+            return 1f + Mathf.Clamp(ScoreMove(move, defender), 0f, 6f) * 0.05f;
+        }
+
+        private void ReduceRepeatedTrickyCategoryWeight(ContestMove move, ref float weight)
+        {
+            if (move != null
+                && consecutivePlannedVisitingCategoryCount >= 2
+                && move.Category == lastPlannedVisitingCategory)
+            {
+                weight = 0f;
+            }
+        }
+
+        private static ContestMove PickWeightedMove(
+            ContestMove first,
+            float firstWeight,
+            ContestMove second,
+            float secondWeight)
+        {
+            float totalWeight = Mathf.Max(0f, firstWeight) + Mathf.Max(0f, secondWeight);
+            if (totalWeight <= 0f)
+            {
+                return first;
+            }
+
+            return Random.value * totalWeight < firstWeight ? first : second;
+        }
+
+        private void RememberPlannedVisitingCategory(ContestMove selectedMove)
+        {
+            if (selectedMove == null)
+            {
+                consecutivePlannedVisitingCategoryCount = 0;
+                return;
+            }
+
+            if (consecutivePlannedVisitingCategoryCount > 0
+                && selectedMove.Category == lastPlannedVisitingCategory)
+            {
+                consecutivePlannedVisitingCategoryCount += 1;
+                return;
+            }
+
+            lastPlannedVisitingCategory = selectedMove.Category;
+            consecutivePlannedVisitingCategoryCount = 1;
         }
 
         private static float ScoreMove(ContestMove move, TidelingSpecies defender)
@@ -367,6 +455,7 @@ namespace Tidepool.Runtime
             BindActivePartyMembers();
             plannedVisitingMove = null;
             waitingForTelegraph = false;
+            consecutivePlannedVisitingCategoryCount = 0;
             StopTelegraphRoutine();
         }
 
@@ -544,7 +633,7 @@ namespace Tidepool.Runtime
             }
 
             ContestMoveCategory category = plannedVisitingMove.Category;
-            visitingTelegraphText.text = $"{GetDisplayName(visitingSpecies)} is {FormatCategoryVerb(category)} - {category}";
+            visitingTelegraphText.text = $"{FormatPatternHint(visitingSpecies.VisitingContestAiPattern)}: {GetDisplayName(visitingSpecies)} is {FormatCategoryVerb(category)} - {category}";
             visitingTelegraphText.color = GetCategoryColor(category);
         }
 
@@ -822,6 +911,20 @@ namespace Tidepool.Runtime
                 case ContestMoveCategory.Attack:
                 default:
                     return "making a bright splash";
+            }
+        }
+
+        private static string FormatPatternHint(ContestAiPattern pattern)
+        {
+            switch (pattern)
+            {
+                case ContestAiPattern.Defensive:
+                    return "Careful visitor";
+                case ContestAiPattern.Tricky:
+                    return "Curious visitor";
+                case ContestAiPattern.Aggressive:
+                default:
+                    return "Bold visitor";
             }
         }
 
