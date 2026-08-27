@@ -55,6 +55,11 @@ namespace Tidepool.Editor
             background.rectTransform.offsetMin = Vector2.zero;
             background.rectTransform.offsetMax = Vector2.zero;
 
+            Image narrativePanel = CreateImage("OldBarnabyNarrativePanel", safeArea, new Color(0.08f, 0.22f, 0.26f, 0.92f), new Vector2(-112f, 306f), new Vector2(520f, 104f));
+            narrativePanel.raycastTarget = false;
+            Text narrativeText = CreateText("OldBarnabyNarrativeText", narrativePanel.transform, string.Empty, 22, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(480f, 88f));
+            narrativeText.color = Color.white;
+
             Image creatureImage = CreateImage("CreatureImage", safeArea, Color.white, new Vector2(0f, 125f), new Vector2(300f, 300f));
             creatureImage.preserveAspect = true;
 
@@ -94,6 +99,9 @@ namespace Tidepool.Editor
             SerializedObject serializedController = new SerializedObject(controller);
             serializedController.FindProperty("creatureImage").objectReferenceValue = creatureImage;
             serializedController.FindProperty("creatureNameText").objectReferenceValue = creatureName;
+            serializedController.FindProperty("backgroundImage").objectReferenceValue = background;
+            serializedController.FindProperty("narrativeRoot").objectReferenceValue = narrativePanel.gameObject;
+            serializedController.FindProperty("narrativeText").objectReferenceValue = narrativeText;
             serializedController.FindProperty("calmBarTrack").objectReferenceValue = calmBarTrack;
             serializedController.FindProperty("steadyZone").objectReferenceValue = steadyZone;
             serializedController.FindProperty("marker").objectReferenceValue = marker;

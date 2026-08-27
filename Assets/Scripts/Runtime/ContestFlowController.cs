@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using Tidepool.Domain;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -9,6 +10,8 @@ namespace Tidepool.Runtime
     public class ContestFlowController : MonoBehaviour
     {
         private const float CategoryAdvantageScoreBonus = 1000f;
+        private const int ContestPartySize = 3;
+        private const int SwapRestRounds = 2;
         private static readonly TidelingCurrent[] CurrentRingOrder =
         {
             TidelingCurrent.Current,
@@ -36,6 +39,11 @@ namespace Tidepool.Runtime
         [SerializeField] private Button secondMoveButton;
         [SerializeField] private Text secondMoveButtonText;
 
+        [Header("Party controls")]
+        [SerializeField] private Button[] playerPartyButtons;
+        [SerializeField] private Image[] playerPartyImages;
+        [SerializeField] private Text[] playerPartyLabels;
+
         [Header("Visiting telegraph")]
         [SerializeField] private Text visitingTelegraphText;
         [SerializeField, Min(0.1f)] private float visitingTelegraphDurationSeconds = 1.5f;
@@ -62,6 +70,12 @@ namespace Tidepool.Runtime
         private TidelingSpecies visitingSpecies;
         private ContestParticipantState playerState;
         private ContestParticipantState visitingState;
+        private List<TidelingSpecies> playerParty;
+        private List<TidelingSpecies> visitingParty;
+        private List<ContestParticipantState> playerPartyStates;
+        private List<ContestParticipantState> visitingPartyStates;
+        private int activePlayerPartyIndex;
+        private int activeVisitingPartyIndex;
         private bool contestFinished;
         private int currentRound = 1;
         private int resolvedRounds;
@@ -75,14 +89,18 @@ namespace Tidepool.Runtime
 
         private void Start()
         {
-            playerSpecies = ContestContext.PlayerSpecies == null ? fallbackPlayerSpecies : ContestContext.PlayerSpecies;
-            visitingSpecies = ContestContext.VisitingSpecies == null ? fallbackVisitingSpecies : ContestContext.VisitingSpecies;
-            playerState = ContestParticipantState.ForSpecies(playerSpecies);
-            visitingState = ContestParticipantState.ForSpecies(visitingSpecies);
+            playerParty = BuildParty(ContestContext.PlayerParty, ContestContext.PlayerSpecies, fallbackPlayerSpecies);
+            visitingParty = BuildParty(ContestContext.VisitingParty, ContestContext.VisitingSpecies, fallbackVisitingSpecies);
+            playerPartyStates = BuildPartyStates(playerParty);
+            visitingPartyStates = BuildPartyStates(visitingParty);
+            activePlayerPartyIndex = 0;
+            activeVisitingPartyIndex = 0;
+            BindActivePartyMembers();
             int playerLevel = ResolvePlayerLevel();
 
             BindCreature(playerSpecies, playerImage, playerNameText);
             BindCreature(visitingSpecies, visitingImage, visitingNameText);
+            WirePartyButtons();
             BindMoveButton(firstMoveButton, firstMoveButtonText,
                 playerSpecies?.GetUnlockedContestMove(0, playerLevel), ChooseFirstMove);
             BindMoveButton(secondMoveButton, secondMoveButtonText,
@@ -105,6 +123,7 @@ namespace Tidepool.Runtime
             RefreshRoundCounter();
             RefreshCurrentRing();
             RefreshTuckeredVisuals();
+            RefreshPartyControls();
             BeginRoundTelegraph(playerLevel);
         }
 
@@ -154,6 +173,37 @@ namespace Tidepool.Runtime
             }
         }
 
+        public void SelectPlayerPartySlot(int partyIndex)
+        {
+            if (contestFinished
+                || playerParty == null
+                || partyIndex < 0
+                || partyIndex >= playerParty.Count
+                || partyIndex == activePlayerPartyIndex)
+            {
+                return;
+            }
+
+            ContestParticipantState selectedState = playerPartyStates[partyIndex];
+            if (selectedState != null && !selectedState.CanChooseMove)
+            {
+                SetResultText($"{GetDisplayName(playerParty[partyIndex])} needs a little rest.");
+                RefreshPartyControls();
+                return;
+            }
+
+            activePlayerPartyIndex = partyIndex;
+            BindActivePartyMembers();
+            int playerLevel = ResolvePlayerLevel();
+            BindCreature(playerSpecies, playerImage, playerNameText);
+            RebindMoveButtons(playerLevel);
+            RefreshCurrentRing();
+            RefreshTuckeredVisuals();
+            RefreshPartyControls();
+            SetResultText($"{GetDisplayName(playerSpecies)} is ready.");
+            BeginRoundTelegraph(playerLevel);
+        }
+
         private static void UnloadAdditiveSceneIfLoaded(string sceneName)
         {
             if (string.IsNullOrWhiteSpace(sceneName))
@@ -200,13 +250,13 @@ namespace Tidepool.Runtime
 
             if (playerScore > visitingScore)
             {
-                visitingState?.MarkTuckeredOut();
+                visitingState?.MarkTuckeredOut(SwapRestRounds);
                 playerRoundWins += 1;
                 SetResultText($"{playerMove.DisplayName} sparkles through. {visitingName} naps a little.");
             }
             else if (visitingScore > playerScore)
             {
-                playerState?.MarkTuckeredOut();
+                playerState?.MarkTuckeredOut(SwapRestRounds);
                 visitingRoundWins += 1;
                 SetResultText($"{visitingName} uses {visitingMove.DisplayName}. Your Tideling needs a quick nap.");
             }
@@ -360,13 +410,15 @@ namespace Tidepool.Runtime
         private void AdvanceToNextRound()
         {
             currentRound = Mathf.Min(resolvedRounds + 1, maxResolvedRounds);
-            playerState?.AdvanceRest();
-            visitingState?.AdvanceRest();
+            AdvancePartyRest(playerPartyStates);
+            AdvancePartyRest(visitingPartyStates);
+            SwapVisitingTidelingIfNeeded();
             int playerLevel = ResolvePlayerLevel();
 
             RebindMoveButtons(playerLevel);
             RefreshRoundCounter();
             RefreshTuckeredVisuals();
+            RefreshPartyControls();
             BeginRoundTelegraph(playerLevel);
         }
 
@@ -396,8 +448,11 @@ namespace Tidepool.Runtime
             resolvedRounds = 0;
             playerRoundWins = 0;
             visitingRoundWins = 0;
-            playerState = ContestParticipantState.ForSpecies(playerSpecies);
-            visitingState = ContestParticipantState.ForSpecies(visitingSpecies);
+            playerPartyStates = BuildPartyStates(playerParty);
+            visitingPartyStates = BuildPartyStates(visitingParty);
+            activePlayerPartyIndex = 0;
+            activeVisitingPartyIndex = 0;
+            BindActivePartyMembers();
             plannedVisitingMove = null;
             waitingForTelegraph = false;
             consecutivePlannedVisitingCategoryCount = 0;
@@ -536,10 +591,12 @@ namespace Tidepool.Runtime
             if (!waitingForTelegraph)
             {
                 SetMoveButtonsInteractable(CanPlayerChooseMove());
+                RefreshPartyControls();
                 return;
             }
 
             SetMoveButtonsInteractable(false);
+            RefreshPartyControls();
             SetResultText("Watch their friendly move.");
             telegraphRoutine = StartCoroutine(ReleaseTelegraphAfterDelay(playerLevel));
         }
@@ -557,6 +614,7 @@ namespace Tidepool.Runtime
 
             RebindMoveButtons(playerLevel);
             SetMoveButtonsInteractable(CanPlayerChooseMove());
+            RefreshPartyControls();
             SetResultText("Pick a friendly move.");
         }
 
@@ -586,6 +644,164 @@ namespace Tidepool.Runtime
                 StopCoroutine(telegraphRoutine);
                 telegraphRoutine = null;
             }
+        }
+
+        private void WirePartyButtons()
+        {
+            if (playerPartyButtons == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < playerPartyButtons.Length; i++)
+            {
+                Button button = playerPartyButtons[i];
+                if (button == null)
+                {
+                    continue;
+                }
+
+                int capturedIndex = i;
+                button.onClick.RemoveAllListeners();
+                button.onClick.AddListener(() => SelectPlayerPartySlot(capturedIndex));
+            }
+        }
+
+        private void RefreshPartyControls()
+        {
+            if (playerPartyButtons == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < playerPartyButtons.Length; i++)
+            {
+                TidelingSpecies species = playerParty != null && i < playerParty.Count ? playerParty[i] : null;
+                ContestParticipantState state = playerPartyStates != null && i < playerPartyStates.Count ? playerPartyStates[i] : null;
+                bool hasSpecies = species != null;
+                bool isActive = i == activePlayerPartyIndex;
+                bool canSwapTo = hasSpecies && !isActive && state != null && state.CanChooseMove && !waitingForTelegraph && !contestFinished;
+
+                if (playerPartyButtons[i] != null)
+                {
+                    playerPartyButtons[i].gameObject.SetActive(hasSpecies);
+                    playerPartyButtons[i].interactable = canSwapTo;
+                }
+
+                if (playerPartyImages != null && i < playerPartyImages.Length && playerPartyImages[i] != null)
+                {
+                    playerPartyImages[i].sprite = species == null ? null : species.Sprite;
+                    playerPartyImages[i].enabled = hasSpecies && species.Sprite != null;
+                    playerPartyImages[i].preserveAspect = true;
+                    playerPartyImages[i].color = state != null && state.IsTuckeredOut
+                        ? new Color(0.5f, 0.5f, 0.5f, 0.6f)
+                        : Color.white;
+                }
+
+                if (playerPartyLabels != null && i < playerPartyLabels.Length)
+                {
+                    string suffix = isActive ? " ready" : state != null && state.IsTuckeredOut ? " resting" : string.Empty;
+                    SetText(playerPartyLabels[i], hasSpecies ? $"{GetDisplayName(species)}{suffix}" : string.Empty);
+                }
+            }
+        }
+
+        private void BindActivePartyMembers()
+        {
+            playerSpecies = GetPartySpecies(playerParty, activePlayerPartyIndex);
+            visitingSpecies = GetPartySpecies(visitingParty, activeVisitingPartyIndex);
+            playerState = GetPartyState(playerPartyStates, activePlayerPartyIndex);
+            visitingState = GetPartyState(visitingPartyStates, activeVisitingPartyIndex);
+        }
+
+        private void SwapVisitingTidelingIfNeeded()
+        {
+            if (visitingState == null || visitingState.CanChooseMove || visitingParty == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < visitingParty.Count; i++)
+            {
+                ContestParticipantState candidateState = GetPartyState(visitingPartyStates, i);
+                if (i != activeVisitingPartyIndex && candidateState != null && candidateState.CanChooseMove)
+                {
+                    activeVisitingPartyIndex = i;
+                    BindActivePartyMembers();
+                    BindCreature(visitingSpecies, visitingImage, visitingNameText);
+                    RefreshCurrentRing();
+                    return;
+                }
+            }
+        }
+
+        private static void AdvancePartyRest(List<ContestParticipantState> states)
+        {
+            if (states == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < states.Count; i++)
+            {
+                states[i]?.AdvanceRest();
+            }
+        }
+
+        private static List<TidelingSpecies> BuildParty(
+            IReadOnlyList<TidelingSpecies> contextParty,
+            TidelingSpecies contextSpecies,
+            TidelingSpecies fallbackSpecies)
+        {
+            List<TidelingSpecies> party = new List<TidelingSpecies>();
+            AddPartySpecies(party, contextSpecies);
+
+            if (contextParty != null)
+            {
+                for (int i = 0; i < contextParty.Count && party.Count < ContestPartySize; i++)
+                {
+                    AddPartySpecies(party, contextParty[i]);
+                }
+            }
+
+            AddPartySpecies(party, fallbackSpecies);
+            return party;
+        }
+
+        private static List<ContestParticipantState> BuildPartyStates(IReadOnlyList<TidelingSpecies> party)
+        {
+            List<ContestParticipantState> states = new List<ContestParticipantState>();
+            if (party == null)
+            {
+                return states;
+            }
+
+            for (int i = 0; i < party.Count; i++)
+            {
+                states.Add(ContestParticipantState.ForSpecies(party[i]));
+            }
+
+            return states;
+        }
+
+        private static void AddPartySpecies(List<TidelingSpecies> party, TidelingSpecies species)
+        {
+            if (species == null || party.Contains(species))
+            {
+                return;
+            }
+
+            party.Add(species);
+        }
+
+        private static TidelingSpecies GetPartySpecies(IReadOnlyList<TidelingSpecies> party, int index)
+        {
+            return party != null && index >= 0 && index < party.Count ? party[index] : null;
+        }
+
+        private static ContestParticipantState GetPartyState(IReadOnlyList<ContestParticipantState> states, int index)
+        {
+            return states != null && index >= 0 && index < states.Count ? states[index] : null;
         }
 
         private void RefreshCurrentRing()

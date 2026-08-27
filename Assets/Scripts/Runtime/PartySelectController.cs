@@ -8,6 +8,8 @@ namespace Tidepool.Runtime
 {
     public class PartySelectController : MonoBehaviour
     {
+        private const int ContestPartySize = 3;
+
         [SerializeField] private SpeciesDatabase speciesDatabase;
         [SerializeField] private Transform listRoot;
         [SerializeField] private GameObject entryPrefab;
@@ -136,6 +138,8 @@ namespace Tidepool.Runtime
             selectedPlayerSpecies = species;
 
             TidelingSpecies opponent = PickOpponent(species);
+            ContestContext.SetPlayerParty(BuildPlayerParty(species));
+            ContestContext.SetVisitingParty(BuildVisitingParty(opponent, species));
 
             ContestContext.PlayerSpecies = species;
             ContestContext.VisitingSpecies = opponent;
@@ -168,6 +172,59 @@ namespace Tidepool.Runtime
             }
 
             return candidates[Random.Range(0, candidates.Count)];
+        }
+
+        private List<TidelingSpecies> BuildPlayerParty(TidelingSpecies selected)
+        {
+            List<TidelingSpecies> party = new List<TidelingSpecies>();
+            AddToParty(party, selected);
+
+            if (speciesDatabase == null || GameSaveService.Instance == null)
+            {
+                return party;
+            }
+
+            List<CaughtTideling> caught = GameSaveService.Instance.Data.caught;
+            for (int i = 0; i < caught.Count && party.Count < ContestPartySize; i++)
+            {
+                TidelingSpecies species = speciesDatabase.FindById(caught[i].speciesId);
+                AddToParty(party, species);
+            }
+
+            return party;
+        }
+
+        private List<TidelingSpecies> BuildVisitingParty(TidelingSpecies selected, TidelingSpecies playerSpecies)
+        {
+            List<TidelingSpecies> party = new List<TidelingSpecies>();
+            AddToParty(party, selected);
+
+            if (speciesDatabase == null)
+            {
+                return party;
+            }
+
+            IReadOnlyList<TidelingSpecies> all = speciesDatabase.All;
+            for (int i = 0; i < all.Count && party.Count < ContestPartySize; i++)
+            {
+                TidelingSpecies candidate = all[i];
+                if (candidate != null && candidate.Id != playerSpecies?.Id)
+                {
+                    AddToParty(party, candidate);
+                }
+            }
+
+            return party;
+        }
+
+        private static void AddToParty(List<TidelingSpecies> party, TidelingSpecies species)
+        {
+            if (species == null || party.Contains(species))
+            {
+                return;
+            }
+
+            party.Add(species);
         }
     }
 }

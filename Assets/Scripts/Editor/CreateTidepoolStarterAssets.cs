@@ -114,7 +114,7 @@ namespace Tidepool.Editor
             new SpeciesSeed("thistlecoat", "Thistlecoat", TidelingCurrent.Coral, TidelingRarity.Uncommon, new[] { ZoneId.SeagrassMeadow, ZoneId.RockyShelf }, EncounterAvailability.Always, string.Empty, "A careful urchin whose spines lie flat when it decides to trust you.", ContestAiPattern.Defensive, 0.30f, 0.72f),
             new SpeciesSeed("gullwing", "Gullwing", TidelingCurrent.Current, TidelingRarity.Rare, new[] { ZoneId.SeagrassMeadow, ZoneId.KelpCurtain }, EncounterAvailability.LastHourOfDaylight, "Look near the end of the daylight cycle.", "A flying fish that flashes silver at the edge of daylight.", ContestAiPattern.Aggressive, 0.24f, 0.88f),
             new SpeciesSeed("tanglemaw", "Tanglemaw", TidelingCurrent.Tide, TidelingRarity.Rare, new[] { ZoneId.SeagrassMeadow, ZoneId.KelpCurtain }, EncounterAvailability.Always, string.Empty, "A curious octopus that would rather inspect the jar than sit inside it.", ContestAiPattern.Tricky, 0.24f, 0.88f),
-            new SpeciesSeed("old-barnaby", "Old Barnaby", TidelingCurrent.Stone, TidelingRarity.Secret, new[] { ZoneId.TidepoolShallows }, EncounterAvailability.Always, string.Empty, "An ancient barnacled shape that seems to know every quiet pool by name.", ContestAiPattern.Defensive, 0.22f, 0.92f)
+            new SpeciesSeed("old-barnaby", "Old Barnaby", TidelingCurrent.Stone, TidelingRarity.Secret, new[] { ZoneId.TidepoolShallows }, EncounterAvailability.Always, string.Empty, "Old Barnaby rests where the warm shallows meet the old stones. He is patient, quiet, and older than every shell around him.", ContestAiPattern.Defensive, 0.22f, 0.92f)
         };
 
         private readonly struct SpeciesSeed
