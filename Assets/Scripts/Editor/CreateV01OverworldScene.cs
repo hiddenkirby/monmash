@@ -94,9 +94,11 @@ namespace Tidepool.Editor
             ZoneWelcomeBanner zoneWelcomeBanner = CreateZoneWelcomeBanner(safeArea);
             CreateZoneTransitions(gridObject.transform, playerObject.transform, playerMover, grid, zoneWelcomeBanner);
             CreateFirstRunGuidance(safeArea);
+            GoalsPanelController goalsPanel = CreateGoalsPanel(safeArea);
             CreateContestButton(safeArea, playerMover, database);
             CreateJournalButton(safeArea, playerMover);
             CreateCharacterButton(safeArea, playerMover);
+            CreateGoalsButton(safeArea, goalsPanel);
             CreateEventSystem();
 
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -216,6 +218,46 @@ namespace Tidepool.Editor
             serializedTrigger.FindProperty("playerMover").objectReferenceValue = playerMover;
             serializedTrigger.FindProperty("characterSelectSceneName").stringValue = "CharacterSelect";
             serializedTrigger.ApplyModifiedProperties();
+        }
+
+        private static void CreateGoalsButton(RectTransform safeArea, GoalsPanelController goalsPanel)
+        {
+            Button goalsButton = CreateButton("GoalsButton", safeArea, "Goals", new Vector2(224f, -300f), new Vector2(180f, 96f));
+            goalsButton.transform.SetAsFirstSibling();
+
+            if (goalsPanel != null)
+            {
+                UnityEditor.Events.UnityEventTools.AddPersistentListener(goalsButton.onClick, goalsPanel.OpenGoals);
+            }
+        }
+
+        private static GoalsPanelController CreateGoalsPanel(RectTransform safeArea)
+        {
+            GoalsPanelController goalsPanel = safeArea.gameObject.AddComponent<GoalsPanelController>();
+            Image panel = CreateImage("GoalsPanel", safeArea, new Color(0.92f, 0.97f, 0.91f, 0.97f), Vector2.zero, new Vector2(720f, 520f));
+            panel.transform.SetAsLastSibling();
+
+            Text title = CreateText("GoalsTitle", panel.transform, "Goals", 34, TextAnchor.MiddleLeft, new Vector2(-260f, 204f), new Vector2(320f, 56f));
+            title.color = new Color(0.06f, 0.16f, 0.18f);
+
+            Text subtitle = CreateText("GoalsSubtitle", panel.transform, "Small things to look for next.", 22, TextAnchor.MiddleLeft, new Vector2(-190f, 158f), new Vector2(460f, 44f));
+            subtitle.color = new Color(0.24f, 0.34f, 0.32f);
+
+            Button closeButton = CreateButton("CloseGoalsButton", panel.transform, "OK", new Vector2(276f, 204f), new Vector2(112f, 88f));
+
+            Text[] checks = new Text[5];
+            Text[] goals = new Text[5];
+            for (int i = 0; i < goals.Length; i++)
+            {
+                float y = 88f - i * 70f;
+                Image row = CreateImage($"GoalRow{i + 1}", panel.transform, new Color(0.82f, 0.93f, 0.88f, 0.72f), new Vector2(0f, y), new Vector2(620f, 56f));
+                checks[i] = CreateText("Check", row.transform, "-", 26, TextAnchor.MiddleCenter, new Vector2(-272f, 0f), new Vector2(48f, 48f));
+                goals[i] = CreateText("Goal", row.transform, string.Empty, 22, TextAnchor.MiddleLeft, new Vector2(36f, 0f), new Vector2(500f, 48f));
+            }
+
+            WireGoalsPanel(goalsPanel, panel.gameObject, checks, goals, closeButton);
+            panel.gameObject.SetActive(false);
+            return goalsPanel;
         }
 
         private static void CreateZoneTransitions(Transform gridTransform, Transform playerRoot, PlayerGridMover playerMover,
@@ -398,6 +440,25 @@ namespace Tidepool.Editor
                 default:
                     UnityEditor.Events.UnityEventTools.AddPersistentListener(trigger.EnteredZone, banner.ShowTidepoolShallows);
                     break;
+            }
+        }
+
+        private static void WireGoalsPanel(GoalsPanelController controller, GameObject root, Text[] checks, Text[] goals, Button closeButton)
+        {
+            SerializedObject serializedGoals = new SerializedObject(controller);
+            serializedGoals.FindProperty("panelRoot").objectReferenceValue = root;
+            WireTextArray(serializedGoals.FindProperty("checkTexts"), checks);
+            WireTextArray(serializedGoals.FindProperty("goalTexts"), goals);
+            serializedGoals.FindProperty("closeButton").objectReferenceValue = closeButton;
+            serializedGoals.ApplyModifiedProperties();
+        }
+
+        private static void WireTextArray(SerializedProperty property, Text[] texts)
+        {
+            property.arraySize = texts.Length;
+            for (int i = 0; i < texts.Length; i++)
+            {
+                property.GetArrayElementAtIndex(i).objectReferenceValue = texts[i];
             }
         }
 
