@@ -3,6 +3,13 @@ using UnityEngine;
 
 namespace Tidepool.Domain
 {
+    public enum ContestAiPattern
+    {
+        Aggressive,
+        Defensive,
+        Tricky
+    }
+
     [CreateAssetMenu(menuName = "Tidepool/Tideling Species", fileName = "NewTidelingSpecies")]
     public class TidelingSpecies : ScriptableObject
     {
@@ -21,6 +28,7 @@ namespace Tidepool.Domain
         [SerializeField] private ContestMove secondContestMove;
         [SerializeField, Range(CaughtTideling.MinLevel, CaughtTideling.MaxLevel)]
         private int secondContestMoveUnlockLevel = 3;
+        [SerializeField] private ContestAiPattern visitingContestAiPattern = ContestAiPattern.Aggressive;
         [SerializeField, Range(0.1f, 0.75f)] private float catchZoneWidth = 0.35f;
         [SerializeField, Min(0.1f)] private float catchMarkerSpeed = 0.65f;
 
@@ -37,6 +45,7 @@ namespace Tidepool.Domain
         public int FirstContestMoveUnlockLevel => firstContestMoveUnlockLevel;
         public ContestMove SecondContestMove => secondContestMove;
         public int SecondContestMoveUnlockLevel => secondContestMoveUnlockLevel;
+        public ContestAiPattern VisitingContestAiPattern => visitingContestAiPattern;
         public float CatchZoneWidth => catchZoneWidth;
         public float CatchMarkerSpeed => catchMarkerSpeed;
 
@@ -111,6 +120,7 @@ namespace Tidepool.Domain
             EncounterAvailability speciesEncounterAvailability,
             string speciesAvailabilityHint,
             string speciesFieldNote,
+            ContestAiPattern speciesVisitingContestAiPattern,
             float speciesCatchZoneWidth,
             float speciesCatchMarkerSpeed)
         {
@@ -125,6 +135,7 @@ namespace Tidepool.Domain
             firstContestMoveUnlockLevel = CaughtTideling.MinLevel;
             secondContestMove = null;
             secondContestMoveUnlockLevel = 3;
+            visitingContestAiPattern = speciesVisitingContestAiPattern;
             fieldNote = speciesFieldNote;
             catchZoneWidth = speciesCatchZoneWidth;
             catchMarkerSpeed = speciesCatchMarkerSpeed;
