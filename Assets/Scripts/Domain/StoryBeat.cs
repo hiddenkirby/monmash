@@ -6,6 +6,7 @@ namespace Tidepool.Domain
     {
         OnFirstCatch,
         OnSpeciesCount,
+        OnCaughtInZoneCount,
         OnZoneEntered,
         OnOldBarnaby
     }
