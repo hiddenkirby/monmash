@@ -10,6 +10,9 @@ namespace Tidepool.Runtime
     {
         [SerializeField] private Image creatureImage;
         [SerializeField] private Text creatureNameText;
+        [SerializeField] private Image backgroundImage;
+        [SerializeField] private GameObject narrativeRoot;
+        [SerializeField] private Text narrativeText;
         [SerializeField] private RectTransform calmBarTrack;
         [SerializeField] private RectTransform steadyZone;
         [SerializeField] private RectTransform marker;
@@ -21,8 +24,11 @@ namespace Tidepool.Runtime
         [SerializeField] private AudioClip escapeNoteClip;
         [SerializeField] private AudioClip uiTapClip;
         [SerializeField, Min(0f)] private float escapeResultSeconds = 0.8f;
+        [SerializeField, Min(0f)] private float oldBarnabyCatchResultSeconds = 1.4f;
+        [SerializeField] private Color oldBarnabyBackgroundColor = new Color(0.58f, 0.76f, 0.82f);
 
         private TidelingSpecies species;
+        private bool isOldBarnabyEncounter;
         private float markerPosition;
         private float markerDirection = 1f;
         private float zoneWidth = 0.35f;
@@ -42,6 +48,8 @@ namespace Tidepool.Runtime
 
             zoneWidth = species.CatchZoneWidth;
             markerSpeed = species.CatchMarkerSpeed;
+            isOldBarnabyEncounter = EncounterContext.IsOldBarnabyEncounter;
+            ApplyNarrativePresentation();
             creatureNameText.text = species.DisplayName;
             creatureImage.sprite = species.Sprite;
             creatureImage.enabled = species.Sprite != null;
@@ -91,7 +99,15 @@ namespace Tidepool.Runtime
                 {
                     PlayClip(catchChimeClip);
                     GameSaveService.Instance?.RecordCatch(species, EncounterContext.CurrentZone);
-                    Finish(true);
+                    if (isOldBarnabyEncounter && !string.IsNullOrWhiteSpace(EncounterContext.CatchCelebrationText))
+                    {
+                        resultText.text = EncounterContext.CatchCelebrationText;
+                        Finish(true, oldBarnabyCatchResultSeconds);
+                    }
+                    else
+                    {
+                        Finish(true);
+                    }
                 }
             }
             else
@@ -144,6 +160,25 @@ namespace Tidepool.Runtime
             float trackWidth = calmBarTrack.rect.width;
             steadyZone.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, trackWidth * zoneWidth);
             steadyZone.anchoredPosition = Vector2.zero;
+        }
+
+        private void ApplyNarrativePresentation()
+        {
+            if (backgroundImage != null && isOldBarnabyEncounter)
+            {
+                backgroundImage.color = oldBarnabyBackgroundColor;
+            }
+
+            bool showNarrative = isOldBarnabyEncounter && !string.IsNullOrWhiteSpace(EncounterContext.EncounterIntroText);
+            if (narrativeRoot != null)
+            {
+                narrativeRoot.SetActive(showNarrative);
+            }
+
+            if (narrativeText != null)
+            {
+                narrativeText.text = showNarrative ? EncounterContext.EncounterIntroText : string.Empty;
+            }
         }
 
         private void RefreshPips()
