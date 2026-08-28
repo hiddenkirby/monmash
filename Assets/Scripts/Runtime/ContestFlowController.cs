@@ -36,8 +36,12 @@ namespace Tidepool.Runtime
         [Header("Move controls")]
         [SerializeField] private Button firstMoveButton;
         [SerializeField] private Text firstMoveButtonText;
+        [SerializeField] private Image firstMoveCategoryBadge;
+        [SerializeField] private Text firstMoveCategoryText;
         [SerializeField] private Button secondMoveButton;
         [SerializeField] private Text secondMoveButtonText;
+        [SerializeField] private Image secondMoveCategoryBadge;
+        [SerializeField] private Text secondMoveCategoryText;
 
         [Header("Party controls")]
         [SerializeField] private Button[] playerPartyButtons;
@@ -51,6 +55,7 @@ namespace Tidepool.Runtime
         [Header("Result controls")]
         [SerializeField] private Text roundCounterText;
         [SerializeField] private Text resultText;
+        [SerializeField] private Text contestResultText;
         [SerializeField] private Button retryButton;
         [SerializeField] private Button exitButton;
         [SerializeField] private string exitSceneName = "Overworld";
@@ -102,8 +107,10 @@ namespace Tidepool.Runtime
             BindCreature(visitingSpecies, visitingImage, visitingNameText);
             WirePartyButtons();
             BindMoveButton(firstMoveButton, firstMoveButtonText,
+                firstMoveCategoryBadge, firstMoveCategoryText,
                 playerSpecies?.GetUnlockedContestMove(0, playerLevel), ChooseFirstMove);
             BindMoveButton(secondMoveButton, secondMoveButtonText,
+                secondMoveCategoryBadge, secondMoveCategoryText,
                 playerSpecies?.GetUnlockedContestMove(1, playerLevel), ChooseSecondMove);
 
             if (retryButton != null)
@@ -120,6 +127,7 @@ namespace Tidepool.Runtime
             SetResultText(playerSpecies == null || visitingSpecies == null
                 ? "Contest friends are still getting ready."
                 : "Pick a friendly move.");
+            SetContestResultText(string.Empty);
             RefreshRoundCounter();
             RefreshCurrentRing();
             RefreshTuckeredVisuals();
@@ -145,6 +153,7 @@ namespace Tidepool.Runtime
             SetMoveButtonsInteractable(CanPlayerChooseMove());
             RebindMoveButtons(playerLevel);
             SetResultText("Pick a friendly move.");
+            SetContestResultText(string.Empty);
             RefreshRoundCounter();
             RefreshTuckeredVisuals();
             BeginRoundTelegraph(playerLevel);
@@ -431,6 +440,7 @@ namespace Tidepool.Runtime
             SetMoveButtonsInteractable(false);
             AwardContestProgress();
             SetContestResultText();
+            SetResultText("Contest complete.");
             SetText(visitingTelegraphText, "Contest complete.");
             RefreshRoundCounter();
             RefreshTuckeredVisuals();
@@ -518,17 +528,17 @@ namespace Tidepool.Runtime
         {
             if (playerRoundWins > visitingRoundWins)
             {
-                SetResultText($"You won the friendly contest {playerRoundWins}-{visitingRoundWins}!");
+                SetContestResultText($"You won the friendly contest {playerRoundWins}-{visitingRoundWins}!");
                 return;
             }
 
             if (visitingRoundWins > playerRoundWins)
             {
-                SetResultText($"They won this friendly contest {visitingRoundWins}-{playerRoundWins}. Try again when you like.");
+                SetContestResultText($"They won this friendly contest {visitingRoundWins}-{playerRoundWins}. Try again when you like.");
                 return;
             }
 
-            SetResultText("That was a close one. Everyone learned something.");
+            SetContestResultText("That was a close one. Everyone learned something.");
         }
 
         private void RefreshRoundCounter()
@@ -561,8 +571,10 @@ namespace Tidepool.Runtime
         private void RebindMoveButtons(int level)
         {
             BindMoveButton(firstMoveButton, firstMoveButtonText,
+                firstMoveCategoryBadge, firstMoveCategoryText,
                 playerSpecies?.GetUnlockedContestMove(0, level), ChooseFirstMove);
             BindMoveButton(secondMoveButton, secondMoveButtonText,
+                secondMoveCategoryBadge, secondMoveCategoryText,
                 playerSpecies?.GetUnlockedContestMove(1, level), ChooseSecondMove);
         }
 
@@ -942,6 +954,20 @@ namespace Tidepool.Runtime
             }
         }
 
+        private static string FormatCategoryShortLabel(ContestMoveCategory category)
+        {
+            switch (category)
+            {
+                case ContestMoveCategory.Focus:
+                    return "FOC";
+                case ContestMoveCategory.Defend:
+                    return "DEF";
+                case ContestMoveCategory.Attack:
+                default:
+                    return "ATK";
+            }
+        }
+
         private static void BindCreature(TidelingSpecies species, Image image, Text nameText)
         {
             if (image != null)
@@ -954,7 +980,13 @@ namespace Tidepool.Runtime
             SetText(nameText, GetDisplayName(species));
         }
 
-        private static void BindMoveButton(Button button, Text label, ContestMove move, UnityEngine.Events.UnityAction action)
+        private static void BindMoveButton(
+            Button button,
+            Text label,
+            Image categoryBadge,
+            Text categoryLabel,
+            ContestMove move,
+            UnityEngine.Events.UnityAction action)
         {
             if (button == null)
             {
@@ -966,6 +998,27 @@ namespace Tidepool.Runtime
             button.interactable = move != null;
             button.gameObject.SetActive(move != null);
             SetText(label, move == null ? string.Empty : move.DisplayName);
+            SetMoveCategoryBadge(categoryBadge, categoryLabel, move);
+        }
+
+        private static void SetMoveCategoryBadge(Image badge, Text label, ContestMove move)
+        {
+            bool hasMove = move != null;
+            if (badge != null)
+            {
+                badge.gameObject.SetActive(hasMove);
+                if (hasMove)
+                {
+                    badge.color = GetCategoryColor(move.Category);
+                }
+            }
+
+            if (label != null)
+            {
+                label.gameObject.SetActive(hasMove);
+                label.text = hasMove ? FormatCategoryShortLabel(move.Category) : string.Empty;
+                label.color = Color.white;
+            }
         }
 
         private static void SetButtonInteractable(Button button, bool interactable)
@@ -979,6 +1032,11 @@ namespace Tidepool.Runtime
         private void SetResultText(string value)
         {
             SetText(resultText, value);
+        }
+
+        private void SetContestResultText(string value)
+        {
+            SetText(contestResultText, value);
         }
 
         private static void SetText(Text target, string value)

@@ -71,14 +71,20 @@ namespace Tidepool.Editor
             Text roundCounterText = CreateText("RoundCounterText", safeArea, "Round 1 of 3 - You 0, Visitor 0", 26, TextAnchor.MiddleCenter, new Vector2(0f, -20f), new Vector2(720f, 48f));
             roundCounterText.color = new Color(0.08f, 0.18f, 0.22f);
 
-            Text resultText = CreateText("ResultText", safeArea, "Pick a friendly move.", 30, TextAnchor.MiddleCenter, new Vector2(0f, -92f), new Vector2(720f, 80f));
+            Text resultText = CreateText("RoundResultText", safeArea, "Pick a friendly move.", 28, TextAnchor.MiddleCenter, new Vector2(0f, -88f), new Vector2(720f, 56f));
             resultText.color = new Color(0.08f, 0.18f, 0.22f);
+            Text contestResultText = CreateText("ContestResultText", safeArea, string.Empty, 24, TextAnchor.MiddleCenter, new Vector2(0f, -144f), new Vector2(720f, 48f));
+            contestResultText.color = new Color(0.08f, 0.18f, 0.22f);
 
             Button firstMoveButton = CreateButton("FirstMoveButton", safeArea, "Move 1", new Vector2(-190f, -220f), new Vector2(300f, 96f), new Color(0.12f, 0.44f, 0.50f), Color.white);
             Text firstMoveLabel = firstMoveButton.transform.Find("Label")?.GetComponent<Text>();
+            LayoutMoveButtonLabel(firstMoveLabel);
+            Image firstMoveCategoryBadge = CreateMoveCategoryBadge(firstMoveButton.transform, "FirstMoveCategoryBadge", out Text firstMoveCategoryText);
 
             Button secondMoveButton = CreateButton("SecondMoveButton", safeArea, "Move 2", new Vector2(190f, -220f), new Vector2(300f, 96f), new Color(0.12f, 0.44f, 0.50f), Color.white);
             Text secondMoveLabel = secondMoveButton.transform.Find("Label")?.GetComponent<Text>();
+            LayoutMoveButtonLabel(secondMoveLabel);
+            Image secondMoveCategoryBadge = CreateMoveCategoryBadge(secondMoveButton.transform, "SecondMoveCategoryBadge", out Text secondMoveCategoryText);
 
             Button[] playerPartyButtons = new Button[3];
             Image[] playerPartyImages = new Image[3];
@@ -100,14 +106,19 @@ namespace Tidepool.Editor
             serializedController.FindProperty("visitingStatusText").objectReferenceValue = visitingStatus;
             serializedController.FindProperty("firstMoveButton").objectReferenceValue = firstMoveButton;
             serializedController.FindProperty("firstMoveButtonText").objectReferenceValue = firstMoveLabel;
+            serializedController.FindProperty("firstMoveCategoryBadge").objectReferenceValue = firstMoveCategoryBadge;
+            serializedController.FindProperty("firstMoveCategoryText").objectReferenceValue = firstMoveCategoryText;
             serializedController.FindProperty("secondMoveButton").objectReferenceValue = secondMoveButton;
             serializedController.FindProperty("secondMoveButtonText").objectReferenceValue = secondMoveLabel;
+            serializedController.FindProperty("secondMoveCategoryBadge").objectReferenceValue = secondMoveCategoryBadge;
+            serializedController.FindProperty("secondMoveCategoryText").objectReferenceValue = secondMoveCategoryText;
             SetObjectReferenceArray(serializedController.FindProperty("playerPartyButtons"), playerPartyButtons);
             SetObjectReferenceArray(serializedController.FindProperty("playerPartyImages"), playerPartyImages);
             SetObjectReferenceArray(serializedController.FindProperty("playerPartyLabels"), playerPartyLabels);
             serializedController.FindProperty("visitingTelegraphText").objectReferenceValue = visitingTelegraphText;
             serializedController.FindProperty("roundCounterText").objectReferenceValue = roundCounterText;
             serializedController.FindProperty("resultText").objectReferenceValue = resultText;
+            serializedController.FindProperty("contestResultText").objectReferenceValue = contestResultText;
             serializedController.FindProperty("retryButton").objectReferenceValue = retryButton;
             serializedController.FindProperty("exitButton").objectReferenceValue = exitButton;
             serializedController.FindProperty("exitSceneName").stringValue = "Overworld";
@@ -151,6 +162,27 @@ namespace Tidepool.Editor
             Text text = CreateText("Label", image.transform, label, 30, TextAnchor.MiddleCenter, Vector2.zero, size);
             text.color = textColor;
             return button;
+        }
+
+        private static void LayoutMoveButtonLabel(Text label)
+        {
+            if (label == null)
+            {
+                return;
+            }
+
+            RectTransform labelRect = label.GetComponent<RectTransform>();
+            labelRect.anchoredPosition = new Vector2(38f, 0f);
+            labelRect.sizeDelta = new Vector2(208f, 84f);
+            label.fontSize = 26;
+        }
+
+        private static Image CreateMoveCategoryBadge(Transform parent, string name, out Text label)
+        {
+            Image badge = CreateImage(name, parent, new Color(0.74f, 0.28f, 0.30f), new Vector2(-108f, 0f), new Vector2(64f, 44f));
+            label = CreateText("CategoryLabel", badge.transform, "ATK", 16, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(60f, 38f));
+            label.color = Color.white;
+            return badge;
         }
 
         private static void CreateCurrentRingNode(Transform parent, int index, string label, Vector2 anchoredPosition, Color color, Image[] nodes, Text[] labels)
