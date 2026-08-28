@@ -12,6 +12,7 @@ namespace Tidepool.Editor
     public static class CreateV02ContestScene
     {
         private const string ScenePath = "Assets/Scenes/Contest.unity";
+        private const string WinChimePath = "Assets/Audio/catch_chime.wav";
 
         [MenuItem("Tools/Tidepool/Create v0.2 Contest Scene")]
         public static void CreateContestScene()
@@ -22,6 +23,9 @@ namespace Tidepool.Editor
 
             GameObject controllerObject = new GameObject("ContestFlowController");
             ContestFlowController controller = controllerObject.AddComponent<ContestFlowController>();
+            AudioSource controllerAudioSource = controllerObject.AddComponent<AudioSource>();
+            controllerAudioSource.playOnAwake = false;
+            controllerAudioSource.spatialBlend = 0f;
 
             Canvas canvas = CreateCanvas();
             RectTransform safeArea = CreateRect("SafeArea", canvas.transform);
@@ -119,6 +123,8 @@ namespace Tidepool.Editor
             serializedController.FindProperty("roundCounterText").objectReferenceValue = roundCounterText;
             serializedController.FindProperty("resultText").objectReferenceValue = resultText;
             serializedController.FindProperty("contestResultText").objectReferenceValue = contestResultText;
+            serializedController.FindProperty("audioSource").objectReferenceValue = controllerAudioSource;
+            serializedController.FindProperty("winChimeClip").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(WinChimePath);
             serializedController.FindProperty("retryButton").objectReferenceValue = retryButton;
             serializedController.FindProperty("exitButton").objectReferenceValue = exitButton;
             serializedController.FindProperty("exitSceneName").stringValue = "Overworld";

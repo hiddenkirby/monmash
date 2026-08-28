@@ -56,6 +56,8 @@ namespace Tidepool.Runtime
         [SerializeField] private Text roundCounterText;
         [SerializeField] private Text resultText;
         [SerializeField] private Text contestResultText;
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip winChimeClip;
         [SerializeField] private Button retryButton;
         [SerializeField] private Button exitButton;
         [SerializeField] private string exitSceneName = "Overworld";
@@ -105,6 +107,8 @@ namespace Tidepool.Runtime
 
             BindCreature(playerSpecies, playerImage, playerNameText);
             BindCreature(visitingSpecies, visitingImage, visitingNameText);
+            audioSource ??= GetComponent<AudioSource>();
+            TidepoolSettingsService.ApplyGlobalAudio();
             WirePartyButtons();
             BindMoveButton(firstMoveButton, firstMoveButtonText,
                 firstMoveCategoryBadge, firstMoveCategoryText,
@@ -440,6 +444,7 @@ namespace Tidepool.Runtime
             SetMoveButtonsInteractable(false);
             AwardContestProgress();
             SetContestResultText();
+            PlayWinChime();
             SetResultText("Contest complete.");
             SetText(visitingTelegraphText, "Contest complete.");
             RefreshRoundCounter();
@@ -539,6 +544,22 @@ namespace Tidepool.Runtime
             }
 
             SetContestResultText("That was a close one. Everyone learned something.");
+        }
+
+        private void PlayWinChime()
+        {
+            if (playerRoundWins <= visitingRoundWins || winChimeClip == null)
+            {
+                return;
+            }
+
+            if (audioSource != null)
+            {
+                audioSource.PlayOneShot(winChimeClip);
+                return;
+            }
+
+            AudioSource.PlayClipAtPoint(winChimeClip, Vector3.zero);
         }
 
         private void RefreshRoundCounter()
