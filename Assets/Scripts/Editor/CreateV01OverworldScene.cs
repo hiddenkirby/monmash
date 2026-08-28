@@ -16,6 +16,7 @@ namespace Tidepool.Editor
     {
         private const string ScenePath = "Assets/Scenes/Overworld.unity";
         private const string TileAssetFolder = "Assets/Data/Tiles";
+        private const string StoryBeatFolder = "Assets/Data/StoryBeats";
         private const string PlayerSpritePath = "Assets/Art/Creatures/blip.png";
         private const string SpeciesDatabasePath = "Assets/Data/Databases/SpeciesDatabase.asset";
         private const int MinX = -12;
@@ -83,6 +84,8 @@ namespace Tidepool.Editor
 
             SpeciesDatabase database = AssetDatabase.LoadAssetAtPath<SpeciesDatabase>(SpeciesDatabasePath);
             CreateZoneEncounterDirectors(gridObject.transform, seagrassMap, playerMover, database);
+            CreateMentorSpawnPoints(gridObject.transform, grid);
+            CreateZoneNameSigns(gridObject.transform, grid);
 
             Canvas canvas = CreateCanvas();
             RectTransform safeArea = CreateRect("SafeArea", canvas.transform);
@@ -92,6 +95,7 @@ namespace Tidepool.Editor
             safeArea.offsetMax = Vector2.zero;
             safeArea.gameObject.AddComponent<SafeAreaFitter>();
             ZoneWelcomeBanner zoneWelcomeBanner = CreateZoneWelcomeBanner(safeArea);
+            CreateStoryBeatDialogue(safeArea);
             CreateZoneTransitions(gridObject.transform, playerObject.transform, playerMover, grid, zoneWelcomeBanner);
             CreateFirstRunGuidance(safeArea);
             GoalsPanelController goalsPanel = CreateGoalsPanel(safeArea);
@@ -173,6 +177,69 @@ namespace Tidepool.Editor
             ZoneWelcomeBanner banner = panel.gameObject.AddComponent<ZoneWelcomeBanner>();
             WireZoneWelcomeBanner(banner, panel.gameObject, canvasGroup, zoneName, subtitle);
             return banner;
+        }
+
+        private static void CreateStoryBeatDialogue(RectTransform safeArea)
+        {
+            CreateStoryBeatAssets.CreateAssets();
+
+            StoryBeatDirector director = safeArea.gameObject.AddComponent<StoryBeatDirector>();
+            Image panel = CreateImage("StoryBeatDialoguePanel", safeArea, new Color(0.08f, 0.22f, 0.24f, 0.94f), new Vector2(0f, 54f), new Vector2(760f, 128f));
+
+            Image npcImage = CreateImage("MentorPortrait", panel.transform, new Color(0.92f, 0.97f, 0.91f), new Vector2(-306f, 0f), new Vector2(96f, 96f));
+            npcImage.preserveAspect = true;
+
+            Text dialogue = CreateText("StoryBeatText", panel.transform, "The tidepool has something to show you.", 24, TextAnchor.MiddleLeft, new Vector2(34f, 0f), new Vector2(488f, 96f));
+            dialogue.color = Color.white;
+
+            Button continueButton = CreateButton("ContinueStoryBeatButton", panel.transform, "OK", new Vector2(318f, 0f), new Vector2(112f, 88f));
+
+            WireStoryBeatDirector(director, panel.gameObject, npcImage, dialogue, continueButton, LoadStoryBeats());
+            panel.gameObject.SetActive(false);
+        }
+
+        private static void CreateMentorSpawnPoints(Transform parent, Grid grid)
+        {
+            CreateWorldMarker("MentorSpawn_ShallowEntrance", parent, grid, -8, -2);
+            CreateWorldMarker("MentorSpawn_MeadowEntrance", parent, grid, 2, -2);
+            CreateWorldMarker("MentorSpawn_KelpEntrance", parent, grid, MeadowEndX + 1, -2);
+            CreateWorldMarker("MentorSpawn_RockyEntrance", parent, grid, KelpEndX + 1, -2);
+        }
+
+        private static void CreateZoneNameSigns(Transform parent, Grid grid)
+        {
+            CreateZoneNameSign("ShallowsSign", parent, grid, "Tidepool Shallows", -8, 3);
+            CreateZoneNameSign("MeadowSign", parent, grid, "Seagrass Meadow", 2, 3);
+            CreateZoneNameSign("KelpSign", parent, grid, "Kelp Curtain", MeadowEndX + 1, 3);
+            CreateZoneNameSign("RockySign", parent, grid, "Rocky Shelf", KelpEndX + 1, 3);
+        }
+
+        private static void CreateWorldMarker(string name, Transform parent, Grid grid, int x, int y)
+        {
+            GameObject marker = new GameObject(name);
+            marker.transform.SetParent(parent);
+            marker.transform.position = grid.GetCellCenterWorld(new Vector3Int(x, y, 0));
+        }
+
+        private static void CreateZoneNameSign(string name, Transform parent, Grid grid, string label, int x, int y)
+        {
+            GameObject sign = new GameObject(name);
+            sign.transform.SetParent(parent);
+            sign.transform.position = grid.GetCellCenterWorld(new Vector3Int(x, y, 0));
+
+            TextMesh text = sign.AddComponent<TextMesh>();
+            text.text = label;
+            text.fontSize = 36;
+            text.characterSize = 0.12f;
+            text.anchor = TextAnchor.MiddleCenter;
+            text.alignment = TextAlignment.Center;
+            text.color = new Color(0.08f, 0.22f, 0.24f);
+
+            MeshRenderer renderer = sign.GetComponent<MeshRenderer>();
+            if (renderer != null)
+            {
+                renderer.sortingOrder = 4;
+            }
         }
 
         private static void CreateContestButton(RectTransform safeArea, PlayerGridMover playerMover, SpeciesDatabase database)
@@ -427,6 +494,37 @@ namespace Tidepool.Editor
             serializedBanner.ApplyModifiedProperties();
         }
 
+        private static void WireStoryBeatDirector(StoryBeatDirector director, GameObject root, Image npcImage, Text dialogue, Button continueButton, StoryBeat[] beats)
+        {
+            SerializedObject serializedDirector = new SerializedObject(director);
+            SetObjectReferenceArray(serializedDirector.FindProperty("storyBeats"), beats);
+            serializedDirector.FindProperty("dialogueRoot").objectReferenceValue = root;
+            serializedDirector.FindProperty("npcImage").objectReferenceValue = npcImage;
+            serializedDirector.FindProperty("dialogueText").objectReferenceValue = dialogue;
+            serializedDirector.FindProperty("continueButton").objectReferenceValue = continueButton;
+            serializedDirector.ApplyModifiedProperties();
+        }
+
+        private static StoryBeat[] LoadStoryBeats()
+        {
+            string[] ids =
+            {
+                "first_catch_intro",
+                "meadow_pointer",
+                "kelp_clue",
+                "kelp_unlock",
+                "old_barnaby_omen",
+                "all_found_celebration"
+            };
+            StoryBeat[] beats = new StoryBeat[ids.Length];
+            for (int i = 0; i < ids.Length; i++)
+            {
+                beats[i] = AssetDatabase.LoadAssetAtPath<StoryBeat>($"{StoryBeatFolder}/{ids[i]}.asset");
+            }
+
+            return beats;
+        }
+
         private static void WireZoneTransitionBanner(ZoneTransitionTrigger trigger, ZoneId destinationZone, ZoneWelcomeBanner banner)
         {
             if (banner == null)
@@ -467,6 +565,15 @@ namespace Tidepool.Editor
             for (int i = 0; i < texts.Length; i++)
             {
                 property.GetArrayElementAtIndex(i).objectReferenceValue = texts[i];
+            }
+        }
+
+        private static void SetObjectReferenceArray(SerializedProperty property, Object[] values)
+        {
+            property.arraySize = values.Length;
+            for (int i = 0; i < values.Length; i++)
+            {
+                property.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
             }
         }
 
