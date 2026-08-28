@@ -44,8 +44,8 @@ namespace Tidepool.Editor
 
             UpsertStoryBeat(
                 "kelp_unlock",
-                StoryBeatTriggerCondition.OnCaughtInZoneCount,
-                5,
+                StoryBeatTriggerCondition.OnSpeciesCount,
+                8,
                 ZoneId.SeagrassMeadow,
                 "The kelp has thinned. Care to look further?",
                 true,
