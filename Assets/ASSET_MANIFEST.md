@@ -4,7 +4,7 @@ Every non-code asset that ships with the game belongs here before it is committe
 
 ## Current Committed Asset Inventory
 
-As of 2026-08-03, the repository includes a small CC0 prototype tile/UI subset, a small original procedural audio set, one original app icon, and 13 AI-generated creature sprites. No video, font, or other runtime media assets are committed.
+As of 2026-08-27, the repository includes a small CC0 prototype tile/UI subset, a small original procedural audio set, one original app icon, 13 AI-generated creature sprites, and an AI-generated journal UI art set. No video or font assets are committed.
 
 | Asset | Type | Source | License | Tool/Model | Date | Prompt or Notes | Reviewed |
 |---|---|---|---|---|---|---|---|
@@ -16,6 +16,73 @@ As of 2026-08-03, the repository includes a small CC0 prototype tile/UI subset, 
 | `Assets/Audio/ui_tap.wav` | UI tap sound | Original procedural synthesis generated in-repo | Original Tidepool project asset | `scripts/generate-minimal-audio-assets.py`, Python `wave`/`math` synthesis | 2026-08-03 | Quiet percussive UI tap; no external samples. | Yes - reviewed for absence of recognizable protected motifs or borrowed commercial sounds. |
 | `Assets/Art/UI/app_icon_glass_jar.png` | App icon | Original procedural drawing generated in-repo | Original Tidepool project asset | `scripts/generate-app-icon.py`, Python PNG drawing | 2026-08-03 | Glass collecting jar concept on a calm teal background; no external image input. | Yes - reviewed for protected visual trade dress; no red/white sphere, copied character, or protected UI iconography. |
 | `Assets/Art/Creatures/*.png` | Creature sprites | AI-generated in Codex with local chroma-key background removal | Tidepool project AI-generated asset | OpenAI built-in image generation tool, local `remove_chroma_key.py`, Pillow resize | 2026-08-03 | 13 species-specific prompts logged below. Final PNGs are 512x512 transparent sprites. | Yes - reviewed as a set for accidental resemblance, protected trade dress, prompt compliance, and usable framing. |
+| `Assets/Art/UI/Journal/journal-background.png` | Journal background | AI-generated in Codex | Tidepool project AI-generated asset | OpenAI built-in image generation tool | 2026-08-27 | Exact prompt logged in the Journal UI Prompt Log below. Final PNG is 1448x1086. | Yes - reviewed for quiet center readability, prompt compliance, and protected visual trade dress. |
+| `Assets/Art/UI/Journal/journal-card-frame.png` | Journal card frame sprite | AI-generated in Codex; resized with FFmpeg | Tidepool project AI-generated asset | OpenAI built-in image generation tool, FFmpeg scale | 2026-08-27 | Exact prompt logged below. Final PNG is 288x328 with alpha. | Yes - reviewed for clean small-size silhouette, prompt compliance, and protected visual trade dress. |
+| `Assets/Art/UI/Journal/journal-section-divider.png` | Journal section divider sprite | AI-generated in Codex; cropped and resized with FFmpeg | Tidepool project AI-generated asset | OpenAI built-in image generation tool, FFmpeg crop/scale | 2026-08-27 | Exact prompt logged below. Final PNG is 840x96 with alpha. | Yes - reviewed for clean transparent edges, prompt compliance, and protected visual trade dress. |
+| `Assets/Art/UI/Journal/journal-progress-empty.png` | Empty shell progress sprite | AI-generated in Codex as part of a two-state sheet; cropped and resized with FFmpeg | Tidepool project AI-generated asset | OpenAI built-in image generation tool, FFmpeg crop/scale | 2026-08-27 | Exact shared two-state prompt logged below. Final PNG is 840x96 with alpha. | Yes - reviewed with the fill state for alignment, readability, prompt compliance, and protected visual trade dress. |
+| `Assets/Art/UI/Journal/journal-progress-fill.png` | Filled shell progress sprite | AI-generated in Codex as part of a two-state sheet; cropped and resized with FFmpeg | Tidepool project AI-generated asset | OpenAI built-in image generation tool, FFmpeg crop/scale | 2026-08-27 | Exact shared two-state prompt logged below. Final PNG is 840x96 with alpha. | Yes - reviewed with the empty state for alignment, readability, prompt compliance, and protected visual trade dress. |
+
+## Journal UI Prompt Log
+
+All journal UI assets used the built-in OpenAI image generation tool. Transparent sprites were
+visually inspected and checked for alpha after generation. The card frame was resized to 288x328;
+the divider and progress states were cropped and resized to 840x96 with FFmpeg. No generative edit
+was applied after the prompts below.
+
+Background prompt:
+
+```text
+Use case: stylized-concept
+Asset type: Tidepool iPad game journal background texture
+Primary request: A warm hand-painted nature field notebook page inspired by a sunny tidepool walk, suitable as a quiet full-screen UI background behind readable panels.
+Scene/backdrop: flat warm cream tidepaper with extremely subtle watercolor washes suggesting shallow seawater, sand, and faint kelp fronds only around the outer edges.
+Style/medium: original soft watercolor-and-ink paper texture, gentle children's nature journal feeling, polished game UI asset.
+Composition/framing: landscape 4:3, seamless-feeling calm center with generous low-detail negative space; decorations restricted to thin edge accents and corners.
+Color palette: Tidepaper #F7EBCB dominant, Shallow Wash #D8EEF0, Soft Kelp #3E6F5A at very low saturation, tiny Glow Amber #E7A83A accents.
+Materials/textures: light fibrous paper grain, subtle watercolor bloom, no strong shadows.
+Constraints: no text, no labels, no logos, no watermark, no creatures, no characters, no interface controls, no large gradient, no recognizable franchise imagery, no red-and-white sphere imagery; keep the central 80% quiet and readable.
+```
+
+Card frame prompt:
+
+```text
+Use case: stylized-concept
+Asset type: Tidepool iPad game journal card-frame sprite
+Primary request: A single original portrait-oriented field-notebook card frame for a friendly creature collection journal.
+Scene/backdrop: genuinely transparent background.
+Subject: empty rounded rectangular frame only, with a warm shell-paper inner surface, slim hand-painted driftwood-ink outline, subtle lower shallow-water caption band, and tiny restrained seagrass and ripple corner marks.
+Style/medium: polished soft watercolor-and-ink game UI sprite matching a sunny tidepool nature journal.
+Composition/framing: one centered upright card frame, aspect ratio about 144 wide by 164 tall, straight-on orthographic view, generous transparent padding, clean uninterrupted inner image area.
+Color palette: Shell Panel #FFF7E4, Driftwood Ink #2F3A35, Shallow Wash #D8EEF0, tiny Soft Kelp #3E6F5A accents.
+Constraints: transparent outside the frame; no text, no letters, no numbers, no creature, no character, no drop shadow, no perspective, no mockup, no watermark, no logos, no recognizable franchise imagery, no red-and-white sphere imagery; clear silhouette and clean edges suitable for resizing to a small Unity UI sprite.
+```
+
+Section divider prompt:
+
+```text
+Use case: stylized-concept
+Asset type: Tidepool iPad game journal section-divider sprite
+Primary request: A single slim horizontal section divider for a warm tidepool field notebook UI.
+Scene/backdrop: genuinely transparent background.
+Subject: one gently hand-painted horizontal ink line with a small original shell mark at the center and two restrained seagrass strokes tapering toward the ends.
+Style/medium: soft watercolor-and-ink game UI ornament, simple and readable at small size, coordinated with cream tidepaper and driftwood card frames.
+Composition/framing: very wide and low, straight-on, centered, generous transparent padding above and below, symmetrical enough to use between journal sections.
+Color palette: Driftwood Ink #2F3A35, Soft Kelp #3E6F5A, tiny Glow Amber #E7A83A shell highlight.
+Constraints: transparent background; no text, no letters, no numbers, no creatures, no characters, no drop shadow, no perspective, no mockup, no watermark, no logos, no recognizable franchise imagery; only one divider ornament.
+```
+
+Shared empty/fill progress-state prompt:
+
+```text
+Use case: stylized-concept
+Asset type: Tidepool iPad game journal progress-bar two-state sprite sheet
+Primary request: Create exactly two perfectly matching long shell-shaped progress bars, one EMPTY state and one FULL state.
+Scene/backdrop: genuinely transparent alpha background.
+Subject: top row EMPTY: pale Shell Panel #FFF7E4 interior with Stone Gray #6F756E outline and ridge marks. Bottom row FULL: identical silhouette, exact same proportions, exact same ridge positions, filled Soft Kelp #3E6F5A with a restrained Glow Amber #E7A83A highlight only on the far right edge. Each bar has 13 equal subtle ridge segments.
+Style/medium: clean soft watercolor-and-ink game UI sprites, readable when each is resized to 420 by 36 pixels.
+Composition/framing: two rows only, empty on top and full below; both straight-on, perfectly horizontally aligned, same width and height, wide and low, with clear transparent separation and generous transparent outer padding.
+Constraints: actual transparency; do not show a checkerboard; no text, labels, numbers, creatures, characters, shadows, perspective, mockup, watermark, logos, or recognizable franchise imagery; no extra objects; the two silhouettes must match exactly.
+```
 
 ## Shared Creature Style Prompt
 
