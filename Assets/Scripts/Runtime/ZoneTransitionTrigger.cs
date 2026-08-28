@@ -15,14 +15,38 @@ namespace Tidepool.Runtime
         [SerializeField] private bool requireDestinationUnlocked;
         [SerializeField] private ZoneId requiredCaughtZone = ZoneId.SeagrassMeadow;
         [SerializeField, Min(0)] private int requiredCaughtSpeciesCount;
+        [SerializeField] private GameObject lockedVisualRoot;
+        [SerializeField] private GameObject unlockedVisualRoot;
         [SerializeField] private UnityEvent gateLocked = new UnityEvent();
         [SerializeField] private UnityEvent enteredZone = new UnityEvent();
 
         private bool transitionInProgress;
+        private GameSaveService subscribedSaveService;
 
         public ZoneId DestinationZone => destinationZone;
         public UnityEvent GateLocked => gateLocked;
         public UnityEvent EnteredZone => enteredZone;
+
+        private void OnEnable()
+        {
+            SubscribeToSaveService();
+            RefreshGateVisualState();
+        }
+
+        private void Start()
+        {
+            SubscribeToSaveService();
+            RefreshGateVisualState();
+        }
+
+        private void OnDisable()
+        {
+            if (subscribedSaveService != null)
+            {
+                subscribedSaveService.ZoneUnlocked -= HandleZoneUnlocked;
+                subscribedSaveService = null;
+            }
+        }
 
         public void EnterZone()
         {
@@ -75,6 +99,9 @@ namespace Tidepool.Runtime
 
         private void ApplyTransition(Transform candidate)
         {
+            SubscribeToSaveService();
+            RefreshGateVisualState();
+
             Transform target = ResolveTarget(candidate);
             if (target == null)
             {
@@ -83,10 +110,12 @@ namespace Tidepool.Runtime
 
             if (!CanEnterDestination())
             {
+                RefreshGateVisualState();
                 gateLocked?.Invoke();
                 return;
             }
 
+            RefreshGateVisualState();
             transitionInProgress = true;
             try
             {
@@ -112,6 +141,56 @@ namespace Tidepool.Runtime
 
                 transitionInProgress = false;
             }
+        }
+
+        private void SubscribeToSaveService()
+        {
+            GameSaveService saveService = GameSaveService.Instance;
+            if (saveService == null || subscribedSaveService == saveService)
+            {
+                return;
+            }
+
+            if (subscribedSaveService != null)
+            {
+                subscribedSaveService.ZoneUnlocked -= HandleZoneUnlocked;
+            }
+
+            subscribedSaveService = saveService;
+            subscribedSaveService.ZoneUnlocked += HandleZoneUnlocked;
+        }
+
+        private void HandleZoneUnlocked(ZoneId zone)
+        {
+            if (zone == destinationZone)
+            {
+                RefreshGateVisualState();
+            }
+        }
+
+        private void RefreshGateVisualState()
+        {
+            bool open = IsDestinationOpen();
+            if (lockedVisualRoot != null)
+            {
+                lockedVisualRoot.SetActive(requireDestinationUnlocked && !open);
+            }
+
+            if (unlockedVisualRoot != null)
+            {
+                unlockedVisualRoot.SetActive(open);
+            }
+        }
+
+        private bool IsDestinationOpen()
+        {
+            if (!requireDestinationUnlocked)
+            {
+                return true;
+            }
+
+            GameSaveService saveService = GameSaveService.Instance;
+            return saveService == null || saveService.IsZoneUnlocked(destinationZone);
         }
 
         private bool CanEnterDestination()

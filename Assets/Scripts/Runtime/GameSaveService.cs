@@ -18,6 +18,7 @@ namespace Tidepool.Runtime
         public SaveData Data { get; private set; } = new SaveData();
         public event Action<TidelingSpecies, ZoneId> SpeciesCaught;
         public event Action<ZoneId> ZoneChanged;
+        public event Action<ZoneId> ZoneUnlocked;
 
         private string SavePath => Path.Combine(Application.persistentDataPath, saveFileName);
 
@@ -111,6 +112,7 @@ namespace Tidepool.Runtime
             {
                 Data.unlockedZoneIds.Add(zone);
                 Save();
+                ZoneUnlocked?.Invoke(zone);
             }
         }
 
