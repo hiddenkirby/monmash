@@ -14,6 +14,11 @@ namespace Tidepool.Editor
         private const string ScenePath = "Assets/Scenes/Journal.unity";
         private const string SlotPrefabPath = "Assets/Prefabs/JournalSlot.prefab";
         private const string SpeciesDatabasePath = "Assets/Data/Databases/SpeciesDatabase.asset";
+        private const string JournalBackgroundPath = "Assets/Art/UI/Journal/journal-background.png";
+        private const string JournalCardFramePath = "Assets/Art/UI/Journal/journal-card-frame.png";
+        private const string JournalDividerPath = "Assets/Art/UI/Journal/journal-section-divider.png";
+        private const string JournalProgressEmptyPath = "Assets/Art/UI/Journal/journal-progress-empty.png";
+        private const string JournalProgressFillPath = "Assets/Art/UI/Journal/journal-progress-fill.png";
 
         [MenuItem("Tools/Tidepool/Create v0.1 Journal Scene")]
         public static void CreateJournalScene()
@@ -32,7 +37,9 @@ namespace Tidepool.Editor
             safeArea.offsetMax = Vector2.zero;
             safeArea.gameObject.AddComponent<SafeAreaFitter>();
 
-            Image background = CreateImage("Background", safeArea, new Color(0.969f, 0.922f, 0.796f), Vector2.zero, new Vector2(1024f, 768f));
+            Image background = CreateImage("Background", safeArea, Color.white, Vector2.zero, new Vector2(1024f, 768f));
+            background.sprite = LoadSprite(JournalBackgroundPath);
+            background.raycastTarget = false;
             background.rectTransform.anchorMin = Vector2.zero;
             background.rectTransform.anchorMax = Vector2.one;
             background.rectTransform.offsetMin = Vector2.zero;
@@ -48,29 +55,26 @@ namespace Tidepool.Editor
             progressBarRoot.sizeDelta = new Vector2(420f, 36f);
 
             Image progressBarTrack = progressBarRoot.gameObject.AddComponent<Image>();
-            progressBarTrack.color = new Color(0.435f, 0.459f, 0.431f, 0.30f);
+            progressBarTrack.sprite = LoadSprite(JournalProgressEmptyPath);
+            progressBarTrack.color = Color.white;
+            progressBarTrack.preserveAspect = true;
+            progressBarTrack.raycastTarget = false;
 
-            Image progressBarFill = CreateImage("ProgressBarFill", progressBarRoot, new Color(0.243f, 0.435f, 0.353f), Vector2.zero, new Vector2(420f, 36f));
-            // Image.Type.Filled only clips a mesh when a sprite is assigned — without
-            // one it silently falls back to drawing the full rect regardless of
-            // fillAmount, so give it a plain solid-white sprite to fill against.
-            progressBarFill.sprite = Sprite.Create(
-                Texture2D.whiteTexture,
-                new Rect(0f, 0f, Texture2D.whiteTexture.width, Texture2D.whiteTexture.height),
-                new Vector2(0.5f, 0.5f));
+            Image progressBarFill = CreateImage("ProgressBarFill", progressBarRoot, Color.white, Vector2.zero, new Vector2(420f, 36f));
+            progressBarFill.sprite = LoadSprite(JournalProgressFillPath);
             progressBarFill.type = Image.Type.Filled;
             progressBarFill.fillMethod = Image.FillMethod.Horizontal;
             progressBarFill.fillOrigin = (int)Image.OriginHorizontal.Left;
             progressBarFill.fillAmount = 0f;
+            progressBarFill.preserveAspect = true;
+            progressBarFill.raycastTarget = false;
 
             Text progressText = CreateText("ProgressText", progressBarRoot, "0 of 13 found", 22, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(420f, 36f));
             progressText.color = new Color(0.08f, 0.18f, 0.22f);
 
             // Sort row (by Name/Zone/Current/Rarity) and filter row (by zone, plus
-            // "All") sit above the grid. Space here is too tight for literal 88pt
-            // square icon buttons alongside the title/progress bar/detail panel
-            // without a broader layout pass (tracked separately as #125); these use
-            // this codebase's existing ~40-56pt secondary-button sizing instead.
+            // "All") are compact secondary controls above the grid. Core selection
+            // cards and the Back action retain at least 88pt touch targets.
             Button sortByName = CreateSmallButton("SortByNameButton", safeArea, "Name", new Vector2(-494f, 210f), new Vector2(70f, 40f));
             Button sortByZone = CreateSmallButton("SortByZoneButton", safeArea, "Zone", new Vector2(-418f, 210f), new Vector2(70f, 40f));
             Button sortByCurrent = CreateSmallButton("SortByCurrentButton", safeArea, "Current", new Vector2(-342f, 210f), new Vector2(70f, 40f));
@@ -108,7 +112,7 @@ namespace Tidepool.Editor
             gridScroll.content = gridRoot;
 
             GridLayoutGroup gridLayout = gridRoot.gameObject.AddComponent<GridLayoutGroup>();
-            gridLayout.cellSize = new Vector2(88f, 88f);
+            gridLayout.cellSize = new Vector2(88f, 104f);
             gridLayout.spacing = new Vector2(8f, 8f);
             gridLayout.startAxis = GridLayoutGroup.Axis.Horizontal;
             gridLayout.childAlignment = TextAnchor.UpperLeft;
@@ -258,20 +262,23 @@ namespace Tidepool.Editor
         {
             GameObject slotObj = new GameObject("JournalSlot");
             RectTransform slotRect = slotObj.AddComponent<RectTransform>();
-            slotRect.sizeDelta = new Vector2(88f, 88f);
+            slotRect.sizeDelta = new Vector2(88f, 104f);
 
-            // slotBg is the 4px rarity-trim border (colored per-slot at runtime by
-            // JournalSlotView.Bind); CardInterior is the fixed Shell Panel card face on
-            // top of it. Root stays 88x88 to keep the 88pt touch target.
+            // slotBg is the rarity-trim border (colored per-slot at runtime by
+            // JournalSlotView.Bind); CardInterior uses the illustrated journal frame.
+            // The root remains at least 88pt in both dimensions for touch input.
             Image slotBg = slotObj.AddComponent<Image>();
             slotBg.color = new Color(0.44f, 0.46f, 0.43f);
 
-            Image cardInterior = CreateImage("CardInterior", slotObj.transform, new Color(1f, 0.969f, 0.894f, 0.96f), Vector2.zero, new Vector2(80f, 80f));
+            Image cardInterior = CreateImage("CardInterior", slotObj.transform, Color.white, Vector2.zero, new Vector2(84f, 96f));
+            cardInterior.sprite = LoadSprite(JournalCardFramePath);
+            cardInterior.preserveAspect = true;
+            cardInterior.raycastTarget = false;
 
-            Image creatureImage = CreateImage("CreatureImage", slotObj.transform, Color.black, new Vector2(0f, 8f), new Vector2(60f, 60f));
+            Image creatureImage = CreateImage("CreatureImage", slotObj.transform, Color.black, new Vector2(0f, 10f), new Vector2(60f, 60f));
             creatureImage.preserveAspect = true;
 
-            Text nameText = CreateText("NameText", slotObj.transform, "?", 16, TextAnchor.MiddleCenter, new Vector2(0f, -32f), new Vector2(84f, 20f));
+            Text nameText = CreateText("NameText", slotObj.transform, "?", 16, TextAnchor.MiddleCenter, new Vector2(0f, -38f), new Vector2(80f, 20f));
             nameText.color = new Color(0.18f, 0.23f, 0.21f);
             nameText.horizontalOverflow = HorizontalWrapMode.Overflow;
             nameText.resizeTextForBestFit = true;
@@ -319,7 +326,22 @@ namespace Tidepool.Editor
 
         private static Image CreateDivider(string name, Transform parent, Vector2 anchoredPosition)
         {
-            return CreateImage(name, parent, new Color(0.85f, 0.68f, 0.38f, 0.55f), anchoredPosition, new Vector2(420f, 2f));
+            Image divider = CreateImage(name, parent, Color.white, anchoredPosition, new Vector2(420f, 48f));
+            divider.sprite = LoadSprite(JournalDividerPath);
+            divider.preserveAspect = true;
+            divider.raycastTarget = false;
+            return divider;
+        }
+
+        private static Sprite LoadSprite(string assetPath)
+        {
+            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+            if (sprite == null)
+            {
+                Debug.LogWarning($"Journal art sprite is missing or not imported as a Sprite: {assetPath}");
+            }
+
+            return sprite;
         }
 
         private static Button CreateButton(string name, Transform parent, string label, Vector2 anchoredPosition, Vector2 size)
