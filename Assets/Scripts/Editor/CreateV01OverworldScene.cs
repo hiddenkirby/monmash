@@ -26,6 +26,18 @@ namespace Tidepool.Editor
         private const int MeadowEndX = 12;
         private const int KelpEndX = 19;
 
+        private struct GateVisualRoots
+        {
+            public GateVisualRoots(GameObject lockedRoot, GameObject unlockedRoot)
+            {
+                LockedRoot = lockedRoot;
+                UnlockedRoot = unlockedRoot;
+            }
+
+            public GameObject LockedRoot { get; }
+            public GameObject UnlockedRoot { get; }
+        }
+
         [MenuItem("Tools/Tidepool/Create v0.1 Overworld Scene")]
         public static void CreateOverworldScene()
         {
@@ -354,6 +366,10 @@ namespace Tidepool.Editor
             collider.isTrigger = true;
             collider.size = new Vector2(2f, 16f);
 
+            GateVisualRoots gateVisuals = requireDestinationUnlocked
+                ? CreateGateVisuals(name, gridTransform, destinationZone, triggerPosition)
+                : new GateVisualRoots();
+
             ZoneTransitionTrigger trigger = triggerObj.AddComponent<ZoneTransitionTrigger>();
             SerializedObject serializedTrigger = new SerializedObject(trigger);
             serializedTrigger.FindProperty("destinationZone").enumValueIndex = (int)destinationZone;
@@ -363,10 +379,87 @@ namespace Tidepool.Editor
             serializedTrigger.FindProperty("requireDestinationUnlocked").boolValue = requireDestinationUnlocked;
             serializedTrigger.FindProperty("requiredCaughtZone").enumValueIndex = (int)requiredCaughtZone;
             serializedTrigger.FindProperty("requiredCaughtSpeciesCount").intValue = requiredCaughtSpeciesCount;
+            serializedTrigger.FindProperty("lockedVisualRoot").objectReferenceValue = gateVisuals.LockedRoot;
+            serializedTrigger.FindProperty("unlockedVisualRoot").objectReferenceValue = gateVisuals.UnlockedRoot;
             serializedTrigger.ApplyModifiedProperties();
 
             WireZoneTransitionBanner(trigger, destinationZone, zoneWelcomeBanner);
             WireZoneGateMessage(trigger, destinationZone, zoneWelcomeBanner);
+        }
+
+        private static GateVisualRoots CreateGateVisuals(string transitionName, Transform parent, ZoneId destinationZone, Vector3 center)
+        {
+            GameObject lockedRoot = new GameObject($"{transitionName}_LockedVisuals");
+            lockedRoot.transform.SetParent(parent);
+            lockedRoot.transform.position = Vector3.zero;
+
+            GameObject unlockedRoot = new GameObject($"{transitionName}_OpenVisuals");
+            unlockedRoot.transform.SetParent(parent);
+            unlockedRoot.transform.position = Vector3.zero;
+
+            switch (destinationZone)
+            {
+                case ZoneId.KelpCurtain:
+                    CreateKelpGateVisuals(lockedRoot.transform, unlockedRoot.transform, center);
+                    break;
+                case ZoneId.RockyShelf:
+                    CreateRockyGateVisuals(lockedRoot.transform, unlockedRoot.transform, center);
+                    break;
+            }
+
+            unlockedRoot.SetActive(false);
+            return new GateVisualRoots(lockedRoot, unlockedRoot);
+        }
+
+        private static void CreateKelpGateVisuals(Transform lockedRoot, Transform unlockedRoot, Vector3 center)
+        {
+            Sprite kelpSprite = LoadSprite("Assets/Art/Tiles/KenneyRpgBase/kelp_tall.png", 64f);
+            Sprite waterSprite = LoadSprite("Assets/Art/Tiles/KenneyRpgBase/water_plain.png", 64f);
+            Color lockedKelp = new Color(0.12f, 0.42f, 0.30f, 1f);
+            Color openKelp = new Color(0.30f, 0.62f, 0.42f, 0.82f);
+            Color openWater = new Color(0.68f, 0.90f, 0.88f, 0.74f);
+
+            CreateGateSprite("DenseKelpTop", lockedRoot, kelpSprite, center + new Vector3(0.10f, 1.5f, 0f), lockedKelp, 3, new Vector3(1.15f, 1.15f, 1f));
+            CreateGateSprite("DenseKelpUpper", lockedRoot, kelpSprite, center + new Vector3(-0.16f, 0.5f, 0f), lockedKelp, 3, Vector3.one);
+            CreateGateSprite("DenseKelpLower", lockedRoot, kelpSprite, center + new Vector3(0.16f, -0.5f, 0f), lockedKelp, 3, Vector3.one);
+            CreateGateSprite("DenseKelpBottom", lockedRoot, kelpSprite, center + new Vector3(-0.10f, -1.5f, 0f), lockedKelp, 3, new Vector3(1.15f, 1.15f, 1f));
+
+            CreateGateSprite("OpenKelpTop", unlockedRoot, kelpSprite, center + new Vector3(0.62f, 1.5f, 0f), openKelp, 3, Vector3.one);
+            CreateGateSprite("OpenKelpBottom", unlockedRoot, kelpSprite, center + new Vector3(-0.62f, -1.5f, 0f), openKelp, 3, Vector3.one);
+            CreateGateSprite("OpenKelpPathA", unlockedRoot, waterSprite, center + new Vector3(0f, 0.5f, 0f), openWater, 1, Vector3.one);
+            CreateGateSprite("OpenKelpPathB", unlockedRoot, waterSprite, center + new Vector3(0f, -0.5f, 0f), openWater, 1, Vector3.one);
+        }
+
+        private static void CreateRockyGateVisuals(Transform lockedRoot, Transform unlockedRoot, Vector3 center)
+        {
+            Sprite rockSprite = LoadSprite("Assets/Art/Tiles/KenneyRpgBase/rock_mossy.png", 64f);
+            Sprite sandSprite = LoadSprite("Assets/Art/Tiles/KenneyRpgBase/sand_plain.png", 64f);
+            Color lockedRock = new Color(0.42f, 0.44f, 0.38f, 1f);
+            Color openRock = new Color(0.62f, 0.66f, 0.56f, 0.88f);
+            Color openSand = new Color(0.88f, 0.78f, 0.55f, 0.70f);
+
+            CreateGateSprite("ClosedRockTop", lockedRoot, rockSprite, center + new Vector3(0f, 1f, 0f), lockedRock, 3, new Vector3(1.1f, 1.1f, 1f));
+            CreateGateSprite("ClosedRockMiddle", lockedRoot, rockSprite, center, lockedRock, 3, new Vector3(1.2f, 1.2f, 1f));
+            CreateGateSprite("ClosedRockBottom", lockedRoot, rockSprite, center + new Vector3(0f, -1f, 0f), lockedRock, 3, new Vector3(1.1f, 1.1f, 1f));
+
+            CreateGateSprite("OpenShelfSandA", unlockedRoot, sandSprite, center + new Vector3(0f, 0.5f, 0f), openSand, 1, Vector3.one);
+            CreateGateSprite("OpenShelfSandB", unlockedRoot, sandSprite, center + new Vector3(0f, -0.5f, 0f), openSand, 1, Vector3.one);
+            CreateGateSprite("OpenStepTop", unlockedRoot, rockSprite, center + new Vector3(-0.38f, 1.2f, 0f), openRock, 3, new Vector3(0.72f, 0.72f, 1f));
+            CreateGateSprite("OpenStepBottom", unlockedRoot, rockSprite, center + new Vector3(0.38f, -1.2f, 0f), openRock, 3, new Vector3(0.72f, 0.72f, 1f));
+        }
+
+        private static void CreateGateSprite(string name, Transform parent, Sprite sprite, Vector3 position, Color color,
+            int sortingOrder, Vector3 scale)
+        {
+            GameObject spriteObject = new GameObject(name);
+            spriteObject.transform.SetParent(parent);
+            spriteObject.transform.position = position;
+            spriteObject.transform.localScale = scale;
+
+            SpriteRenderer renderer = spriteObject.AddComponent<SpriteRenderer>();
+            renderer.sprite = sprite;
+            renderer.color = color;
+            renderer.sortingOrder = sortingOrder;
         }
 
         private static void CreateZoneEncounterDirectors(Transform gridTransform, Tilemap seagrassMap,
