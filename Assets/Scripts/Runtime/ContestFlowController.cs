@@ -49,8 +49,12 @@ namespace Tidepool.Runtime
         [SerializeField] private Text[] playerPartyLabels;
 
         [Header("Visiting telegraph")]
+        [SerializeField] private Image visitingTelegraphCategoryBadge;
+        [SerializeField] private Text visitingTelegraphCategoryIconText;
         [SerializeField] private Text visitingTelegraphText;
         [SerializeField, Min(0.1f)] private float visitingTelegraphDurationSeconds = 1.5f;
+        [SerializeField, Min(0f)] private float visitingTelegraphLeanDegrees = 6f;
+        [SerializeField, Min(0f)] private float visitingTelegraphLeanOffsetPixels = 18f;
 
         [Header("Result controls")]
         [SerializeField] private Text roundCounterText;
@@ -91,6 +95,10 @@ namespace Tidepool.Runtime
         private ContestMove plannedVisitingMove;
         private Coroutine telegraphRoutine;
         private bool waitingForTelegraph;
+        private bool hasVisitingImageRestingPose;
+        private Vector2 visitingImageRestingAnchoredPosition;
+        private Quaternion visitingImageRestingLocalRotation;
+        private Vector3 visitingImageRestingLocalScale;
         private ContestMoveCategory lastPlannedVisitingCategory;
         private int consecutivePlannedVisitingCategoryCount;
 
@@ -107,6 +115,7 @@ namespace Tidepool.Runtime
 
             BindCreature(playerSpecies, playerImage, playerNameText);
             BindCreature(visitingSpecies, visitingImage, visitingNameText);
+            CacheVisitingImageRestingPose();
             audioSource ??= GetComponent<AudioSource>();
             TidepoolSettingsService.ApplyGlobalAudio();
             WirePartyButtons();
@@ -447,6 +456,7 @@ namespace Tidepool.Runtime
             PlayWinChime();
             SetResultText("Contest complete.");
             SetText(visitingTelegraphText, "Contest complete.");
+            SetTelegraphCategoryBadge(false, ContestMoveCategory.Attack);
             RefreshRoundCounter();
             RefreshTuckeredVisuals();
 
@@ -631,13 +641,22 @@ namespace Tidepool.Runtime
             SetMoveButtonsInteractable(false);
             RefreshPartyControls();
             SetResultText("Watch their friendly move.");
-            telegraphRoutine = StartCoroutine(ReleaseTelegraphAfterDelay(playerLevel));
+            telegraphRoutine = StartCoroutine(PlayTelegraphThenRelease(playerLevel));
         }
 
-        private IEnumerator ReleaseTelegraphAfterDelay(int playerLevel)
+        private IEnumerator PlayTelegraphThenRelease(int playerLevel)
         {
-            yield return new WaitForSecondsRealtime(visitingTelegraphDurationSeconds);
+            CacheVisitingImageRestingPose();
+            float elapsedSeconds = 0f;
+            while (elapsedSeconds < visitingTelegraphDurationSeconds)
+            {
+                float normalizedTime = Mathf.Clamp01(elapsedSeconds / visitingTelegraphDurationSeconds);
+                ApplyVisitingTelegraphPose(normalizedTime);
+                elapsedSeconds += Time.unscaledDeltaTime;
+                yield return null;
+            }
 
+            RestoreVisitingTelegraphPose();
             waitingForTelegraph = false;
             telegraphRoutine = null;
             if (contestFinished)
@@ -662,12 +681,14 @@ namespace Tidepool.Runtime
             {
                 visitingTelegraphText.text = "Visiting move is getting ready.";
                 visitingTelegraphText.color = new Color(0.08f, 0.18f, 0.22f);
+                SetTelegraphCategoryBadge(false, ContestMoveCategory.Attack);
                 return;
             }
 
             ContestMoveCategory category = plannedVisitingMove.Category;
             visitingTelegraphText.text = $"{FormatPatternHint(visitingSpecies.VisitingContestAiPattern)}: {GetDisplayName(visitingSpecies)} is {FormatCategoryVerb(category)} - {category}";
             visitingTelegraphText.color = GetCategoryColor(category);
+            SetTelegraphCategoryBadge(true, category);
         }
 
         private void StopTelegraphRoutine()
@@ -676,6 +697,68 @@ namespace Tidepool.Runtime
             {
                 StopCoroutine(telegraphRoutine);
                 telegraphRoutine = null;
+            }
+
+            RestoreVisitingTelegraphPose();
+        }
+
+        private void CacheVisitingImageRestingPose()
+        {
+            if (hasVisitingImageRestingPose || visitingImage == null)
+            {
+                return;
+            }
+
+            RectTransform rectTransform = visitingImage.rectTransform;
+            visitingImageRestingAnchoredPosition = rectTransform.anchoredPosition;
+            visitingImageRestingLocalRotation = rectTransform.localRotation;
+            visitingImageRestingLocalScale = rectTransform.localScale;
+            hasVisitingImageRestingPose = true;
+        }
+
+        private void ApplyVisitingTelegraphPose(float normalizedTime)
+        {
+            if (!hasVisitingImageRestingPose || visitingImage == null)
+            {
+                return;
+            }
+
+            RectTransform rectTransform = visitingImage.rectTransform;
+            float leanAmount = Mathf.Sin(normalizedTime * Mathf.PI);
+            rectTransform.anchoredPosition = visitingImageRestingAnchoredPosition + (Vector2.left * visitingTelegraphLeanOffsetPixels * leanAmount);
+            rectTransform.localRotation = visitingImageRestingLocalRotation * Quaternion.Euler(0f, 0f, visitingTelegraphLeanDegrees * leanAmount);
+            rectTransform.localScale = visitingImageRestingLocalScale * (1f + (0.04f * leanAmount));
+        }
+
+        private void RestoreVisitingTelegraphPose()
+        {
+            if (!hasVisitingImageRestingPose || visitingImage == null)
+            {
+                return;
+            }
+
+            RectTransform rectTransform = visitingImage.rectTransform;
+            rectTransform.anchoredPosition = visitingImageRestingAnchoredPosition;
+            rectTransform.localRotation = visitingImageRestingLocalRotation;
+            rectTransform.localScale = visitingImageRestingLocalScale;
+        }
+
+        private void SetTelegraphCategoryBadge(bool visible, ContestMoveCategory category)
+        {
+            if (visitingTelegraphCategoryBadge != null)
+            {
+                visitingTelegraphCategoryBadge.gameObject.SetActive(visible);
+                if (visible)
+                {
+                    visitingTelegraphCategoryBadge.color = GetCategoryColor(category);
+                }
+            }
+
+            if (visitingTelegraphCategoryIconText != null)
+            {
+                visitingTelegraphCategoryIconText.gameObject.SetActive(visible);
+                visitingTelegraphCategoryIconText.text = visible ? FormatCategoryIconLabel(category) : string.Empty;
+                visitingTelegraphCategoryIconText.color = Color.white;
             }
         }
 
@@ -986,6 +1069,20 @@ namespace Tidepool.Runtime
                 case ContestMoveCategory.Attack:
                 default:
                     return "ATK";
+            }
+        }
+
+        private static string FormatCategoryIconLabel(ContestMoveCategory category)
+        {
+            switch (category)
+            {
+                case ContestMoveCategory.Focus:
+                    return "@";
+                case ContestMoveCategory.Defend:
+                    return "[]";
+                case ContestMoveCategory.Attack:
+                default:
+                    return "!";
             }
         }
 
