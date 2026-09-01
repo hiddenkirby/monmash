@@ -27,7 +27,7 @@ namespace Tidepool.Domain
         private int firstContestMoveUnlockLevel = CaughtTideling.MinLevel;
         [SerializeField] private ContestMove secondContestMove;
         [SerializeField, Range(CaughtTideling.MinLevel, CaughtTideling.MaxLevel)]
-        private int secondContestMoveUnlockLevel = 3;
+        private int secondContestMoveUnlockLevel = CaughtTideling.MinLevel;
         [SerializeField] private ContestAiPattern visitingContestAiPattern = ContestAiPattern.Aggressive;
         [SerializeField, Range(0.1f, 0.75f)] private float catchZoneWidth = 0.35f;
         [SerializeField, Min(0.1f)] private float catchMarkerSpeed = 0.65f;
@@ -134,7 +134,7 @@ namespace Tidepool.Domain
             firstContestMove = null;
             firstContestMoveUnlockLevel = CaughtTideling.MinLevel;
             secondContestMove = null;
-            secondContestMoveUnlockLevel = 3;
+            secondContestMoveUnlockLevel = CaughtTideling.MinLevel;
             visitingContestAiPattern = speciesVisitingContestAiPattern;
             fieldNote = speciesFieldNote;
             catchZoneWidth = speciesCatchZoneWidth;
