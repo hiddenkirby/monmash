@@ -57,8 +57,9 @@ namespace Tidepool.Editor
             Text visitingStatus = CreateText("VisitingStatus", visitingPanel.transform, string.Empty, 22, TextAnchor.MiddleCenter, new Vector2(0f, -160f), new Vector2(300f, 40f));
             visitingStatus.color = new Color(0.5f, 0.5f, 0.5f);
 
-            Image telegraphBadge = CreateImage("VisitingTelegraphBadge", safeArea, new Color(1f, 0.97f, 0.89f, 0.94f), new Vector2(300f, 318f), new Vector2(216f, 56f));
-            Text visitingTelegraphText = CreateText("VisitingTelegraphText", telegraphBadge.transform, "Watching...", 18, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(204f, 48f));
+            Image telegraphBadge = CreateImage("VisitingTelegraphBadge", safeArea, new Color(1f, 0.97f, 0.89f, 0.94f), new Vector2(300f, 318f), new Vector2(284f, 64f));
+            Image telegraphCategoryBadge = CreateTelegraphCategoryBadge(telegraphBadge.transform, out Text telegraphCategoryIconText);
+            Text visitingTelegraphText = CreateText("VisitingTelegraphText", telegraphBadge.transform, "Watching...", 18, TextAnchor.MiddleLeft, new Vector2(44f, 0f), new Vector2(218f, 48f));
             visitingTelegraphText.color = new Color(0.08f, 0.18f, 0.22f);
 
             Image currentRingPanel = CreateImage("CurrentRingPanel", safeArea, new Color(0.95f, 0.98f, 0.94f, 0.92f), new Vector2(0f, 318f), new Vector2(360f, 104f));
@@ -119,6 +120,8 @@ namespace Tidepool.Editor
             SetObjectReferenceArray(serializedController.FindProperty("playerPartyButtons"), playerPartyButtons);
             SetObjectReferenceArray(serializedController.FindProperty("playerPartyImages"), playerPartyImages);
             SetObjectReferenceArray(serializedController.FindProperty("playerPartyLabels"), playerPartyLabels);
+            serializedController.FindProperty("visitingTelegraphCategoryBadge").objectReferenceValue = telegraphCategoryBadge;
+            serializedController.FindProperty("visitingTelegraphCategoryIconText").objectReferenceValue = telegraphCategoryIconText;
             serializedController.FindProperty("visitingTelegraphText").objectReferenceValue = visitingTelegraphText;
             serializedController.FindProperty("roundCounterText").objectReferenceValue = roundCounterText;
             serializedController.FindProperty("resultText").objectReferenceValue = resultText;
@@ -187,6 +190,14 @@ namespace Tidepool.Editor
         {
             Image badge = CreateImage(name, parent, new Color(0.74f, 0.28f, 0.30f), new Vector2(-108f, 0f), new Vector2(64f, 44f));
             label = CreateText("CategoryLabel", badge.transform, "ATK", 16, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(60f, 38f));
+            label.color = Color.white;
+            return badge;
+        }
+
+        private static Image CreateTelegraphCategoryBadge(Transform parent, out Text label)
+        {
+            Image badge = CreateImage("TelegraphCategoryBadge", parent, new Color(0.74f, 0.28f, 0.30f), new Vector2(-110f, 0f), new Vector2(52f, 52f));
+            label = CreateText("Icon", badge.transform, "!", 24, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(48f, 48f));
             label.color = Color.white;
             return badge;
         }
