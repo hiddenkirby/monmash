@@ -268,7 +268,7 @@ namespace Tidepool.Editor
                 level = level,
                 levelProgress = levelProgress,
                 activeGrowthFormId = TidelingGrowthForms.OriginalFormId,
-                rememberedGrowthFormIds = new List<string> { TidelingGrowthForms.OriginalFormId }
+                rememberedGrowthFormIds = new List<string>()
             };
         }
 
