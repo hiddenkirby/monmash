@@ -14,7 +14,7 @@ namespace Tidepool.Editor
         private const string SpeciesDatabasePath = "Assets/Data/Databases/SpeciesDatabase.asset";
         private const int SimulationCount = 100000;
         private const int SimulationSeed = 134;
-        private const int VerificationLevel = 3;
+        private static readonly int[] VerificationLevels = { CaughtTideling.MinLevel, 3 };
         private const float ReasonableChoiceRate = 0.75f;
         private const float MinimumTargetWinRate = 0.68f;
         private const float MaximumTargetWinRate = 0.75f;
@@ -38,12 +38,15 @@ namespace Tidepool.Editor
 
             GameObject controllerObject = new GameObject("ContestBalanceSimulationController");
             UnityEngine.Random.State previousRandomState = UnityEngine.Random.state;
-            float winRate;
+            Dictionary<int, float> winRatesByLevel = new Dictionary<int, float>();
             try
             {
-                UnityEngine.Random.InitState(SimulationSeed);
                 ContestFlowController controller = controllerObject.AddComponent<ContestFlowController>();
-                winRate = SimulateReasonablePlay(database.All, controller);
+                foreach (int level in VerificationLevels)
+                {
+                    UnityEngine.Random.InitState(SimulationSeed);
+                    winRatesByLevel[level] = SimulateReasonablePlay(database.All, controller, level);
+                }
             }
             finally
             {
@@ -51,21 +54,27 @@ namespace Tidepool.Editor
                 UnityEngine.Object.DestroyImmediate(controllerObject);
             }
 
-            if (winRate < MinimumTargetWinRate || winRate > MaximumTargetWinRate)
+            foreach (KeyValuePair<int, float> entry in winRatesByLevel)
             {
-                throw new InvalidOperationException(
-                    $"Reasonable-play contest win rate was {winRate:P1}; expected {MinimumTargetWinRate:P0}-{MaximumTargetWinRate:P0}.");
+                if (entry.Value < MinimumTargetWinRate || entry.Value > MaximumTargetWinRate)
+                {
+                    throw new InvalidOperationException(
+                        $"Reasonable-play contest win rate at level {entry.Key} was {entry.Value:P1}; "
+                        + $"expected {MinimumTargetWinRate:P0}-{MaximumTargetWinRate:P0}.");
+                }
             }
 
             VerifyProgressAndSaveSafety(database.All[0]);
+            string winRateSummary = string.Join(", ", Array.ConvertAll(VerificationLevels, level => $"level {level}: {winRatesByLevel[level]:P1}"));
             Debug.Log(
-                $"Contest balance verification passed: {SimulationCount:N0} contests, "
-                + $"{winRate:P1} reasonable-play win rate, win=2 points, loss=1 point, save data preserved.");
+                $"Contest balance verification passed: {SimulationCount:N0} contests per level, "
+                + $"reasonable-play win rate ({winRateSummary}), win=2 points, loss=1 point, save data preserved.");
         }
 
         private static float SimulateReasonablePlay(
             IReadOnlyList<TidelingSpecies> species,
-            ContestFlowController controller)
+            ContestFlowController controller,
+            int level)
         {
             System.Random random = new System.Random(SimulationSeed);
             int playerContestWins = 0;
@@ -74,7 +83,7 @@ namespace Tidepool.Editor
             {
                 TidelingSpecies player = species[random.Next(species.Count)];
                 TidelingSpecies visitor = PickDifferentSpecies(species, player, random);
-                if (SimulateContest(player, visitor, controller, random))
+                if (SimulateContest(player, visitor, controller, random, level))
                 {
                     playerContestWins += 1;
                 }
@@ -87,7 +96,8 @@ namespace Tidepool.Editor
             TidelingSpecies player,
             TidelingSpecies visitor,
             ContestFlowController controller,
-            System.Random random)
+            System.Random random,
+            int level)
         {
             SetPrivateField(controller, "playerSpecies", player);
             SetPrivateField(controller, "visitingSpecies", visitor);
@@ -99,8 +109,8 @@ namespace Tidepool.Editor
             {
                 ContestMove visitorMove = (ContestMove)ChooseVisitingMoveMethod.Invoke(controller, null);
                 ContestMove playerMove = random.NextDouble() < ReasonableChoiceRate
-                    ? ChooseBestResponse(player, visitor, visitorMove)
-                    : ChooseRandomUnlockedMove(player, random);
+                    ? ChooseBestResponse(player, visitor, visitorMove, level)
+                    : ChooseRandomUnlockedMove(player, random, level);
 
                 float playerScore = ScoreMove(playerMove, visitor, visitorMove);
                 float visitorScore = ScoreMove(visitorMove, player, playerMove);
@@ -120,7 +130,8 @@ namespace Tidepool.Editor
         private static ContestMove ChooseBestResponse(
             TidelingSpecies player,
             TidelingSpecies visitor,
-            ContestMove visitorMove)
+            ContestMove visitorMove,
+            int level)
         {
             ContestMove bestMove = null;
             float bestMargin = float.NegativeInfinity;
@@ -128,7 +139,7 @@ namespace Tidepool.Editor
 
             for (int index = 0; index < 2; index++)
             {
-                ContestMove candidate = player.GetUnlockedContestMove(index, VerificationLevel);
+                ContestMove candidate = player.GetUnlockedContestMove(index, level);
                 if (candidate == null)
                 {
                     continue;
@@ -144,16 +155,16 @@ namespace Tidepool.Editor
                 }
             }
 
-            return bestMove ?? throw new InvalidOperationException($"{player.DisplayName} has no unlocked contest move at level {VerificationLevel}.");
+            return bestMove ?? throw new InvalidOperationException($"{player.DisplayName} has no unlocked contest move at level {level}.");
         }
 
-        private static ContestMove ChooseRandomUnlockedMove(TidelingSpecies species, System.Random random)
+        private static ContestMove ChooseRandomUnlockedMove(TidelingSpecies species, System.Random random, int level)
         {
-            ContestMove first = species.GetUnlockedContestMove(0, VerificationLevel);
-            ContestMove second = species.GetUnlockedContestMove(1, VerificationLevel);
+            ContestMove first = species.GetUnlockedContestMove(0, level);
+            ContestMove second = species.GetUnlockedContestMove(1, level);
             if (first == null)
             {
-                return second ?? throw new InvalidOperationException($"{species.DisplayName} has no unlocked contest move at level {VerificationLevel}.");
+                return second ?? throw new InvalidOperationException($"{species.DisplayName} has no unlocked contest move at level {level}.");
             }
 
             return second == null || random.Next(2) == 0 ? first : second;
