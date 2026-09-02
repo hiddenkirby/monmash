@@ -8,6 +8,7 @@ namespace Tidepool.Editor
     public static class CreateStoryBeatAssets
     {
         private const string StoryBeatFolder = "Assets/Data/StoryBeats";
+        private const string MentorSpritePath = "Assets/Art/Characters/mentor-barnacle-bill.png";
 
         [MenuItem("Tools/Tidepool/Create Story Beat Assets")]
         public static void CreateAssets()
@@ -95,6 +96,7 @@ namespace Tidepool.Editor
             serializedBeat.FindProperty("triggerCondition").enumValueIndex = (int)triggerCondition;
             serializedBeat.FindProperty("triggerThreshold").intValue = triggerThreshold;
             serializedBeat.FindProperty("triggerZone").enumValueIndex = (int)triggerZone;
+            serializedBeat.FindProperty("npcSprite").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(MentorSpritePath);
             serializedBeat.FindProperty("dialogueText").stringValue = dialogueText;
             serializedBeat.FindProperty("unlockZoneOnTrigger").boolValue = unlockZoneOnTrigger;
             serializedBeat.FindProperty("unlockZoneId").enumValueIndex = (int)unlockZoneId;

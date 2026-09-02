@@ -16,7 +16,7 @@ MonoBehaviour:
   triggerCondition: 1
   triggerThreshold: 3
   triggerZone: 1
-  npcSprite: {fileID: 0}
+  npcSprite: {fileID: 21300000, guid: 10a3b76e9ecbc475fa4d59ecb0d98b36, type: 3}
   dialogueText: The meadow is just through here. Look for the grass waving in the
     water.
   unlockZoneOnTrigger: 0
