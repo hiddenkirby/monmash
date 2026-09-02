@@ -18,6 +18,7 @@ namespace Tidepool.Editor
         private const string TileAssetFolder = "Assets/Data/Tiles";
         private const string StoryBeatFolder = "Assets/Data/StoryBeats";
         private const string PlayerSpritePath = "Assets/Art/Creatures/blip.png";
+        private const string MentorSpritePath = "Assets/Art/Characters/mentor-barnacle-bill.png";
         private const string SpeciesDatabasePath = "Assets/Data/Databases/SpeciesDatabase.asset";
         private const string GrassTuftsSpritePath = "Assets/Art/Tiles/KenneyRpgBase/grass_tufts.png";
         private const string SandSpritePath = "Assets/Art/Tiles/KenneyRpgBase/sand_plain.png";
@@ -204,6 +205,13 @@ namespace Tidepool.Editor
 
             Image npcImage = CreateImage("MentorPortrait", panel.transform, new Color(0.92f, 0.97f, 0.91f), new Vector2(-306f, 0f), new Vector2(96f, 96f));
             npcImage.preserveAspect = true;
+
+            Sprite mentorSprite = LoadSprite(MentorSpritePath, 100f);
+            if (mentorSprite != null)
+            {
+                npcImage.sprite = mentorSprite;
+                npcImage.color = Color.white;
+            }
 
             Text dialogue = CreateText("StoryBeatText", panel.transform, "The tidepool has something to show you.", 24, TextAnchor.MiddleLeft, new Vector2(34f, 0f), new Vector2(488f, 96f));
             dialogue.color = Color.white;

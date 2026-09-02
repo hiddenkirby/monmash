@@ -16,7 +16,7 @@ MonoBehaviour:
   triggerCondition: 0
   triggerThreshold: 1
   triggerZone: 0
-  npcSprite: {fileID: 0}
+  npcSprite: {fileID: 21300000, guid: 10a3b76e9ecbc475fa4d59ecb0d98b36, type: 3}
   dialogueText: What did you find? Show me!
   unlockZoneOnTrigger: 0
   unlockZoneId: 2

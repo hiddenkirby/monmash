@@ -16,7 +16,7 @@ MonoBehaviour:
   triggerCondition: 1
   triggerThreshold: 13
   triggerZone: 0
-  npcSprite: {fileID: 0}
+  npcSprite: {fileID: 21300000, guid: 10a3b76e9ecbc475fa4d59ecb0d98b36, type: 3}
   dialogueText: You found them all! The tidepools are full.
   unlockZoneOnTrigger: 0
   unlockZoneId: 2
