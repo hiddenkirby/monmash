@@ -438,13 +438,14 @@ namespace Tidepool.Editor
         {
             Sprite rockSprite = LoadSprite(ShrubLightSpritePath, 64f);
             Sprite sandSprite = LoadSprite(SandSpritePath, 64f);
-            Color lockedRock = new Color(0.42f, 0.44f, 0.38f, 1f);
+            Color lockedRock = new Color(0.33f, 0.33f, 0.35f, 1f);
             Color openRock = new Color(0.62f, 0.66f, 0.56f, 0.88f);
             Color openSand = new Color(0.88f, 0.78f, 0.55f, 0.70f);
 
-            CreateGateSprite("ClosedRockTop", lockedRoot, rockSprite, center + new Vector3(0f, 1f, 0f), lockedRock, 3, new Vector3(1.1f, 1.1f, 1f));
-            CreateGateSprite("ClosedRockMiddle", lockedRoot, rockSprite, center, lockedRock, 3, new Vector3(1.2f, 1.2f, 1f));
-            CreateGateSprite("ClosedRockBottom", lockedRoot, rockSprite, center + new Vector3(0f, -1f, 0f), lockedRock, 3, new Vector3(1.1f, 1.1f, 1f));
+            CreateGateSprite("ClosedRockTop", lockedRoot, rockSprite, center + new Vector3(0.16f, 1.5f, 0f), lockedRock, 3, new Vector3(1.35f, 1.35f, 1f));
+            CreateGateSprite("ClosedRockUpper", lockedRoot, rockSprite, center + new Vector3(-0.20f, 0.5f, 0f), lockedRock, 3, new Vector3(1.2f, 1.2f, 1f));
+            CreateGateSprite("ClosedRockLower", lockedRoot, rockSprite, center + new Vector3(0.20f, -0.5f, 0f), lockedRock, 3, new Vector3(1.2f, 1.2f, 1f));
+            CreateGateSprite("ClosedRockBottom", lockedRoot, rockSprite, center + new Vector3(-0.16f, -1.5f, 0f), lockedRock, 3, new Vector3(1.35f, 1.35f, 1f));
 
             CreateGateSprite("OpenShelfSandA", unlockedRoot, sandSprite, center + new Vector3(0f, 0.5f, 0f), openSand, 1, Vector3.one);
             CreateGateSprite("OpenShelfSandB", unlockedRoot, sandSprite, center + new Vector3(0f, -0.5f, 0f), openSand, 1, Vector3.one);
