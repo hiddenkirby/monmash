@@ -56,6 +56,11 @@ namespace Tidepool.Runtime
         [SerializeField, Min(0f)] private float visitingTelegraphLeanDegrees = 6f;
         [SerializeField, Min(0f)] private float visitingTelegraphLeanOffsetPixels = 18f;
 
+        [Header("Category icons")]
+        [SerializeField] private Sprite attackCategoryIcon;
+        [SerializeField] private Sprite focusCategoryIcon;
+        [SerializeField] private Sprite defendCategoryIcon;
+
         [Header("Result controls")]
         [SerializeField] private Text roundCounterText;
         [SerializeField] private Text resultText;
@@ -743,6 +748,20 @@ namespace Tidepool.Runtime
             rectTransform.localScale = visitingImageRestingLocalScale;
         }
 
+        private Sprite GetCategoryIconSprite(ContestMoveCategory category)
+        {
+            switch (category)
+            {
+                case ContestMoveCategory.Focus:
+                    return focusCategoryIcon;
+                case ContestMoveCategory.Defend:
+                    return defendCategoryIcon;
+                case ContestMoveCategory.Attack:
+                default:
+                    return attackCategoryIcon;
+            }
+        }
+
         private void SetTelegraphCategoryBadge(bool visible, ContestMoveCategory category)
         {
             if (visitingTelegraphCategoryBadge != null)
@@ -751,13 +770,16 @@ namespace Tidepool.Runtime
                 if (visible)
                 {
                     visitingTelegraphCategoryBadge.color = GetCategoryColor(category);
+                    visitingTelegraphCategoryBadge.sprite = GetCategoryIconSprite(category);
+                    visitingTelegraphCategoryBadge.type = Image.Type.Simple;
+                    visitingTelegraphCategoryBadge.preserveAspect = true;
                 }
             }
 
             if (visitingTelegraphCategoryIconText != null)
             {
-                visitingTelegraphCategoryIconText.gameObject.SetActive(visible);
-                visitingTelegraphCategoryIconText.text = visible ? FormatCategoryIconLabel(category) : string.Empty;
+                visitingTelegraphCategoryIconText.gameObject.SetActive(false);
+                visitingTelegraphCategoryIconText.text = string.Empty;
                 visitingTelegraphCategoryIconText.color = Color.white;
             }
         }
@@ -1058,34 +1080,6 @@ namespace Tidepool.Runtime
             }
         }
 
-        private static string FormatCategoryShortLabel(ContestMoveCategory category)
-        {
-            switch (category)
-            {
-                case ContestMoveCategory.Focus:
-                    return "FOC";
-                case ContestMoveCategory.Defend:
-                    return "DEF";
-                case ContestMoveCategory.Attack:
-                default:
-                    return "ATK";
-            }
-        }
-
-        private static string FormatCategoryIconLabel(ContestMoveCategory category)
-        {
-            switch (category)
-            {
-                case ContestMoveCategory.Focus:
-                    return "@";
-                case ContestMoveCategory.Defend:
-                    return "[]";
-                case ContestMoveCategory.Attack:
-                default:
-                    return "!";
-            }
-        }
-
         private static void BindCreature(TidelingSpecies species, Image image, Text nameText)
         {
             if (image != null)
@@ -1098,7 +1092,7 @@ namespace Tidepool.Runtime
             SetText(nameText, GetDisplayName(species));
         }
 
-        private static void BindMoveButton(
+        private void BindMoveButton(
             Button button,
             Text label,
             Image categoryBadge,
@@ -1119,7 +1113,7 @@ namespace Tidepool.Runtime
             SetMoveCategoryBadge(categoryBadge, categoryLabel, move);
         }
 
-        private static void SetMoveCategoryBadge(Image badge, Text label, ContestMove move)
+        private void SetMoveCategoryBadge(Image badge, Text label, ContestMove move)
         {
             bool hasMove = move != null;
             if (badge != null)
@@ -1128,14 +1122,16 @@ namespace Tidepool.Runtime
                 if (hasMove)
                 {
                     badge.color = GetCategoryColor(move.Category);
+                    badge.sprite = GetCategoryIconSprite(move.Category);
+                    badge.type = Image.Type.Simple;
+                    badge.preserveAspect = true;
                 }
             }
 
             if (label != null)
             {
-                label.gameObject.SetActive(hasMove);
-                label.text = hasMove ? FormatCategoryShortLabel(move.Category) : string.Empty;
-                label.color = Color.white;
+                label.gameObject.SetActive(false);
+                label.text = string.Empty;
             }
         }
 

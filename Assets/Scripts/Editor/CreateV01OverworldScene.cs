@@ -24,6 +24,8 @@ namespace Tidepool.Editor
         private const string SandSpritePath = "Assets/Art/Tiles/KenneyRpgBase/sand_plain.png";
         private const string ShrubLightSpritePath = "Assets/Art/Tiles/KenneyRpgBase/shrub_light.png";
         private const string WaterPlainSpritePath = "Assets/Art/Tiles/KenneyRpgBase/water_plain.png";
+        private const string KelpTallSpritePath = "Assets/Art/Tiles/KenneyRpgBase/kelp_tall.png";
+        private const string RockMossySpritePath = "Assets/Art/Tiles/KenneyRpgBase/rock_mossy.png";
         private const int MinX = -12;
         private const int MaxX = 26;
         private const int MinY = -8;
@@ -58,8 +60,8 @@ namespace Tidepool.Editor
             TileBase seagrass = CreateTile("grass_tufts", GrassTuftsSpritePath);
             TileBase shrub = CreateTile("shrub_green", "Assets/Art/Tiles/KenneyRpgBase/shrub_green.png");
             TileBase crate = CreateTile("crate_large", "Assets/Art/Tiles/KenneyRpgBase/crate_large.png");
-            TileBase kelp = CreateTile("kelp_tall", GrassTuftsSpritePath, new Color(0.24f, 0.52f, 0.36f));
-            TileBase rock = CreateTile("rock_mossy", ShrubLightSpritePath, new Color(0.62f, 0.64f, 0.54f));
+            TileBase kelp = CreateTile("kelp_tall", KelpTallSpritePath);
+            TileBase rock = CreateTile("rock_mossy", RockMossySpritePath);
             TileBase darkWater = CreateTile("water_dark", WaterPlainSpritePath, new Color(0.38f, 0.66f, 0.74f));
 
             GameObject gridObject = new GameObject("Grid");
@@ -174,6 +176,7 @@ namespace Tidepool.Editor
         private static ZoneWelcomeBanner CreateZoneWelcomeBanner(RectTransform safeArea)
         {
             Image panel = CreateImage("ZoneWelcomeBanner", safeArea, new Color(0.08f, 0.22f, 0.26f, 0.88f), new Vector2(0f, -24f), new Vector2(680f, 112f));
+            ApplyRoundedPanelStyle(panel);
             RectTransform panelTransform = panel.rectTransform;
             panelTransform.anchorMin = new Vector2(0.5f, 1f);
             panelTransform.anchorMax = new Vector2(0.5f, 1f);
@@ -202,6 +205,7 @@ namespace Tidepool.Editor
 
             StoryBeatDirector director = safeArea.gameObject.AddComponent<StoryBeatDirector>();
             Image panel = CreateImage("StoryBeatDialoguePanel", safeArea, new Color(0.08f, 0.22f, 0.24f, 0.94f), new Vector2(0f, 54f), new Vector2(760f, 128f));
+            ApplyRoundedPanelStyle(panel);
 
             Image npcImage = CreateImage("MentorPortrait", panel.transform, new Color(0.92f, 0.97f, 0.91f), new Vector2(-306f, 0f), new Vector2(96f, 96f));
             npcImage.preserveAspect = true;
@@ -326,6 +330,7 @@ namespace Tidepool.Editor
         {
             GoalsPanelController goalsPanel = safeArea.gameObject.AddComponent<GoalsPanelController>();
             Image panel = CreateImage("GoalsPanel", safeArea, new Color(0.92f, 0.97f, 0.91f, 0.97f), Vector2.zero, new Vector2(720f, 520f));
+            ApplyRoundedPanelStyle(panel);
             panel.transform.SetAsLastSibling();
 
             Text title = CreateText("GoalsTitle", panel.transform, "Goals", 34, TextAnchor.MiddleLeft, new Vector2(-260f, 204f), new Vector2(320f, 56f));
@@ -425,10 +430,10 @@ namespace Tidepool.Editor
 
         private static void CreateKelpGateVisuals(Transform lockedRoot, Transform unlockedRoot, Vector3 center)
         {
-            Sprite kelpSprite = LoadSprite(GrassTuftsSpritePath, 64f);
+            Sprite kelpSprite = LoadSprite(KelpTallSpritePath, 64f);
             Sprite waterSprite = LoadSprite(WaterPlainSpritePath, 64f);
-            Color lockedKelp = new Color(0.12f, 0.42f, 0.30f, 1f);
-            Color openKelp = new Color(0.30f, 0.62f, 0.42f, 0.82f);
+            Color lockedKelp = Color.white;
+            Color openKelp = new Color(1f, 1f, 1f, 0.55f);
             Color openWater = new Color(0.68f, 0.90f, 0.88f, 0.74f);
 
             CreateGateSprite("DenseKelpTop", lockedRoot, kelpSprite, center + new Vector3(0.10f, 1.5f, 0f), lockedKelp, 3, new Vector3(1.15f, 1.15f, 1f));
@@ -444,10 +449,10 @@ namespace Tidepool.Editor
 
         private static void CreateRockyGateVisuals(Transform lockedRoot, Transform unlockedRoot, Vector3 center)
         {
-            Sprite rockSprite = LoadSprite(ShrubLightSpritePath, 64f);
+            Sprite rockSprite = LoadSprite(RockMossySpritePath, 64f);
             Sprite sandSprite = LoadSprite(SandSpritePath, 64f);
-            Color lockedRock = new Color(0.33f, 0.33f, 0.35f, 1f);
-            Color openRock = new Color(0.62f, 0.66f, 0.56f, 0.88f);
+            Color lockedRock = Color.white;
+            Color openRock = new Color(1f, 1f, 1f, 0.55f);
             Color openSand = new Color(0.88f, 0.78f, 0.55f, 0.70f);
 
             CreateGateSprite("ClosedRockTop", lockedRoot, rockSprite, center + new Vector3(0.16f, 1.5f, 0f), lockedRock, 3, new Vector3(1.35f, 1.35f, 1f));
@@ -512,12 +517,46 @@ namespace Tidepool.Editor
         private static Button CreateButton(string name, Transform parent, string label, Vector2 anchoredPosition, Vector2 size)
         {
             Image image = CreateImage(name, parent, new Color(0.78f, 0.92f, 0.76f), anchoredPosition, size);
+            ApplyRoundedButtonStyle(image);
             Button button = image.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
 
             Text text = CreateText("Label", image.transform, label, 28, TextAnchor.MiddleCenter, Vector2.zero, size);
             text.color = new Color(0.06f, 0.16f, 0.18f);
             return button;
+        }
+
+        private static void ApplyRoundedButtonStyle(Image image)
+        {
+            image.sprite = LoadRoundedPanelSprite();
+            image.type = Image.Type.Sliced;
+            Shadow shadow = image.gameObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.28f);
+            shadow.effectDistance = new Vector2(2f, -3f);
+        }
+
+        private static void ApplyRoundedPanelStyle(Image image)
+        {
+            image.sprite = LoadRoundedPanelSprite();
+            image.type = Image.Type.Sliced;
+        }
+
+        private static Sprite LoadRoundedPanelSprite()
+        {
+            const string path = "Assets/Art/UI/rounded_panel.png";
+            Sprite sprite = LoadSprite(path, 100f);
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer != null)
+            {
+                Vector4 targetBorder = new Vector4(32f, 32f, 32f, 32f);
+                if (importer.spriteBorder != targetBorder)
+                {
+                    importer.spriteBorder = targetBorder;
+                    importer.SaveAndReimport();
+                }
+            }
+
+            return sprite;
         }
 
         private static Image CreateImage(string name, Transform parent, Color color, Vector2 anchoredPosition, Vector2 size)
