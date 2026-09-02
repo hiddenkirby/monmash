@@ -57,7 +57,7 @@ namespace Tidepool.Editor
             Text visitingStatus = CreateText("VisitingStatus", visitingPanel.transform, string.Empty, 22, TextAnchor.MiddleCenter, new Vector2(0f, -160f), new Vector2(300f, 40f));
             visitingStatus.color = new Color(0.5f, 0.5f, 0.5f);
 
-            Image telegraphBadge = CreateImage("VisitingTelegraphBadge", safeArea, new Color(1f, 0.97f, 0.89f, 0.94f), new Vector2(300f, 318f), new Vector2(284f, 64f));
+            Image telegraphBadge = CreateImage("VisitingTelegraphBadge", safeArea, new Color(1f, 0.97f, 0.89f, 0.94f), new Vector2(345f, 318f), new Vector2(284f, 64f));
             Image telegraphCategoryBadge = CreateTelegraphCategoryBadge(telegraphBadge.transform, out Text telegraphCategoryIconText);
             Text visitingTelegraphText = CreateText("VisitingTelegraphText", telegraphBadge.transform, "Watching...", 18, TextAnchor.MiddleLeft, new Vector2(44f, 0f), new Vector2(218f, 48f));
             visitingTelegraphText.color = new Color(0.08f, 0.18f, 0.22f);

@@ -71,6 +71,8 @@ namespace Tidepool.Editor
 
             Text progressText = CreateText("ProgressText", progressBarRoot, "0 of 13 found", 22, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(420f, 36f));
             progressText.color = new Color(0.08f, 0.18f, 0.22f);
+            progressText.fontStyle = FontStyle.Bold;
+            AddReadabilityHalo(progressText.gameObject, new Color(0.97f, 0.95f, 0.87f, 0.95f), 2f);
 
             // Sort row (by Name/Zone/Current/Rarity) and filter row (by zone, plus
             // "All") are compact secondary controls above the grid. Core selection
@@ -280,10 +282,12 @@ namespace Tidepool.Editor
 
             Text nameText = CreateText("NameText", slotObj.transform, "?", 16, TextAnchor.MiddleCenter, new Vector2(0f, -38f), new Vector2(80f, 20f));
             nameText.color = new Color(0.18f, 0.23f, 0.21f);
+            nameText.fontStyle = FontStyle.Bold;
             nameText.horizontalOverflow = HorizontalWrapMode.Overflow;
             nameText.resizeTextForBestFit = true;
             nameText.resizeTextMinSize = 10;
             nameText.resizeTextMaxSize = 16;
+            AddReadabilityHalo(nameText.gameObject, new Color(0.97f, 0.95f, 0.87f, 0.95f), 1.5f);
 
             Button button = slotObj.AddComponent<Button>();
             button.targetGraphic = slotBg;
@@ -440,6 +444,19 @@ namespace Tidepool.Editor
             text.alignment = alignment;
             text.raycastTarget = false;
             return text;
+        }
+
+        // Adds a light halo around text sitting on top of illustrated art (e.g. the
+        // shell progress bar), so it stays readable regardless of the art's local tone.
+        private static void AddReadabilityHalo(GameObject textObject, Color haloColor, float distance)
+        {
+            Outline outlineA = textObject.AddComponent<Outline>();
+            outlineA.effectColor = haloColor;
+            outlineA.effectDistance = new Vector2(distance, distance);
+
+            Outline outlineB = textObject.AddComponent<Outline>();
+            outlineB.effectColor = haloColor;
+            outlineB.effectDistance = new Vector2(-distance, -distance);
         }
 
         private static RectTransform CreateRect(string name, Transform parent)
