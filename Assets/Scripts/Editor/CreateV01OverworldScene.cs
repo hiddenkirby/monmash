@@ -19,6 +19,10 @@ namespace Tidepool.Editor
         private const string StoryBeatFolder = "Assets/Data/StoryBeats";
         private const string PlayerSpritePath = "Assets/Art/Creatures/blip.png";
         private const string SpeciesDatabasePath = "Assets/Data/Databases/SpeciesDatabase.asset";
+        private const string GrassTuftsSpritePath = "Assets/Art/Tiles/KenneyRpgBase/grass_tufts.png";
+        private const string SandSpritePath = "Assets/Art/Tiles/KenneyRpgBase/sand_plain.png";
+        private const string ShrubLightSpritePath = "Assets/Art/Tiles/KenneyRpgBase/shrub_light.png";
+        private const string WaterPlainSpritePath = "Assets/Art/Tiles/KenneyRpgBase/water_plain.png";
         private const int MinX = -12;
         private const int MaxX = 26;
         private const int MinY = -8;
@@ -47,15 +51,15 @@ namespace Tidepool.Editor
 
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
-            TileBase sand = CreateTile("sand_plain", "Assets/Art/Tiles/KenneyRpgBase/sand_plain.png");
-            TileBase water = CreateTile("water_plain", "Assets/Art/Tiles/KenneyRpgBase/water_plain.png");
+            TileBase sand = CreateTile("sand_plain", SandSpritePath);
+            TileBase water = CreateTile("water_plain", WaterPlainSpritePath);
             TileBase grass = CreateTile("grass_plain", "Assets/Art/Tiles/KenneyRpgBase/grass_plain.png");
-            TileBase seagrass = CreateTile("grass_tufts", "Assets/Art/Tiles/KenneyRpgBase/grass_tufts.png");
+            TileBase seagrass = CreateTile("grass_tufts", GrassTuftsSpritePath);
             TileBase shrub = CreateTile("shrub_green", "Assets/Art/Tiles/KenneyRpgBase/shrub_green.png");
             TileBase crate = CreateTile("crate_large", "Assets/Art/Tiles/KenneyRpgBase/crate_large.png");
-            TileBase kelp = CreateTile("kelp_tall", "Assets/Art/Tiles/KenneyRpgBase/kelp_tall.png");
-            TileBase rock = CreateTile("rock_mossy", "Assets/Art/Tiles/KenneyRpgBase/rock_mossy.png");
-            TileBase darkWater = CreateTile("water_dark", "Assets/Art/Tiles/KenneyRpgBase/water_dark.png");
+            TileBase kelp = CreateTile("kelp_tall", GrassTuftsSpritePath, new Color(0.24f, 0.52f, 0.36f));
+            TileBase rock = CreateTile("rock_mossy", ShrubLightSpritePath, new Color(0.62f, 0.64f, 0.54f));
+            TileBase darkWater = CreateTile("water_dark", WaterPlainSpritePath, new Color(0.38f, 0.66f, 0.74f));
 
             GameObject gridObject = new GameObject("Grid");
             Grid grid = gridObject.AddComponent<Grid>();
@@ -413,8 +417,8 @@ namespace Tidepool.Editor
 
         private static void CreateKelpGateVisuals(Transform lockedRoot, Transform unlockedRoot, Vector3 center)
         {
-            Sprite kelpSprite = LoadSprite("Assets/Art/Tiles/KenneyRpgBase/kelp_tall.png", 64f);
-            Sprite waterSprite = LoadSprite("Assets/Art/Tiles/KenneyRpgBase/water_plain.png", 64f);
+            Sprite kelpSprite = LoadSprite(GrassTuftsSpritePath, 64f);
+            Sprite waterSprite = LoadSprite(WaterPlainSpritePath, 64f);
             Color lockedKelp = new Color(0.12f, 0.42f, 0.30f, 1f);
             Color openKelp = new Color(0.30f, 0.62f, 0.42f, 0.82f);
             Color openWater = new Color(0.68f, 0.90f, 0.88f, 0.74f);
@@ -432,8 +436,8 @@ namespace Tidepool.Editor
 
         private static void CreateRockyGateVisuals(Transform lockedRoot, Transform unlockedRoot, Vector3 center)
         {
-            Sprite rockSprite = LoadSprite("Assets/Art/Tiles/KenneyRpgBase/rock_mossy.png", 64f);
-            Sprite sandSprite = LoadSprite("Assets/Art/Tiles/KenneyRpgBase/sand_plain.png", 64f);
+            Sprite rockSprite = LoadSprite(ShrubLightSpritePath, 64f);
+            Sprite sandSprite = LoadSprite(SandSpritePath, 64f);
             Color lockedRock = new Color(0.42f, 0.44f, 0.38f, 1f);
             Color openRock = new Color(0.62f, 0.66f, 0.56f, 0.88f);
             Color openSand = new Color(0.88f, 0.78f, 0.55f, 0.70f);
@@ -783,7 +787,7 @@ namespace Tidepool.Editor
             }
         }
 
-        private static TileBase CreateTile(string name, string spritePath)
+        private static TileBase CreateTile(string name, string spritePath, Color? color = null)
         {
             string tilePath = $"{TileAssetFolder}/{name}.asset";
             Tile tile = AssetDatabase.LoadAssetAtPath<Tile>(tilePath);
@@ -804,6 +808,7 @@ namespace Tidepool.Editor
             }
 
             tile.colliderType = Tile.ColliderType.None;
+            tile.color = color ?? Color.white;
             EditorUtility.SetDirty(tile);
             return tile;
         }
