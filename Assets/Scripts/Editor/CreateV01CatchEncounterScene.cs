@@ -71,18 +71,24 @@ namespace Tidepool.Editor
             calmBarTrack.sizeDelta = new Vector2(560f, 44f);
             Image calmBarImage = calmBarTrack.gameObject.AddComponent<Image>();
             calmBarImage.color = new Color(0.87f, 0.96f, 0.88f);
+            ApplyRoundedPanelStyle(calmBarImage);
 
             RectTransform steadyZone = CreateRect("SteadyZone", calmBarTrack);
             steadyZone.anchoredPosition = Vector2.zero;
             steadyZone.sizeDelta = new Vector2(190f, 44f);
             Image steadyZoneImage = steadyZone.gameObject.AddComponent<Image>();
             steadyZoneImage.color = new Color(0.38f, 0.74f, 0.54f);
+            ApplyRoundedPanelStyle(steadyZoneImage);
 
             RectTransform marker = CreateRect("Marker", calmBarTrack);
             marker.anchoredPosition = Vector2.zero;
             marker.sizeDelta = new Vector2(18f, 64f);
             Image markerImage = marker.gameObject.AddComponent<Image>();
             markerImage.color = new Color(0.05f, 0.18f, 0.22f);
+            ApplyRoundedPanelStyle(markerImage);
+            Shadow markerShadow = markerImage.gameObject.AddComponent<Shadow>();
+            markerShadow.effectColor = new Color(0f, 0f, 0f, 0.25f);
+            markerShadow.effectDistance = new Vector2(1.5f, -2f);
 
             Image[] pips = new Image[3];
             for (int i = 0; i < pips.Length; i++)
@@ -149,6 +155,7 @@ namespace Tidepool.Editor
         private static SettingsController CreateSettingsControls(Transform parent)
         {
             Image panel = CreateImage("SettingsPanel", parent, new Color(0.08f, 0.22f, 0.24f, 0.90f), new Vector2(ReferenceHalfWidth - SafeAreaMargin - 165f, ReferenceHalfHeight - SafeAreaMargin - 80f), new Vector2(330f, 160f));
+            ApplyRoundedPanelStyle(panel);
 
             Text label = CreateText("SettingsLabel", panel.transform, "Audio", 22, TextAnchor.MiddleLeft, new Vector2(-104f, 40f), new Vector2(96f, 36f));
             label.color = Color.white;
@@ -170,12 +177,55 @@ namespace Tidepool.Editor
         private static Button CreateButton(string name, Transform parent, string label, Vector2 anchoredPosition, Vector2 size)
         {
             Image image = CreateImage(name, parent, new Color(0.12f, 0.44f, 0.50f), anchoredPosition, size);
+            ApplyRoundedButtonStyle(image);
             Button button = image.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
 
             Text text = CreateText("Label", image.transform, label, 30, TextAnchor.MiddleCenter, Vector2.zero, size);
             text.color = Color.white;
             return button;
+        }
+
+        private static void ApplyRoundedButtonStyle(Image image)
+        {
+            image.sprite = LoadRoundedPanelSprite();
+            image.type = Image.Type.Sliced;
+            Shadow shadow = image.gameObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.28f);
+            shadow.effectDistance = new Vector2(2f, -3f);
+        }
+
+        private static void ApplyRoundedPanelStyle(Image image)
+        {
+            image.sprite = LoadRoundedPanelSprite();
+            image.type = Image.Type.Sliced;
+        }
+
+        private static Sprite LoadRoundedPanelSprite()
+        {
+            const string path = "Assets/Art/UI/rounded_panel.png";
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer != null)
+            {
+                bool changed = importer.textureType != TextureImporterType.Sprite
+                    || importer.spriteImportMode != SpriteImportMode.Single;
+                Vector4 targetBorder = new Vector4(32f, 32f, 32f, 32f);
+                if (importer.spriteBorder != targetBorder)
+                {
+                    importer.spriteBorder = targetBorder;
+                    changed = true;
+                }
+
+                if (changed)
+                {
+                    importer.textureType = TextureImporterType.Sprite;
+                    importer.spriteImportMode = SpriteImportMode.Single;
+                    importer.mipmapEnabled = false;
+                    importer.SaveAndReimport();
+                }
+            }
+
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
         }
 
         private static Toggle CreateToggle(string name, Transform parent, Vector2 anchoredPosition, Vector2 size)
@@ -200,6 +250,7 @@ namespace Tidepool.Editor
             root.sizeDelta = size;
 
             Image background = CreateImage("Background", root, new Color(0.35f, 0.58f, 0.62f), Vector2.zero, size);
+            ApplyRoundedPanelStyle(background);
             RectTransform fillArea = CreateRect("Fill Area", root);
             fillArea.anchorMin = Vector2.zero;
             fillArea.anchorMax = Vector2.one;
@@ -207,6 +258,7 @@ namespace Tidepool.Editor
             fillArea.offsetMax = new Vector2(-4f, -4f);
 
             Image fill = CreateImage("Fill", fillArea, new Color(0.87f, 0.96f, 0.88f), Vector2.zero, Vector2.zero);
+            ApplyRoundedPanelStyle(fill);
             fill.rectTransform.anchorMin = Vector2.zero;
             fill.rectTransform.anchorMax = Vector2.one;
             fill.rectTransform.offsetMin = Vector2.zero;
@@ -218,7 +270,16 @@ namespace Tidepool.Editor
             handleArea.offsetMin = new Vector2(4f, -6f);
             handleArea.offsetMax = new Vector2(-4f, 6f);
 
-            Image handle = CreateImage("Handle", handleArea, Color.white, Vector2.zero, new Vector2(44f, 76f));
+            // "Handle Slide Area" stretches to fill its parent's height (offsetMin/offsetMax
+            // above), and Slider re-anchors the handle to stretch with it vertically, so
+            // sizeDelta.y here is an OFFSET from that stretched height, not an absolute
+            // size — a small negative value keeps the handle close to the track's height
+            // instead of ballooning past it.
+            Image handle = CreateImage("Handle", handleArea, Color.white, Vector2.zero, new Vector2(44f, -24f));
+            ApplyRoundedPanelStyle(handle);
+            Shadow handleShadow = handle.gameObject.AddComponent<Shadow>();
+            handleShadow.effectColor = new Color(0f, 0f, 0f, 0.25f);
+            handleShadow.effectDistance = new Vector2(1.5f, -2f);
 
             Slider slider = root.gameObject.AddComponent<Slider>();
             slider.targetGraphic = background;

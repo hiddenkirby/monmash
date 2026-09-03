@@ -351,6 +351,7 @@ namespace Tidepool.Editor
         private static Button CreateButton(string name, Transform parent, string label, Vector2 anchoredPosition, Vector2 size)
         {
             Image image = CreateImage(name, parent, new Color(0.12f, 0.44f, 0.50f), anchoredPosition, size);
+            ApplyRoundedButtonStyle(image);
             Button button = image.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
 
@@ -362,6 +363,7 @@ namespace Tidepool.Editor
         private static Button CreateSmallButton(string name, Transform parent, string label, Vector2 anchoredPosition, Vector2 size)
         {
             Image image = CreateImage(name, parent, new Color(0.12f, 0.44f, 0.50f), anchoredPosition, size);
+            ApplyRoundedButtonStyle(image);
             Button button = image.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
 
@@ -371,6 +373,42 @@ namespace Tidepool.Editor
             text.resizeTextMinSize = 9;
             text.resizeTextMaxSize = 14;
             return button;
+        }
+
+        private static void ApplyRoundedButtonStyle(Image image)
+        {
+            image.sprite = LoadRoundedPanelSprite();
+            image.type = Image.Type.Sliced;
+            Shadow shadow = image.gameObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.28f);
+            shadow.effectDistance = new Vector2(2f, -3f);
+        }
+
+        private static Sprite LoadRoundedPanelSprite()
+        {
+            const string path = "Assets/Art/UI/rounded_panel.png";
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer != null)
+            {
+                bool changed = importer.textureType != TextureImporterType.Sprite
+                    || importer.spriteImportMode != SpriteImportMode.Single;
+                Vector4 targetBorder = new Vector4(32f, 32f, 32f, 32f);
+                if (importer.spriteBorder != targetBorder)
+                {
+                    importer.spriteBorder = targetBorder;
+                    changed = true;
+                }
+
+                if (changed)
+                {
+                    importer.textureType = TextureImporterType.Sprite;
+                    importer.spriteImportMode = SpriteImportMode.Single;
+                    importer.mipmapEnabled = false;
+                    importer.SaveAndReimport();
+                }
+            }
+
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
         }
 
         private static Dropdown CreateDropdown(string name, Transform parent, Vector2 anchoredPosition, Vector2 size)

@@ -58,11 +58,13 @@ namespace Tidepool.Editor
             visitingStatus.color = new Color(0.5f, 0.5f, 0.5f);
 
             Image telegraphBadge = CreateImage("VisitingTelegraphBadge", safeArea, new Color(1f, 0.97f, 0.89f, 0.94f), new Vector2(345f, 318f), new Vector2(284f, 64f));
+            ApplyRoundedPanelStyle(telegraphBadge);
             Image telegraphCategoryBadge = CreateTelegraphCategoryBadge(telegraphBadge.transform, out Text telegraphCategoryIconText);
             Text visitingTelegraphText = CreateText("VisitingTelegraphText", telegraphBadge.transform, "Watching...", 18, TextAnchor.MiddleLeft, new Vector2(44f, 0f), new Vector2(218f, 48f));
             visitingTelegraphText.color = new Color(0.08f, 0.18f, 0.22f);
 
             Image currentRingPanel = CreateImage("CurrentRingPanel", safeArea, new Color(0.95f, 0.98f, 0.94f, 0.92f), new Vector2(0f, 318f), new Vector2(360f, 104f));
+            ApplyRoundedPanelStyle(currentRingPanel);
             Image[] currentRingNodes = new Image[5];
             Text[] currentRingLabels = new Text[5];
             CreateCurrentRingNode(currentRingPanel.transform, 0, "Current", new Vector2(0f, 28f), new Color(0.18f, 0.52f, 0.72f), currentRingNodes, currentRingLabels);
@@ -122,6 +124,9 @@ namespace Tidepool.Editor
             SetObjectReferenceArray(serializedController.FindProperty("playerPartyLabels"), playerPartyLabels);
             serializedController.FindProperty("visitingTelegraphCategoryBadge").objectReferenceValue = telegraphCategoryBadge;
             serializedController.FindProperty("visitingTelegraphCategoryIconText").objectReferenceValue = telegraphCategoryIconText;
+            serializedController.FindProperty("attackCategoryIcon").objectReferenceValue = LoadCategoryIconSprite("attack");
+            serializedController.FindProperty("focusCategoryIcon").objectReferenceValue = LoadCategoryIconSprite("focus");
+            serializedController.FindProperty("defendCategoryIcon").objectReferenceValue = LoadCategoryIconSprite("defend");
             serializedController.FindProperty("visitingTelegraphText").objectReferenceValue = visitingTelegraphText;
             serializedController.FindProperty("roundCounterText").objectReferenceValue = roundCounterText;
             serializedController.FindProperty("resultText").objectReferenceValue = resultText;
@@ -159,18 +164,78 @@ namespace Tidepool.Editor
         private static Image CreatePanel(string name, Transform parent, Vector2 anchoredPosition)
         {
             Image panel = CreateImage(name, parent, new Color(0.08f, 0.22f, 0.24f, 0.90f), anchoredPosition, new Vector2(340f, 330f));
+            ApplyRoundedPanelStyle(panel);
             return panel;
         }
 
         private static Button CreateButton(string name, Transform parent, string label, Vector2 anchoredPosition, Vector2 size, Color backgroundColor, Color textColor)
         {
             Image image = CreateImage(name, parent, backgroundColor, anchoredPosition, size);
+            ApplyRoundedButtonStyle(image);
             Button button = image.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
 
             Text text = CreateText("Label", image.transform, label, 30, TextAnchor.MiddleCenter, Vector2.zero, size);
             text.color = textColor;
             return button;
+        }
+
+        private static void ApplyRoundedButtonStyle(Image image)
+        {
+            image.sprite = LoadRoundedPanelSprite();
+            image.type = Image.Type.Sliced;
+            Shadow shadow = image.gameObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.28f);
+            shadow.effectDistance = new Vector2(2f, -3f);
+        }
+
+        private static void ApplyRoundedPanelStyle(Image image)
+        {
+            image.sprite = LoadRoundedPanelSprite();
+            image.type = Image.Type.Sliced;
+        }
+
+        private static Sprite LoadCategoryIconSprite(string iconName)
+        {
+            string path = $"Assets/Art/UI/ContestIcons/{iconName}.png";
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer != null && (importer.textureType != TextureImporterType.Sprite
+                || importer.spriteImportMode != SpriteImportMode.Single))
+            {
+                importer.textureType = TextureImporterType.Sprite;
+                importer.spriteImportMode = SpriteImportMode.Single;
+                importer.mipmapEnabled = false;
+                importer.SaveAndReimport();
+            }
+
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        }
+
+        private static Sprite LoadRoundedPanelSprite()
+        {
+            const string path = "Assets/Art/UI/rounded_panel.png";
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer != null)
+            {
+                bool changed = importer.textureType != TextureImporterType.Sprite
+                    || importer.spriteImportMode != SpriteImportMode.Single;
+                Vector4 targetBorder = new Vector4(32f, 32f, 32f, 32f);
+                if (importer.spriteBorder != targetBorder)
+                {
+                    importer.spriteBorder = targetBorder;
+                    changed = true;
+                }
+
+                if (changed)
+                {
+                    importer.textureType = TextureImporterType.Sprite;
+                    importer.spriteImportMode = SpriteImportMode.Single;
+                    importer.mipmapEnabled = false;
+                    importer.SaveAndReimport();
+                }
+            }
+
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
         }
 
         private static void LayoutMoveButtonLabel(Text label)
