@@ -5,8 +5,9 @@ namespace Tidepool.Domain
     [Serializable]
     public class SettingsData
     {
-        public int schemaVersion = 1;
+        public int schemaVersion = 2;
         public bool muted;
         public float masterVolume = 1f;
+        public bool reducedMotion;
     }
 }

@@ -7,6 +7,7 @@ namespace Tidepool.Runtime
 {
     public static class TidepoolSettingsService
     {
+        private const int CurrentSettingsSchemaVersion = 2;
         private const string SettingsFileName = "settings.json";
 
         private static SettingsData settings;
@@ -26,6 +27,15 @@ namespace Tidepool.Runtime
             {
                 EnsureLoaded();
                 return settings.masterVolume;
+            }
+        }
+
+        public static bool ReducedMotion
+        {
+            get
+            {
+                EnsureLoaded();
+                return settings.reducedMotion;
             }
         }
 
@@ -58,6 +68,18 @@ namespace Tidepool.Runtime
             settings.masterVolume = clampedVolume;
             Save();
             ApplyGlobalAudio();
+        }
+
+        public static void SetReducedMotion(bool reducedMotion)
+        {
+            EnsureLoaded();
+            if (settings.reducedMotion == reducedMotion)
+            {
+                return;
+            }
+
+            settings.reducedMotion = reducedMotion;
+            Save();
         }
 
         public static void ApplyGlobalAudio()
@@ -118,6 +140,7 @@ namespace Tidepool.Runtime
             }
 
             settings.masterVolume = Mathf.Clamp01(settings.masterVolume);
+            settings.schemaVersion = CurrentSettingsSchemaVersion;
         }
     }
 }
