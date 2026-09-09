@@ -9,7 +9,7 @@ namespace Tidepool.Runtime
 {
     public class GameSaveService : MonoBehaviour
     {
-        private const int CurrentSaveSchemaVersion = 2;
+        private const int CurrentSaveSchemaVersion = 3;
 
         public static GameSaveService Instance { get; private set; }
 
@@ -19,6 +19,7 @@ namespace Tidepool.Runtime
         public event Action<TidelingSpecies, ZoneId> SpeciesCaught;
         public event Action<ZoneId> ZoneChanged;
         public event Action<ZoneId> ZoneUnlocked;
+        public event Action ExpeditionStateChanged;
 
         private string SavePath => Path.Combine(Application.persistentDataPath, saveFileName);
 
@@ -127,6 +128,75 @@ namespace Tidepool.Runtime
             {
                 Save();
             }
+        }
+
+        public bool IsExpeditionChapterCompleted(string chapterId)
+        {
+            return ContainsId(Data?.completedExpeditionChapterIds, chapterId);
+        }
+
+        public bool CompleteExpeditionChapter(string chapterId)
+        {
+            return RememberExpeditionId(Data?.completedExpeditionChapterIds, chapterId);
+        }
+
+        public bool HasAuthoredDiscovery(string discoveryId)
+        {
+            return ContainsId(Data?.authoredDiscoveryIds, discoveryId);
+        }
+
+        public bool RememberAuthoredDiscovery(string discoveryId)
+        {
+            return RememberExpeditionId(Data?.authoredDiscoveryIds, discoveryId);
+        }
+
+        public bool HasLandmarkState(string landmarkStateId)
+        {
+            return ContainsId(Data?.landmarkStateIds, landmarkStateId);
+        }
+
+        public bool RememberLandmarkState(string landmarkStateId)
+        {
+            return RememberExpeditionId(Data?.landmarkStateIds, landmarkStateId);
+        }
+
+        public bool HasFieldStationUpgrade(string upgradeId)
+        {
+            return ContainsId(Data?.fieldStationUpgradeIds, upgradeId);
+        }
+
+        public bool RememberFieldStationUpgrade(string upgradeId)
+        {
+            return RememberExpeditionId(Data?.fieldStationUpgradeIds, upgradeId);
+        }
+
+        public bool HasCompletedSetPiece(string setPieceId)
+        {
+            return ContainsId(Data?.completedSetPieceIds, setPieceId);
+        }
+
+        public bool RememberCompletedSetPiece(string setPieceId)
+        {
+            return RememberExpeditionId(Data?.completedSetPieceIds, setPieceId);
+        }
+
+        public bool SetActiveExpeditionChapter(string chapterId)
+        {
+            if (Data == null || string.IsNullOrWhiteSpace(chapterId))
+            {
+                return false;
+            }
+
+            string normalizedId = chapterId.Trim();
+            if (string.Equals(Data.activeExpeditionChapterId, normalizedId, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            Data.activeExpeditionChapterId = normalizedId;
+            Save();
+            ExpeditionStateChanged?.Invoke();
+            return true;
         }
 
         public void MarkSeen(string speciesId)
@@ -365,6 +435,8 @@ namespace Tidepool.Runtime
                 Data.unlockedZoneIds = new List<ZoneId>();
             }
 
+            NormalizeExpeditionState(Data);
+
             if (unlockAllZonesForMigration)
             {
                 UnlockAllZonesWithoutSaving();
@@ -382,6 +454,87 @@ namespace Tidepool.Runtime
                 TidelingLevelProgression.Normalize(Data.caught[i]);
                 TidelingGrowthForms.Normalize(Data.caught[i]);
             }
+        }
+
+        private bool RememberExpeditionId(List<string> ids, string id)
+        {
+            if (!AddId(ids, id))
+            {
+                return false;
+            }
+
+            Save();
+            ExpeditionStateChanged?.Invoke();
+            return true;
+        }
+
+        private static void NormalizeExpeditionState(SaveData data)
+        {
+            data.completedExpeditionChapterIds = NormalizeIds(data.completedExpeditionChapterIds);
+            data.authoredDiscoveryIds = NormalizeIds(data.authoredDiscoveryIds);
+            data.landmarkStateIds = NormalizeIds(data.landmarkStateIds);
+            data.fieldStationUpgradeIds = NormalizeIds(data.fieldStationUpgradeIds);
+            data.completedSetPieceIds = NormalizeIds(data.completedSetPieceIds);
+
+            data.activeExpeditionChapterId = string.IsNullOrWhiteSpace(data.activeExpeditionChapterId)
+                ? InferActiveChapter(data)
+                : data.activeExpeditionChapterId.Trim();
+        }
+
+        private static List<string> NormalizeIds(List<string> ids)
+        {
+            List<string> normalized = new List<string>();
+            if (ids == null)
+            {
+                return normalized;
+            }
+
+            for (int i = 0; i < ids.Count; i++)
+            {
+                AddId(normalized, ids[i]);
+            }
+
+            return normalized;
+        }
+
+        private static string InferActiveChapter(SaveData data)
+        {
+            if (FindCaught(data, "old-barnaby") != null)
+            {
+                return ExpeditionStateIds.ChapterRocky;
+            }
+
+            switch (data.currentZone)
+            {
+                case ZoneId.RockyShelf:
+                    return ExpeditionStateIds.ChapterRocky;
+                case ZoneId.KelpCurtain:
+                    return ExpeditionStateIds.ChapterKelp;
+                case ZoneId.SeagrassMeadow:
+                    return ExpeditionStateIds.ChapterMeadow;
+                default:
+                    return ExpeditionStateIds.ChapterShallows;
+            }
+        }
+
+        private static CaughtTideling FindCaught(SaveData data, string speciesId)
+        {
+            if (data?.caught == null)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < data.caught.Count; i++)
+            {
+                CaughtTideling caughtTideling = data.caught[i];
+                if (caughtTideling != null
+                    && string.Equals(caughtTideling.speciesId, speciesId, StringComparison.OrdinalIgnoreCase))
+                {
+                    return caughtTideling;
+                }
+            }
+
+            return null;
         }
 
         private static bool ContainsId(List<string> ids, string id)

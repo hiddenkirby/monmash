@@ -171,6 +171,24 @@ Suggested canonical IDs:
 | Station stages | `station.shallows`, `station.meadow`, `station.kelp`, `station.rocky`, `station.finale` |
 | Set pieces | `setpiece.opening`, `setpiece.meadow-unlock`, `setpiece.kelp-unlock`, `setpiece.rocky-unlock`, `setpiece.festival`, `setpiece.finale` |
 
+### Save Migration Path
+
+- **Schema 1 to 2:** retain the existing compatibility behavior: catches, nicknames, position,
+  and seen state survive; all previously reachable zones remain reachable; story, quest, level,
+  and growth collections receive safe defaults.
+- **Schema 2 to 3:** preserve every existing field byte-for-byte where normalization does not
+  already apply, initialize the six expedition fields, and infer the active chapter from the
+  saved current zone. No chapter, discovery, landmark, station upgrade, or set piece is awarded
+  merely because the field did not exist.
+- **Schema 3 reload:** trim IDs, remove blanks and duplicates, preserve unknown nonblank IDs,
+  repair null collections, and retain the selected active chapter even when its authored asset
+  is unavailable.
+
+`Tools/Tidepool/Verify Expedition Save Foundation` runs the edit-mode verification for new-save
+defaults, representative schema-2 migration, duplicate writes, unknown IDs, immediate autosave,
+and JSON round trips. Future schema changes must extend that verification and this migration
+table rather than replacing older migration behavior.
+
 ## Reusable Systems vs. Authored Content
 
 | Reusable system | Authored content |
