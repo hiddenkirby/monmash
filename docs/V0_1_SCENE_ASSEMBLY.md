@@ -2,11 +2,16 @@
 
 ## Boot
 
-- Add a `GameSaveService` object.
-- Add `BootRouter`.
-  - For no title screen, leave `loadOverworldOnStart` enabled.
-  - For a title screen, disable `loadOverworldOnStart` and wire the Continue
-    button to `BootRouter.ContinueToOverworld`.
+- Run `Tools/Tidepool/Create v0.8 Boot Scene` to generate the current title flow.
+- The generated scene includes `GameSaveService`, `BootRouter`, `SafeAreaFitter`, and
+  `GreatLowTideOpeningController` wiring.
+- New saves see the skippable Great Low Tide opening once. Its acknowledgement saves before
+  presentation so an interruption resumes at the normal return screen.
+- Existing saves see the active expedition chapter and one warm next-step line.
+- `Reduce motion` is an 88pt toggle stored in local settings. It removes panorama drift while
+  preserving copy and final state.
+- Optional panorama layers and opening audio may be left unassigned; missing presentation
+  assets must not prevent the Continue path.
 
 ## Overworld
 

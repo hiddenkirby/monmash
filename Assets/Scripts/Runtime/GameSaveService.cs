@@ -384,7 +384,18 @@ namespace Tidepool.Runtime
             bool hasCaught = Data.caught != null && Data.caught.Count > 0;
             bool hasSeen = Data.seenSpeciesIds != null && Data.seenSpeciesIds.Count > 0;
             bool hasMoved = Data.playerTile.ToVector2Int() != Vector2Int.zero;
-            return hasCaught || hasSeen || hasMoved || Data.currentZone != ZoneId.TidepoolShallows;
+            bool hasStory = Data.triggeredStoryBeatIds != null && Data.triggeredStoryBeatIds.Count > 0;
+            bool hasGoals = Data.completedQuestIds != null && Data.completedQuestIds.Count > 0;
+            bool hasWiderZone = IsZoneUnlocked(ZoneId.KelpCurtain) || IsZoneUnlocked(ZoneId.RockyShelf);
+            bool hasExpeditionProgress = Data.completedExpeditionChapterIds != null && Data.completedExpeditionChapterIds.Count > 0;
+            return hasCaught
+                || hasSeen
+                || hasMoved
+                || hasStory
+                || hasGoals
+                || hasWiderZone
+                || hasExpeditionProgress
+                || Data.currentZone != ZoneId.TidepoolShallows;
         }
 
         public CaughtTideling FindCaught(string speciesId)
