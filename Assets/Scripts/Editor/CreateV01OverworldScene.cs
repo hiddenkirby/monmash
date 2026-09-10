@@ -17,6 +17,7 @@ namespace Tidepool.Editor
         private const string ScenePath = "Assets/Scenes/Overworld.unity";
         private const string TileAssetFolder = "Assets/Data/Tiles";
         private const string StoryBeatFolder = "Assets/Data/StoryBeats";
+        private const string AmbientTidelingProfileFolder = "Assets/Data/AmbientTidelingProfiles";
         private const string PlayerSpritePath = "Assets/Art/Creatures/blip.png";
         private const string MentorSpritePath = "Assets/Art/Characters/mentor-barnacle-bill.png";
         private const string SpeciesDatabasePath = "Assets/Data/Databases/SpeciesDatabase.asset";
@@ -103,6 +104,7 @@ namespace Tidepool.Editor
 
             SpeciesDatabase database = AssetDatabase.LoadAssetAtPath<SpeciesDatabase>(SpeciesDatabasePath);
             CreateZoneEncounterDirectors(gridObject.transform, seagrassMap, playerMover, database);
+            CreateAmbientTidelingControllers(gridObject.transform, camera, playerObject.transform);
             CreateMentorSpawnPoints(gridObject.transform, grid);
             CreateZoneNameSigns(gridObject.transform, grid);
 
@@ -512,6 +514,38 @@ namespace Tidepool.Editor
             serializedDirector.FindProperty("currentZone").enumValueIndex = (int)zone;
             serializedDirector.FindProperty("catchSceneName").stringValue = "CatchEncounter";
             serializedDirector.ApplyModifiedProperties();
+        }
+
+        private static void CreateAmbientTidelingControllers(Transform gridTransform, Camera camera, Transform playerRoot)
+        {
+            CreateAmbientTidelingZoneProfiles.CreateProfiles();
+
+            CreateAmbientTidelingController(gridTransform, "ShallowsAmbientTidelings", ZoneId.TidepoolShallows, camera, playerRoot, new Vector3(-6f, 0f, 0f));
+            CreateAmbientTidelingController(gridTransform, "MeadowAmbientTidelings", ZoneId.SeagrassMeadow, camera, playerRoot, new Vector3(6f, 0f, 0f));
+            CreateAmbientTidelingController(gridTransform, "KelpAmbientTidelings", ZoneId.KelpCurtain, camera, playerRoot, new Vector3(16f, 0f, 0f));
+            CreateAmbientTidelingController(gridTransform, "RockyAmbientTidelings", ZoneId.RockyShelf, camera, playerRoot, new Vector3(23f, 0f, 0f));
+        }
+
+        private static void CreateAmbientTidelingController(Transform parent, string name, ZoneId zone, Camera camera,
+            Transform playerRoot, Vector3 position)
+        {
+            AmbientTidelingZoneProfile profile = AssetDatabase.LoadAssetAtPath<AmbientTidelingZoneProfile>(
+                $"{AmbientTidelingProfileFolder}/{zone}.asset");
+            if (profile == null)
+            {
+                return;
+            }
+
+            GameObject controllerObj = new GameObject(name);
+            controllerObj.transform.SetParent(parent);
+            controllerObj.transform.position = position;
+
+            AmbientTidelingController controller = controllerObj.AddComponent<AmbientTidelingController>();
+            SerializedObject serializedController = new SerializedObject(controller);
+            serializedController.FindProperty("profile").objectReferenceValue = profile;
+            serializedController.FindProperty("activationCamera").objectReferenceValue = camera;
+            serializedController.FindProperty("playerReference").objectReferenceValue = playerRoot;
+            serializedController.ApplyModifiedProperties();
         }
 
         private static Button CreateButton(string name, Transform parent, string label, Vector2 anchoredPosition, Vector2 size)
