@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Tidepool.Runtime
 {
-    public class GameSaveService : MonoBehaviour
+    public class GameSaveService : MonoBehaviour, IRouteUnlockSaveState
     {
         private const int CurrentSaveSchemaVersion = 3;
 
@@ -97,11 +97,11 @@ namespace Tidepool.Runtime
                 && Data.unlockedZoneIds.Contains(zone);
         }
 
-        public void UnlockZone(ZoneId zone)
+        public bool UnlockZone(ZoneId zone)
         {
             if (Data == null)
             {
-                return;
+                return false;
             }
 
             if (Data.unlockedZoneIds == null)
@@ -114,7 +114,10 @@ namespace Tidepool.Runtime
                 Data.unlockedZoneIds.Add(zone);
                 Save();
                 ZoneUnlocked?.Invoke(zone);
+                return true;
             }
+
+            return false;
         }
 
         public bool HasCompletedQuest(string questId)

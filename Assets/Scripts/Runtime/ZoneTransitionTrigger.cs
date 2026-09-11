@@ -17,6 +17,7 @@ namespace Tidepool.Runtime
         [SerializeField, Min(0)] private int requiredCaughtSpeciesCount;
         [SerializeField] private GameObject lockedVisualRoot;
         [SerializeField] private GameObject unlockedVisualRoot;
+        [SerializeField] private RouteUnlockSequenceController unlockSequenceController;
         [SerializeField] private UnityEvent gateLocked = new UnityEvent();
         [SerializeField] private UnityEvent enteredZone = new UnityEvent();
 
@@ -214,7 +215,11 @@ namespace Tidepool.Runtime
             if (requiredCaughtSpeciesCount > 0
                 && saveService.CountCaughtSpeciesInZone(requiredCaughtZone) >= requiredCaughtSpeciesCount)
             {
-                saveService.UnlockZone(destinationZone);
+                if (unlockSequenceController == null || !unlockSequenceController.PlayOrApply())
+                {
+                    saveService.UnlockZone(destinationZone);
+                }
+
                 return true;
             }
 
