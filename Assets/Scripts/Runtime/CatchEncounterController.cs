@@ -29,6 +29,7 @@ namespace Tidepool.Runtime
 
         private TidelingSpecies species;
         private bool isOldBarnabyEncounter;
+        private bool isAuthoredDiscovery;
         private float markerPosition;
         private float markerDirection = 1f;
         private float zoneWidth = 0.35f;
@@ -49,6 +50,7 @@ namespace Tidepool.Runtime
             zoneWidth = species.CatchZoneWidth;
             markerSpeed = species.CatchMarkerSpeed;
             isOldBarnabyEncounter = EncounterContext.IsOldBarnabyEncounter;
+            isAuthoredDiscovery = EncounterContext.IsAuthoredDiscovery;
             ApplyNarrativePresentation();
             creatureNameText.text = species.DisplayName;
             creatureImage.sprite = species.Sprite;
@@ -99,7 +101,8 @@ namespace Tidepool.Runtime
                 {
                     PlayClip(catchChimeClip);
                     GameSaveService.Instance?.RecordCatch(species, EncounterContext.CurrentZone);
-                    if (isOldBarnabyEncounter && !string.IsNullOrWhiteSpace(EncounterContext.CatchCelebrationText))
+                    if ((isOldBarnabyEncounter || isAuthoredDiscovery)
+                        && !string.IsNullOrWhiteSpace(EncounterContext.CatchCelebrationText))
                     {
                         resultText.text = EncounterContext.CatchCelebrationText;
                         Finish(true, oldBarnabyCatchResultSeconds);
@@ -169,7 +172,8 @@ namespace Tidepool.Runtime
                 backgroundImage.color = oldBarnabyBackgroundColor;
             }
 
-            bool showNarrative = isOldBarnabyEncounter && !string.IsNullOrWhiteSpace(EncounterContext.EncounterIntroText);
+            bool showNarrative = (isOldBarnabyEncounter || isAuthoredDiscovery)
+                && !string.IsNullOrWhiteSpace(EncounterContext.EncounterIntroText);
             if (narrativeRoot != null)
             {
                 narrativeRoot.SetActive(showNarrative);
