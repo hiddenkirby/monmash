@@ -117,6 +117,7 @@ namespace Tidepool.Editor
             safeArea.gameObject.AddComponent<SafeAreaFitter>();
             ZoneWelcomeBanner zoneWelcomeBanner = CreateZoneWelcomeBanner(safeArea);
             CreateStoryBeatDialogue(safeArea);
+            CreateRouteUnlockSequenceAssets.CreateAssets();
             CreateZoneTransitions(gridObject.transform, playerObject.transform, playerMover, grid, zoneWelcomeBanner);
             CreateFirstRunGuidance(safeArea);
             GoalsPanelController goalsPanel = CreateGoalsPanel(safeArea);
@@ -390,6 +391,9 @@ namespace Tidepool.Editor
                 : new GateVisualRoots();
 
             ZoneTransitionTrigger trigger = triggerObj.AddComponent<ZoneTransitionTrigger>();
+            RouteUnlockSequenceController unlockSequenceController = requireDestinationUnlocked
+                ? CreateRouteUnlockSequenceController(triggerObj, playerMover, gateVisuals, destinationZone)
+                : null;
             SerializedObject serializedTrigger = new SerializedObject(trigger);
             serializedTrigger.FindProperty("destinationZone").enumValueIndex = (int)destinationZone;
             serializedTrigger.FindProperty("playerRoot").objectReferenceValue = playerRoot;
@@ -400,10 +404,29 @@ namespace Tidepool.Editor
             serializedTrigger.FindProperty("requiredCaughtSpeciesCount").intValue = requiredCaughtSpeciesCount;
             serializedTrigger.FindProperty("lockedVisualRoot").objectReferenceValue = gateVisuals.LockedRoot;
             serializedTrigger.FindProperty("unlockedVisualRoot").objectReferenceValue = gateVisuals.UnlockedRoot;
+            serializedTrigger.FindProperty("unlockSequenceController").objectReferenceValue = unlockSequenceController;
             serializedTrigger.ApplyModifiedProperties();
 
             WireZoneTransitionBanner(trigger, destinationZone, zoneWelcomeBanner);
             WireZoneGateMessage(trigger, destinationZone, zoneWelcomeBanner);
+        }
+
+        private static RouteUnlockSequenceController CreateRouteUnlockSequenceController(
+            GameObject owner,
+            PlayerGridMover playerMover,
+            GateVisualRoots gateVisuals,
+            ZoneId destinationZone)
+        {
+            RouteUnlockSequenceController controller = owner.AddComponent<RouteUnlockSequenceController>();
+            SerializedObject serializedController = new SerializedObject(controller);
+            serializedController.FindProperty("sequence").objectReferenceValue =
+                CreateRouteUnlockSequenceAssets.LoadForDestination(destinationZone);
+            serializedController.FindProperty("playerMover").objectReferenceValue = playerMover;
+            serializedController.FindProperty("lockedVisualRoot").objectReferenceValue = gateVisuals.LockedRoot;
+            serializedController.FindProperty("unlockedVisualRoot").objectReferenceValue = gateVisuals.UnlockedRoot;
+            serializedController.FindProperty("autoCompleteSeconds").floatValue = 2f;
+            serializedController.ApplyModifiedProperties();
+            return controller;
         }
 
         private static GateVisualRoots CreateGateVisuals(string transitionName, Transform parent, ZoneId destinationZone, Vector3 center)
