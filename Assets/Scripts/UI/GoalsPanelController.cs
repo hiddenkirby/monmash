@@ -14,6 +14,7 @@ namespace Tidepool.UI
         [SerializeField] private Text[] checkTexts;
         [SerializeField] private Text[] goalTexts;
         [SerializeField] private Button closeButton;
+        [SerializeField] private ExpeditionChapter[] expeditionChapters;
 
         private void Start()
         {
@@ -39,6 +40,12 @@ namespace Tidepool.UI
         private void RefreshGoals()
         {
             GameSaveService saveService = GameSaveService.Instance;
+            if (expeditionChapters != null && expeditionChapters.Length > 0)
+            {
+                RefreshExpeditionGoal(saveService);
+                return;
+            }
+
             int meadowCaught = saveService == null ? 0 : saveService.CountCaughtSpeciesInZone(ZoneId.SeagrassMeadow);
             int kelpCaught = saveService == null ? 0 : saveService.CountCaughtSpeciesInZone(ZoneId.KelpCurtain);
             int totalCaught = saveService == null ? 0 : saveService.CountCaughtSpecies();
@@ -52,6 +59,32 @@ namespace Tidepool.UI
             SetGoal(4, totalCaught >= TotalSpeciesCount,
                 $"Fill the journal. {totalCaught} of {TotalSpeciesCount} found.",
                 "The journal is full.");
+        }
+
+        private void RefreshExpeditionGoal(GameSaveService saveService)
+        {
+            ExpeditionChapter active = ExpeditionChapterProgress.FindActiveChapter(
+                expeditionChapters,
+                saveService?.Data);
+            bool expeditionComplete = active == null && saveService?.Data != null;
+            SetGoal(
+                0,
+                expeditionComplete,
+                ExpeditionChapterProgress.GetNextStep(active, saveService?.Data),
+                "The coast remembers your Great Low Tide.");
+
+            if (goalTexts == null)
+            {
+                return;
+            }
+
+            for (int i = 1; i < goalTexts.Length; i++)
+            {
+                if (goalTexts[i] != null)
+                {
+                    goalTexts[i].transform.parent.gameObject.SetActive(false);
+                }
+            }
         }
 
         private static bool HasLookedInKelp(GameSaveService saveService, int kelpCaught)
