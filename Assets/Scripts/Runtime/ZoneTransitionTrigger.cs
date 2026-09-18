@@ -15,6 +15,7 @@ namespace Tidepool.Runtime
         [SerializeField] private bool requireDestinationUnlocked;
         [SerializeField] private ZoneId requiredCaughtZone = ZoneId.SeagrassMeadow;
         [SerializeField, Min(0)] private int requiredCaughtSpeciesCount;
+        [SerializeField] private ExpeditionChapter expeditionChapterRequirement;
         [SerializeField] private GameObject lockedVisualRoot;
         [SerializeField] private GameObject unlockedVisualRoot;
         [SerializeField] private RouteUnlockSequenceController unlockSequenceController;
@@ -214,6 +215,16 @@ namespace Tidepool.Runtime
 
             if (requiredCaughtSpeciesCount > 0
                 && saveService.CountCaughtSpeciesInZone(requiredCaughtZone) >= requiredCaughtSpeciesCount)
+            {
+                if (unlockSequenceController == null || !unlockSequenceController.PlayOrApply())
+                {
+                    saveService.UnlockZone(destinationZone);
+                }
+
+                return true;
+            }
+
+            if (ExpeditionChapterProgress.IsCompletionReady(expeditionChapterRequirement, saveService.Data))
             {
                 if (unlockSequenceController == null || !unlockSequenceController.PlayOrApply())
                 {

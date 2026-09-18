@@ -117,10 +117,14 @@ namespace Tidepool.Editor
             safeArea.gameObject.AddComponent<SafeAreaFitter>();
             ZoneWelcomeBanner zoneWelcomeBanner = CreateZoneWelcomeBanner(safeArea);
             CreateStoryBeatDialogue(safeArea);
+            CreateAuthoredDiscoverySequenceAssets.CreateAssets();
+            CreateExpeditionChapterAssets.CreateAssets();
+            ExpeditionChapter[] expeditionChapters = CreateExpeditionChapterAssets.LoadAll();
+            CreateExpeditionChapterDirector(gridObject.transform, expeditionChapters);
             CreateRouteUnlockSequenceAssets.CreateAssets();
-            CreateZoneTransitions(gridObject.transform, playerObject.transform, playerMover, grid, zoneWelcomeBanner);
+            CreateZoneTransitions(gridObject.transform, playerObject.transform, playerMover, grid, zoneWelcomeBanner, expeditionChapters);
             CreateFirstRunGuidance(safeArea);
-            GoalsPanelController goalsPanel = CreateGoalsPanel(safeArea);
+            GoalsPanelController goalsPanel = CreateGoalsPanel(safeArea, expeditionChapters);
             CreateContestButton(safeArea, playerMover, database);
             CreateJournalButton(safeArea, playerMover);
             CreateCharacterButton(safeArea, playerMover);
@@ -329,7 +333,7 @@ namespace Tidepool.Editor
             }
         }
 
-        private static GoalsPanelController CreateGoalsPanel(RectTransform safeArea)
+        private static GoalsPanelController CreateGoalsPanel(RectTransform safeArea, ExpeditionChapter[] expeditionChapters)
         {
             GoalsPanelController goalsPanel = safeArea.gameObject.AddComponent<GoalsPanelController>();
             Image panel = CreateImage("GoalsPanel", safeArea, new Color(0.92f, 0.97f, 0.91f, 0.97f), Vector2.zero, new Vector2(720f, 520f));
@@ -354,29 +358,29 @@ namespace Tidepool.Editor
                 goals[i] = CreateText("Goal", row.transform, string.Empty, 22, TextAnchor.MiddleLeft, new Vector2(36f, 0f), new Vector2(500f, 48f));
             }
 
-            WireGoalsPanel(goalsPanel, panel.gameObject, checks, goals, closeButton);
+            WireGoalsPanel(goalsPanel, panel.gameObject, checks, goals, closeButton, expeditionChapters);
             panel.gameObject.SetActive(false);
             return goalsPanel;
         }
 
         private static void CreateZoneTransitions(Transform gridTransform, Transform playerRoot, PlayerGridMover playerMover,
-            Grid grid, ZoneWelcomeBanner zoneWelcomeBanner)
+            Grid grid, ZoneWelcomeBanner zoneWelcomeBanner, ExpeditionChapter[] expeditionChapters)
         {
             CreateZoneTransition("ShallowsToMeadowTransition", gridTransform, playerRoot, playerMover, grid,
                 new Vector3(MeadowEndX - 1, 0, 0), ZoneId.SeagrassMeadow, false,
-                ZoneId.SeagrassMeadow, 0, zoneWelcomeBanner);
+                ZoneId.SeagrassMeadow, 0, zoneWelcomeBanner, FindChapter(expeditionChapters, ExpeditionStateIds.ChapterShallows));
             CreateZoneTransition("MeadowToKelpTransition", gridTransform, playerRoot, playerMover, grid,
                 new Vector3(KelpEndX - 1, 0, 0), ZoneId.KelpCurtain, true,
-                ZoneId.SeagrassMeadow, 5, zoneWelcomeBanner);
+                ZoneId.SeagrassMeadow, 5, zoneWelcomeBanner, FindChapter(expeditionChapters, ExpeditionStateIds.ChapterMeadow));
             CreateZoneTransition("KelpToRockyTransition", gridTransform, playerRoot, playerMover, grid,
                 new Vector3(MaxX - 1, 0, 0), ZoneId.RockyShelf, true,
-                ZoneId.KelpCurtain, 3, zoneWelcomeBanner);
+                ZoneId.KelpCurtain, 3, zoneWelcomeBanner, FindChapter(expeditionChapters, ExpeditionStateIds.ChapterKelp));
         }
 
         private static void CreateZoneTransition(string name, Transform gridTransform, Transform playerRoot,
             PlayerGridMover playerMover, Grid grid, Vector3 triggerPosition, ZoneId destinationZone,
             bool requireDestinationUnlocked, ZoneId requiredCaughtZone, int requiredCaughtSpeciesCount,
-            ZoneWelcomeBanner zoneWelcomeBanner)
+            ZoneWelcomeBanner zoneWelcomeBanner, ExpeditionChapter expeditionChapterRequirement)
         {
             GameObject triggerObj = new GameObject(name);
             triggerObj.transform.SetParent(gridTransform);
@@ -402,6 +406,7 @@ namespace Tidepool.Editor
             serializedTrigger.FindProperty("requireDestinationUnlocked").boolValue = requireDestinationUnlocked;
             serializedTrigger.FindProperty("requiredCaughtZone").enumValueIndex = (int)requiredCaughtZone;
             serializedTrigger.FindProperty("requiredCaughtSpeciesCount").intValue = requiredCaughtSpeciesCount;
+            serializedTrigger.FindProperty("expeditionChapterRequirement").objectReferenceValue = expeditionChapterRequirement;
             serializedTrigger.FindProperty("lockedVisualRoot").objectReferenceValue = gateVisuals.LockedRoot;
             serializedTrigger.FindProperty("unlockedVisualRoot").objectReferenceValue = gateVisuals.UnlockedRoot;
             serializedTrigger.FindProperty("unlockSequenceController").objectReferenceValue = unlockSequenceController;
@@ -751,14 +756,44 @@ namespace Tidepool.Editor
             }
         }
 
-        private static void WireGoalsPanel(GoalsPanelController controller, GameObject root, Text[] checks, Text[] goals, Button closeButton)
+        private static void WireGoalsPanel(GoalsPanelController controller, GameObject root, Text[] checks, Text[] goals, Button closeButton,
+            ExpeditionChapter[] expeditionChapters)
         {
             SerializedObject serializedGoals = new SerializedObject(controller);
             serializedGoals.FindProperty("panelRoot").objectReferenceValue = root;
             WireTextArray(serializedGoals.FindProperty("checkTexts"), checks);
             WireTextArray(serializedGoals.FindProperty("goalTexts"), goals);
             serializedGoals.FindProperty("closeButton").objectReferenceValue = closeButton;
+            SetObjectReferenceArray(serializedGoals.FindProperty("expeditionChapters"), expeditionChapters);
             serializedGoals.ApplyModifiedProperties();
+        }
+
+        private static void CreateExpeditionChapterDirector(Transform parent, ExpeditionChapter[] expeditionChapters)
+        {
+            GameObject directorObject = new GameObject("ExpeditionChapterDirector");
+            directorObject.transform.SetParent(parent);
+            ExpeditionChapterDirector director = directorObject.AddComponent<ExpeditionChapterDirector>();
+            SerializedObject serializedDirector = new SerializedObject(director);
+            SetObjectReferenceArray(serializedDirector.FindProperty("chapters"), expeditionChapters);
+            serializedDirector.ApplyModifiedProperties();
+        }
+
+        private static ExpeditionChapter FindChapter(ExpeditionChapter[] chapters, string chapterId)
+        {
+            if (chapters == null)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < chapters.Length; i++)
+            {
+                if (chapters[i] != null && chapters[i].Id == chapterId)
+                {
+                    return chapters[i];
+                }
+            }
+
+            return null;
         }
 
         private static void WireTextArray(SerializedProperty property, Text[] texts)
