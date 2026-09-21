@@ -19,6 +19,7 @@ Before editing, read:
    - `GROWING_UP_FORMS.md` — v0.4 growth-form save memory and journal hooks
    - `DAY_NIGHT_RULES.md` — conditional encounter timing
    - `V0_4_ZONE_TRANSITIONS.md` — zone transitions
+   - `V0_8_FIELD_STATION.md` — v0.8 field-station projection and scene wiring
    - `NO_NETWORK_GUARDRAILS.md` — package review and release gate
    - `ASSET_PIPELINE.md` — art/audio/video import checklist
    - `PRE_RELEASE_CHECKLIST.md` and `IP_SAFETY_CHECKLIST.md` — release gates
@@ -83,4 +84,3 @@ When possible:
 - For save work, verify force-quit and relaunch.
 
 If Unity or iPad verification was not possible, say so explicitly in the final response.
-
