@@ -16,6 +16,22 @@ namespace Tidepool.Editor
             EnsureFolder(AuthoredDiscoveryFolder);
 
             UpsertSequence(
+                "discovery.shallows.blip",
+                "blip",
+                ZoneId.TidepoolShallows,
+                AuthoredDiscoveryReplayRule.UntilCaught,
+                string.Empty,
+                ExpeditionStateIds.SetPieceOpening,
+                string.Empty,
+                "setpiece.discovery.blip",
+                ExpeditionStateIds.LandmarkShallowsArch,
+                "camera.shallows.shell-glint",
+                "audio.discovery.ripple",
+                new[] { "A shell glints beside the stone arch.", "A tiny ripple answers from the warm pool." },
+                "A quick little shape pauses in the shallows.",
+                "Blip darts happily into the journal.");
+
+            UpsertSequence(
                 "discovery.meadow.gullwing",
                 "gullwing",
                 ZoneId.SeagrassMeadow,
@@ -62,6 +78,22 @@ namespace Tidepool.Editor
                 new[] { "A small light blinks behind the kelp.", "The glow waits, then blinks again." },
                 "A shy lantern light drifts into view.",
                 "Lumen glows a little brighter.");
+
+            UpsertSequence(
+                "discovery.kelp.tanglemaw",
+                "tanglemaw",
+                ZoneId.KelpCurtain,
+                AuthoredDiscoveryReplayRule.UntilCaught,
+                ExpeditionStateIds.ChapterMeadow,
+                ExpeditionStateIds.SetPieceKelpUnlock,
+                ExpeditionStateIds.LandmarkKelpLights,
+                "setpiece.discovery.kelp-tanglemaw",
+                ExpeditionStateIds.LandmarkKelpLights,
+                "camera.kelp.moving-ribbon",
+                "audio.discovery.kelp-rustle",
+                new[] { "One kelp ribbon curls against the current.", "A curious shape peeks through the opening." },
+                "Tiny arms wave from behind the kelp.",
+                "Tanglemaw gives the jar one last curious pat.");
 
             UpsertSequence(
                 "discovery.rocky.clackaw",
