@@ -78,7 +78,7 @@ Do not start battles, levels, growth systems, day/night, or public-release work 
 When possible:
 
 - Compile in Unity.
-- Run the edited scene.
+- Run the edited scene. On a desktop Editor, drive it remotely with the `unity` CLI — see "Unity Editor CLI (Pipeline)" in `AGENTS.md`.
 - Test touch-heavy flows on iPad.
 - For save work, verify force-quit and relaunch.
 

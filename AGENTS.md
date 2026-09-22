@@ -99,6 +99,26 @@ Unity menu items under `Tools/Tidepool/`:
 
 Prefer these generators over hand-building scenes. Inspect the generated scene in Unity before iterating.
 
+## Unity Editor CLI (Pipeline)
+
+The `unity` CLI (on `PATH`, or `~/.unity/bin/unity`) remote-controls a running Unity Editor through the `com.unity.pipeline` package (already in `Packages/manifest.json`; dev-only Editor package, passes `scripts/verify-no-network-guardrails.sh`). Use it to verify gameplay changes against the real running Editor instead of assuming compile-only success.
+
+| Command | What it does |
+|---|---|
+| `unity pipeline install --project-path .` | Idempotently installs/updates the Pipeline package. |
+| `unity open . --non-interactive` | Launches the Editor GUI (skip if one is already running — check `unity status` first). |
+| `unity status --format json` | Poll until connected (`"pid"` present). A fresh Pipeline install needs a domain reload; allow 1–3 minutes. |
+| `unity list --format json` | Enumerates every available remote command (140+: scene/GameObject inspection, `eval`, screenshots, console logs, build settings). |
+| `unity command <name> --format json` | Runs a remote command, e.g. `open_scene`, `clear_console`, `editor_play`, `editor_stop`, `get_console_logs`, `capture_game_view`, `delete_asset`. |
+
+Notes for agents:
+
+- There is no raw tap/click-injection command. Drive gameplay by invoking the code a tap would hit, via `eval` (Roslyn C# in the live Editor process): public API on components, or `Button.onClick.Invoke()` on UI. For random events (e.g. encounter rolls), invoke the private trigger method via reflection so the real code path is still exercised.
+- In `eval`, use `Object.FindAnyObjectByType<T>()` / `FindObjectsByType<T>(FindObjectsSortMode.None)`; the `FindObjectOfType` family is obsolete and fails compilation.
+- After each meaningful step, check `get_console_logs --severity error` and `list_open_scenes` before moving on. Duplicate-EventSystem warnings on additive scene loads are known noise, not a new bug.
+- `capture_game_view --source screen` includes Screen Space - Overlay UI; the default `camera` source misses it silently. `--save_path` is relative to `Assets/`, so write to `Temp/qa-*.png`, copy out anything worth keeping, then `delete_asset --asset "Assets/Temp"` to clean up.
+- Before Play Mode QA, check `git status --short` for unrelated local drift in Unity-generated files (scenes, `.asset`, build settings). Stash it with a labeled `git stash push -u` and test against the clean tree; never discard it, and mention the stash in the handoff.
+
 ## Asset Rules
 
 - Every non-code asset that ships or may ship must be logged in `Assets/ASSET_MANIFEST.md`.
@@ -139,7 +159,7 @@ Prefer these generators over hand-building scenes. Inspect the generated scene i
 For gameplay changes, verify at the lowest level available:
 
 - Compile in Unity after C# changes.
-- Run the relevant scene in the editor.
+- Run the relevant scene in the editor. When a desktop Editor is available, prefer driving it remotely with the `unity` CLI (see "Unity Editor CLI (Pipeline)") and checking console logs for errors.
 - For movement, catching, save/load, and UI work, test on iPad before calling the issue done.
 - For save changes, test catch -> force-quit -> relaunch -> journal still contains progress.
 - For UI changes, check safe area and 88pt touch targets on the target device.
