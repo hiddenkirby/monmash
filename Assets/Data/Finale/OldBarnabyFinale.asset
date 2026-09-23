@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8009e082706434959b4993cc204811ce, type: 3}
+  m_Name: OldBarnabyFinale
+  m_EditorClassIdentifier: Assembly-CSharp::Tidepool.Domain.BarnabyFinaleDefinition
+  species: {fileID: 11400000, guid: 2aa7fe8a4893408f8808bcdf00e6bf62, type: 2}
+  requiredCompletedChapterId: chapter.kelp
+  requiredLandmarkStateId: landmark.rocky.old-stones
+  invitationText: The old stones answer with a slow, friendly ripple.
+  encounterIntroText: That's Old Barnaby. He has been here since before the tidepools
+    had names.
+  catchCelebrationText: He chose you. The whole coast is celebrating.
+  memoryText: The coast remembers the day Old Barnaby came to say hello.
+  cameraCueId: camera.finale.barnaby
+  audioCueId: soundscape.finale

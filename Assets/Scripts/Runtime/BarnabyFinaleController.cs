@@ -94,6 +94,18 @@ namespace Tidepool.Runtime
             return true;
         }
 
+        // Void wrappers so scene generators can attach persistent button listeners
+        // (UnityAction cannot bind to bool-returning methods).
+        public void BeginFinale()
+        {
+            TryBeginFinale();
+        }
+
+        public void ShowMemory()
+        {
+            OpenMemory();
+        }
+
         public void SkipPresentation()
         {
             if (runningPresentation != null)
