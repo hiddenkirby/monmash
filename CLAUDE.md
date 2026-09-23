@@ -16,6 +16,7 @@ Before editing, read:
    - `UNITY_IOS_PIPELINE.md` — build/player settings
    - `V0_1_SCENE_ASSEMBLY.md` — Boot/Overworld/CatchEncounter/Journal scene wiring
    - `CONTEST_ARCHITECTURE.md` — v0.2 contest loop and `ContestFlowController`
+   - `V0_8_COAST_FESTIVAL.md` — coast-festival wrapper and persistent ribbon handoff
    - `GROWING_UP_FORMS.md` — v0.4 growth-form save memory and journal hooks
    - `DAY_NIGHT_RULES.md` — conditional encounter timing
    - `V0_4_ZONE_TRANSITIONS.md` — zone transitions

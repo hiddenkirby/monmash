@@ -26,9 +26,14 @@ namespace Tidepool.Runtime
 
         public void StartContest()
         {
+            TryStartContest();
+        }
+
+        public bool TryStartContest()
+        {
             if (contestActive || speciesDatabase == null)
             {
-                return;
+                return false;
             }
 
             TidelingSpecies playerSpecies = speciesDatabase.FindById(playerSpeciesId);
@@ -36,12 +41,13 @@ namespace Tidepool.Runtime
             if (playerSpecies == null || visitingSpecies == null)
             {
                 Debug.LogWarning("ContestTrigger could not find species for contest.");
-                return;
+                return false;
             }
 
             contestActive = true;
             playerMover?.SetInputEnabled(false);
             SceneManager.LoadScene(partySelectSceneName, LoadSceneMode.Additive);
+            return true;
         }
 
         private void HandleContestFinished()
