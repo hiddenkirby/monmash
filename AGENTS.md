@@ -23,6 +23,7 @@ Read these files before changing behavior:
 - `docs/DAY_NIGHT_RULES.md` before tuning conditional encounter timing.
 - `docs/V0_4_ZONE_TRANSITIONS.md` before adding or modifying zone transitions.
 - `docs/V0_8_FIELD_STATION.md` before wiring the v0.8 field station or its earned displays.
+- `docs/V0_8_BARNABY_FINALE.md` before wiring the Old Barnaby finale or its return memory.
 - `docs/NO_NETWORK_GUARDRAILS.md` before adding or upgrading packages, and before release.
 - `docs/ASSET_PIPELINE.md` before importing art, audio, or video assets.
 - `docs/PRE_RELEASE_CHECKLIST.md` and `docs/IP_SAFETY_CHECKLIST.md` before tagging a playable or release build.
@@ -96,6 +97,8 @@ Unity menu items under `Tools/Tidepool/`:
 | Create v0.2 Contest Scene | Generates `Assets/Scenes/Contest.unity` with the contest flow UI. |
 | Create Field Station Definition | Creates the v0.8 field-station stages and persistent display requirements. |
 | Verify Field Station Projection | Checks fresh-save access, advanced-save backfill, monotonic displays, and read-only visitors. |
+| Create Old Barnaby Finale Definition | Creates the v0.8 finale copy, cues, prerequisites, and Old Barnaby binding. |
+| Verify Old Barnaby Finale | Checks finale gating, gentle retry, catch-authoritative completion, backfill, and memory state. |
 | Configure v0.1 Local Playtest | Sets up local playtest configuration. |
 | Apply iPad iOS Player Settings | Applies all iPad/iOS player settings from `docs/UNITY_IOS_PIPELINE.md`. |
 | Validate iPad iOS Player Settings | Validates that player settings match the required values. |
