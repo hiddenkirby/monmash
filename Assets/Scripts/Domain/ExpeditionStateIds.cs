@@ -12,6 +12,10 @@ namespace Tidepool.Domain
         public const string LandmarkKelpLights = "landmark.kelp.lights";
         public const string LandmarkRockyOldStones = "landmark.rocky.old-stones";
 
+        public const string DiscoveryRockyApproach = "discovery.rocky.approach";
+        public const string FinaleBarnabyMet = "finale.barnaby.met";
+        public const string ExpeditionMemorySeen = "expedition.memory_seen";
+
         public const string StationShallows = "station.shallows";
         public const string StationMeadow = "station.meadow";
         public const string StationKelp = "station.kelp";

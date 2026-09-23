@@ -20,6 +20,7 @@ Before editing, read:
    - `DAY_NIGHT_RULES.md` — conditional encounter timing
    - `V0_4_ZONE_TRANSITIONS.md` — zone transitions
    - `V0_8_FIELD_STATION.md` — v0.8 field-station projection and scene wiring
+   - `V0_8_BARNABY_FINALE.md` — Old Barnaby finale projection and scene wiring
    - `NO_NETWORK_GUARDRAILS.md` — package review and release gate
    - `ASSET_PIPELINE.md` — art/audio/video import checklist
    - `PRE_RELEASE_CHECKLIST.md` and `IP_SAFETY_CHECKLIST.md` — release gates
