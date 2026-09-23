@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98908563751694111a45c073ed23cb4b, type: 3}
+  m_Name: GreatLowTideFieldStation
+  m_EditorClassIdentifier: Assembly-CSharp::Tidepool.Domain.FieldStationDefinition
+  title: Field Station
+  fallbackDescription: A quiet place for everything the coast remembers.
+  stages:
+  - upgradeId: station.shallows
+    displayName: Coast Atlas Table
+    description: The atlas is open to the warm shallows.
+    requirementKind: 0
+    requirementId: 
+    minimumCaughtSpecies: 0
+  - upgradeId: station.species-board
+    displayName: Discovery Board
+    description: New sketches remember the friends you found.
+    requirementKind: 2
+    requirementId: 
+    minimumCaughtSpecies: 5
+  - upgradeId: station.meadow
+    displayName: Meadow Drawing
+    description: Pressed grass and a wide green drawing remember the waving path.
+    requirementKind: 1
+    requirementId: chapter.shallows
+    minimumCaughtSpecies: 0
+  - upgradeId: station.kelp
+    displayName: Hanging Glow
+    description: A soft light remembers the path behind the kelp.
+    requirementKind: 1
+    requirementId: chapter.meadow
+    minimumCaughtSpecies: 0
+  - upgradeId: station.growth-memory
+    displayName: Growing-Up Album
+    description: A small album keeps every remembered form safe.
+    requirementKind: 3
+    requirementId: 
+    minimumCaughtSpecies: 0
+  - upgradeId: station.festival-ribbon
+    displayName: Festival Ribbon
+    description: The coast festival left a bright ribbon for the station.
+    requirementKind: 4
+    requirementId: setpiece.festival
+    minimumCaughtSpecies: 0
+  - upgradeId: station.rocky
+    displayName: Old-Stone Rubbing
+    description: A careful rubbing remembers the quiet old stones.
+    requirementKind: 1
+    requirementId: chapter.kelp
+    minimumCaughtSpecies: 0
+  - upgradeId: station.finale
+    displayName: Coast Celebration
+    description: The whole coast remembers your Great Low Tide.
+    requirementKind: 5
+    requirementId: old-barnaby
+    minimumCaughtSpecies: 0
