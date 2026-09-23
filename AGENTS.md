@@ -19,6 +19,7 @@ Read these files before changing behavior:
 - `docs/UNITY_IOS_PIPELINE.md` before touching build or player settings.
 - `docs/V0_1_SCENE_ASSEMBLY.md` before wiring Unity scenes (Boot, Overworld, CatchEncounter, Journal).
 - `docs/CONTEST_ARCHITECTURE.md` before touching the v0.2 contest loop or `ContestFlowController`.
+- `docs/V0_8_COAST_FESTIVAL.md` before wiring the coast-festival contest wrapper or ribbon handoff.
 - `docs/GROWING_UP_FORMS.md` before touching growth-form memory or journal form selection.
 - `docs/DAY_NIGHT_RULES.md` before tuning conditional encounter timing.
 - `docs/V0_4_ZONE_TRANSITIONS.md` before adding or modifying zone transitions.
@@ -94,6 +95,8 @@ Unity menu items under `Tools/Tidepool/`:
 | Create v0.1 Overworld Scene | Generates `Assets/Scenes/Overworld.unity` with tilemaps, player, and encounter wiring. |
 | Create v0.1 CatchEncounter Scene | Generates `Assets/Scenes/CatchEncounter.unity` with the catch UI and safe-area layout. |
 | Create v0.2 Contest Scene | Generates `Assets/Scenes/Contest.unity` with the contest flow UI. |
+| Create Coast Festival Definition | Creates v0.8 festival prerequisites, copy, and presentation cues. |
+| Verify Coast Festival Projection | Checks entry gating, replay, contest outcomes, win-only completion, and ribbon backfill. |
 | Create Field Station Definition | Creates the v0.8 field-station stages and persistent display requirements. |
 | Verify Field Station Projection | Checks fresh-save access, advanced-save backfill, monotonic displays, and read-only visitors. |
 | Configure v0.1 Local Playtest | Sets up local playtest configuration. |

@@ -459,6 +459,7 @@ namespace Tidepool.Runtime
             AwardContestProgress();
             SetContestResultText();
             PlayWinChime();
+            ContestEvents.RaiseContestResolved(GetContestOutcome());
             SetResultText("Contest complete.");
             SetText(visitingTelegraphText, "Contest complete.");
             SetTelegraphCategoryBadge(false, ContestMoveCategory.Attack);
@@ -469,6 +470,18 @@ namespace Tidepool.Runtime
             {
                 retryButton.gameObject.SetActive(true);
             }
+        }
+
+        private ContestOutcome GetContestOutcome()
+        {
+            if (playerRoundWins > visitingRoundWins)
+            {
+                return ContestOutcome.PlayerWin;
+            }
+
+            return visitingRoundWins > playerRoundWins
+                ? ContestOutcome.VisitorWin
+                : ContestOutcome.Tie;
         }
 
         private void ResetContest()
