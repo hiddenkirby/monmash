@@ -17,6 +17,9 @@ namespace Tidepool.Domain
         public const string StationKelp = "station.kelp";
         public const string StationRocky = "station.rocky";
         public const string StationFinale = "station.finale";
+        public const string StationSpeciesBoard = "station.species-board";
+        public const string StationGrowthMemory = "station.growth-memory";
+        public const string StationFestivalRibbon = "station.festival-ribbon";
 
         public const string SetPieceOpening = "setpiece.opening";
         public const string SetPieceMeadowUnlock = "setpiece.meadow-unlock";
