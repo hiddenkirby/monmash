@@ -17,6 +17,14 @@ namespace Tidepool.UI
         public string UpgradeId => upgradeId;
         public GameObject StandardRoot => standardRoot;
         public GameObject ReducedMotionRoot => reducedMotionRoot;
+
+        // Scene generators construct bindings directly; runtime code only reads them.
+        public FieldStationDecorationBinding(string bindingUpgradeId, GameObject bindingStandardRoot, GameObject bindingReducedMotionRoot)
+        {
+            upgradeId = bindingUpgradeId;
+            standardRoot = bindingStandardRoot;
+            reducedMotionRoot = bindingReducedMotionRoot;
+        }
     }
 
     [Serializable]
@@ -27,6 +35,13 @@ namespace Tidepool.UI
 
         public string SpeciesId => speciesId;
         public GameObject VisitorRoot => visitorRoot;
+
+        // Scene generators construct bindings directly; runtime code only reads them.
+        public FieldStationVisitorBinding(string bindingSpeciesId, GameObject bindingVisitorRoot)
+        {
+            speciesId = bindingSpeciesId;
+            visitorRoot = bindingVisitorRoot;
+        }
     }
 
     public class FieldStationController : MonoBehaviour
@@ -36,10 +51,11 @@ namespace Tidepool.UI
         [SerializeField] private Text descriptionText;
         [SerializeField] private FieldStationDecorationBinding[] decorations = Array.Empty<FieldStationDecorationBinding>();
         [SerializeField] private FieldStationVisitorBinding[] visitors = Array.Empty<FieldStationVisitorBinding>();
-        [SerializeField] private UnityEvent openJournal = new UnityEvent();
-        [SerializeField] private UnityEvent openAtlas = new UnityEvent();
-        [SerializeField] private UnityEvent openGoals = new UnityEvent();
-        [SerializeField] private UnityEvent openSettings = new UnityEvent();
+        // Public so scene generators can attach persistent listeners with UnityEventTools.
+        public UnityEvent openJournal = new UnityEvent();
+        public UnityEvent openAtlas = new UnityEvent();
+        public UnityEvent openGoals = new UnityEvent();
+        public UnityEvent openSettings = new UnityEvent();
 
         private bool isRefreshing;
 

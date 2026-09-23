@@ -6,9 +6,25 @@ namespace Tidepool.UI
 {
     public class SettingsController : MonoBehaviour
     {
+        [SerializeField] private GameObject panelRoot;
         [SerializeField] private Toggle muteToggle;
         [SerializeField] private Slider volumeSlider;
         [SerializeField] private Text volumeValueText;
+
+        private void Start()
+        {
+            SetVisible(false);
+        }
+
+        public void OpenPanel()
+        {
+            SetVisible(true);
+        }
+
+        public void ClosePanel()
+        {
+            SetVisible(false);
+        }
 
         private void OnEnable()
         {
@@ -69,6 +85,12 @@ namespace Tidepool.UI
                 int percent = Mathf.RoundToInt(TidepoolSettingsService.MasterVolume * 100f);
                 volumeValueText.text = TidepoolSettingsService.Muted ? "Muted" : $"{percent}%";
             }
+        }
+
+        private void SetVisible(bool visible)
+        {
+            GameObject target = panelRoot == null ? gameObject : panelRoot;
+            target.SetActive(visible);
         }
     }
 }

@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f300e90101b149f28f7e78782f55d10, type: 3}
+  m_Name: GreatLowTideCoastAtlas
+  m_EditorClassIdentifier: Assembly-CSharp::Tidepool.Domain.CoastAtlasDefinition
+  mapSprite: {fileID: 0}
+  title: The Great Low Tide
+  fallbackObjective: The coast is waiting to be noticed.
+  nodes:
+  - id: atlas.shallows
+    zone: 0
+    chapterId: chapter.shallows
+    requiredChapterId: 
+    completionSetPieceId: setpiece.meadow-unlock
+    displayName: Tidepool Shallows
+    activeObjective: Follow the shell glint near the stone arch.
+    completedSummary: The arch points toward the wider coast.
+    lockedHint: Start in the warm shallows.
+    normalizedPosition: {x: 0.18, y: 0.45}
+    markerSprite: {fileID: 0}
+  - id: atlas.meadow
+    zone: 1
+    chapterId: chapter.meadow
+    requiredChapterId: chapter.shallows
+    completionSetPieceId: setpiece.kelp-unlock
+    displayName: Seagrass Meadow
+    activeObjective: Look for the grass that waves in a broad path.
+    completedSummary: The meadow showed the way through the kelp.
+    lockedHint: The meadow path opens from the shallows.
+    normalizedPosition: {x: 0.38, y: 0.55}
+    markerSprite: {fileID: 0}
+  - id: atlas.kelp
+    zone: 2
+    chapterId: chapter.kelp
+    requiredChapterId: chapter.meadow
+    completionSetPieceId: setpiece.rocky-unlock
+    displayName: Kelp Curtain
+    activeObjective: Follow the quiet lights behind the kelp.
+    completedSummary: The kelp lights point toward the old stones.
+    lockedHint: The kelp parts after the meadow is ready.
+    normalizedPosition: {x: 0.62, y: 0.48}
+    markerSprite: {fileID: 0}
+  - id: atlas.rocky
+    zone: 3
+    chapterId: chapter.rocky
+    requiredChapterId: chapter.kelp
+    completionSetPieceId: setpiece.finale
+    displayName: Rocky Shelf
+    activeObjective: Listen for the old stones near the foam.
+    completedSummary: The coast remembers Old Barnaby.
+    lockedHint: The shelf appears after the kelp path is known.
+    normalizedPosition: {x: 0.82, y: 0.57}
+    markerSprite: {fileID: 0}
