@@ -14,7 +14,7 @@ This repository is initialized for Unity 6.5.6 (6000.5.6f1), 2D URP, iOS 15+, la
 - Remote: `git@github.com:hiddenkirby/monmash.git`
 - Unity-style project layout under `Assets/`, `Packages/`, and `ProjectSettings/`
 - Git LFS tracking patterns for art/audio/video assets in `.gitattributes`
-- Runtime C# scaffolding for:
+- Runtime C# systems for:
   - Tideling species data
   - save/load JSON
   - grid pathfinding and tap-to-move
@@ -22,20 +22,29 @@ This repository is initialized for Unity 6.5.6 (6000.5.6f1), 2D URP, iOS 15+, la
   - catch mini-game controller
   - journal UI controller
   - safe-area UI fitting
-- Editor helper: `Tools/Tidepool/Create Starter Species Assets`
+- Great Low Tide v0.8 foundations for four expedition chapters, ambient Tidelings,
+  authored discoveries, persistent route reveals, the Coast Atlas, the Field Station,
+  the coast festival, and the Old Barnaby finale
+- Committed Boot, Overworld, CatchEncounter, Journal, Contest, CharacterSelect, and
+  PartySelect scenes
+- Editor generators and validators under `Tools/Tidepool/`
+
+The v0.8 source foundations and Field Station/festival/finale desktop-Editor wiring are in
+place, but v0.8 is not release-verified.
+Target-iPad performance, touch, safe-area, force-quit/relaunch, and complete new/legacy-save
+journeys remain required. See [`docs/V0_8_INTEGRATION_CHECKLIST.md`](docs/V0_8_INTEGRATION_CHECKLIST.md)
+for the reproducible scene order and the exact remaining gates.
 
 ## First Unity Steps
 
 1. Install Unity 6.5.6 (6000.5.6f1) with iOS Build Support.
 2. Open this folder as a Unity project.
-3. Let Unity generate missing `.meta`, `.csproj`, and scene metadata.
-4. Run `Tools/Tidepool/Create Starter Species Assets` to create the 13 ScriptableObject species rows from the PRD.
-5. Create these scenes:
-   - `Assets/Scenes/Boot.unity`
-   - `Assets/Scenes/Overworld.unity`
-   - `Assets/Scenes/CatchEncounter.unity`
-   - `Assets/Scenes/Journal.unity`
-6. Build a blank scene to iPad before adding more gameplay.
+3. Let Unity import the project and confirm the Console has no compile errors.
+4. Use the committed scenes for normal development. To prove a clean generated setup, follow
+   the ordered generator runbook in `docs/V0_8_INTEGRATION_CHECKLIST.md` instead of running
+   scene generators in an arbitrary order.
+5. Run the relevant `Tools/Tidepool/Verify ...` menu checks.
+6. Build to iPad and complete the device checks before calling a milestone release-ready.
 
 ## Important Local Tooling Note
 
