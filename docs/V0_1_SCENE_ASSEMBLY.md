@@ -53,6 +53,13 @@
   - `playerMover` (the same `PlayerGridMover` used by `EncounterDirector`)
 - The overworld scene generator (`Tools/Tidepool/Create v0.1 Overworld Scene`)
   creates the Contest button and wires it automatically.
+- The generator also places the six Great Low Tide authored-discovery locations from
+  `Assets/Data/AuthoredDiscoveries`. Each location listens to completed grid steps, records
+  its durable discovery state before presentation, shows a safe-area clue panel with an
+  88pt Continue control, and hands the existing species to `CatchEncounter`.
+- When inspecting a regenerated scene, verify each discovery location sits on a reachable
+  tile and that its clue panel appears above other Overworld UI. Miss, **Let it go**, and
+  interruption paths must restore player input and keep until-caught discoveries available.
 
 ## CatchEncounter
 
