@@ -62,6 +62,12 @@ namespace Tidepool.Runtime
             }
 
             EncounterEvents.EncounterFinished += HandleEncounterFinished;
+            if (playerMover != null)
+            {
+                playerMover.StepCompleted += HandlePlayerStepCompleted;
+            }
+
+            reducedMotion = TidepoolSettingsService.ReducedMotion;
             SetPresentationVisible(false);
         }
 
@@ -73,6 +79,11 @@ namespace Tidepool.Runtime
             }
 
             EncounterEvents.EncounterFinished -= HandleEncounterFinished;
+            if (playerMover != null)
+            {
+                playerMover.StepCompleted -= HandlePlayerStepCompleted;
+            }
+
             runningPresentation = null;
             encounterActive = false;
             RestoreInput();
@@ -84,6 +95,12 @@ namespace Tidepool.Runtime
             {
                 TryStartDiscovery();
             }
+        }
+
+        public bool ContainsWorldPoint(Vector3 worldPoint)
+        {
+            Collider2D trigger = GetComponent<Collider2D>();
+            return trigger != null && trigger.OverlapPoint(worldPoint);
         }
 
         public bool TryStartDiscovery()
@@ -220,6 +237,14 @@ namespace Tidepool.Runtime
             return playerMover == null ? candidateMover != null : candidateMover == playerMover;
         }
 
+        private void HandlePlayerStepCompleted(Vector3Int _)
+        {
+            if (playerMover != null && ContainsWorldPoint(playerMover.transform.position))
+            {
+                TryStartDiscovery();
+            }
+        }
+
         private bool HasRequiredState(GameSaveService saveService)
         {
             return HasOptionalState(sequence.RequiredCompletedChapterId, saveService.IsExpeditionChapterCompleted)
@@ -275,6 +300,11 @@ namespace Tidepool.Runtime
         {
             if (presentationRoot != null)
             {
+                if (visible)
+                {
+                    presentationRoot.transform.SetAsLastSibling();
+                }
+
                 presentationRoot.SetActive(visible);
             }
 

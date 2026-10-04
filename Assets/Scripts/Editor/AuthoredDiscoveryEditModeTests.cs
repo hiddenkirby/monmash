@@ -16,7 +16,8 @@ namespace Tidepool.Editor
             VerifyUntilCaughtReplayRules();
             VerifyOncePerSaveReplayRules();
             VerifyFallbackClueLines();
-            Debug.Log("Authored discovery edit-mode tests passed: eligibility, replay rules, and fallback clue text.");
+            VerifyTriggerPointFallback();
+            Debug.Log("Authored discovery edit-mode tests passed: eligibility, replay rules, fallback clue text, and grid-step trigger bounds.");
         }
 
         private static void VerifyUntilCaughtReplayRules()
@@ -110,6 +111,29 @@ namespace Tidepool.Editor
             {
                 UnityEngine.Object.DestroyImmediate(sequence);
                 UnityEngine.Object.DestroyImmediate(species);
+            }
+        }
+
+        private static void VerifyTriggerPointFallback()
+        {
+            GameObject triggerObject = new GameObject("AuthoredDiscoveryPointTest");
+            try
+            {
+                triggerObject.transform.position = new Vector3(4f, -2f, 0f);
+                BoxCollider2D collider = triggerObject.AddComponent<BoxCollider2D>();
+                collider.isTrigger = true;
+                collider.size = new Vector2(1.4f, 1.4f);
+                AuthoredDiscoveryTrigger trigger = triggerObject.AddComponent<AuthoredDiscoveryTrigger>();
+                Physics2D.SyncTransforms();
+
+                Require(trigger.ContainsWorldPoint(new Vector3(4f, -2f, 0f)),
+                    "A generated discovery must recognize the player at its grid-step center without requiring a player Rigidbody2D.");
+                Require(!trigger.ContainsWorldPoint(new Vector3(6f, -2f, 0f)),
+                    "A generated discovery must not activate from a different grid cell.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(triggerObject);
             }
         }
 

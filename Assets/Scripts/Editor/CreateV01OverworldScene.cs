@@ -118,6 +118,7 @@ namespace Tidepool.Editor
             ZoneWelcomeBanner zoneWelcomeBanner = CreateZoneWelcomeBanner(safeArea);
             CreateStoryBeatDialogue(safeArea);
             CreateAuthoredDiscoverySequenceAssets.CreateAssets();
+            CreateAuthoredDiscoveryTriggers(gridObject.transform, playerObject.transform, playerMover, safeArea);
             CreateExpeditionChapterAssets.CreateAssets();
             ExpeditionChapter[] expeditionChapters = CreateExpeditionChapterAssets.LoadAll();
             CreateExpeditionChapterDirector(gridObject.transform, expeditionChapters);
@@ -574,6 +575,64 @@ namespace Tidepool.Editor
             serializedController.FindProperty("activationCamera").objectReferenceValue = camera;
             serializedController.FindProperty("playerReference").objectReferenceValue = playerRoot;
             serializedController.ApplyModifiedProperties();
+        }
+
+        private static void CreateAuthoredDiscoveryTriggers(Transform parent, Transform playerRoot,
+            PlayerGridMover playerMover, RectTransform safeArea)
+        {
+            CreateAuthoredDiscoveryTrigger(parent, playerRoot, playerMover, safeArea,
+                "ShallowsBlipDiscovery", "discovery.shallows.blip", new Vector3(-5f, 2f, 0f));
+            CreateAuthoredDiscoveryTrigger(parent, playerRoot, playerMover, safeArea,
+                "MeadowGullwingDiscovery", "discovery.meadow.gullwing", new Vector3(6f, 3f, 0f));
+            CreateAuthoredDiscoveryTrigger(parent, playerRoot, playerMover, safeArea,
+                "MeadowTanglemawDiscovery", "discovery.meadow.tanglemaw", new Vector3(10f, -3f, 0f));
+            CreateAuthoredDiscoveryTrigger(parent, playerRoot, playerMover, safeArea,
+                "KelpLumenDiscovery", "discovery.kelp.lumen", new Vector3(15f, 2f, 0f));
+            CreateAuthoredDiscoveryTrigger(parent, playerRoot, playerMover, safeArea,
+                "KelpTanglemawDiscovery", "discovery.kelp.tanglemaw", new Vector3(18f, -2f, 0f));
+            CreateAuthoredDiscoveryTrigger(parent, playerRoot, playerMover, safeArea,
+                "RockyClackawDiscovery", "discovery.rocky.clackaw", new Vector3(23f, 2f, 0f));
+        }
+
+        private static void CreateAuthoredDiscoveryTrigger(Transform parent, Transform playerRoot,
+            PlayerGridMover playerMover, RectTransform safeArea, string name, string sequenceId, Vector3 position)
+        {
+            AuthoredDiscoverySequence sequence = CreateAuthoredDiscoverySequenceAssets.LoadById(sequenceId);
+            if (sequence == null)
+            {
+                Debug.LogWarning($"Could not place authored discovery {sequenceId}: its asset is missing.");
+                return;
+            }
+
+            GameObject triggerObject = new GameObject(name);
+            triggerObject.transform.SetParent(parent);
+            triggerObject.transform.position = position;
+
+            BoxCollider2D collider = triggerObject.AddComponent<BoxCollider2D>();
+            collider.isTrigger = true;
+            collider.size = new Vector2(1.4f, 1.4f);
+
+            Image panel = CreateImage($"{name}Panel", safeArea,
+                new Color(0.08f, 0.22f, 0.24f, 0.94f), Vector2.zero, new Vector2(720f, 220f));
+            ApplyRoundedPanelStyle(panel);
+            Text clueText = CreateText("ClueText", panel.transform, sequence.GetFallbackClueLine(), 30,
+                TextAnchor.MiddleCenter, new Vector2(0f, 34f), new Vector2(640f, 92f));
+            clueText.color = Color.white;
+            Button skipButton = CreateButton("SkipButton", panel.transform, "Continue",
+                new Vector2(0f, -64f), new Vector2(220f, 88f));
+
+            AuthoredDiscoveryTrigger trigger = triggerObject.AddComponent<AuthoredDiscoveryTrigger>();
+            SerializedObject serializedTrigger = new SerializedObject(trigger);
+            serializedTrigger.FindProperty("sequence").objectReferenceValue = sequence;
+            serializedTrigger.FindProperty("playerRoot").objectReferenceValue = playerRoot;
+            serializedTrigger.FindProperty("playerMover").objectReferenceValue = playerMover;
+            serializedTrigger.FindProperty("catchSceneName").stringValue = "CatchEncounter";
+            serializedTrigger.FindProperty("presentationRoot").objectReferenceValue = panel.gameObject;
+            serializedTrigger.FindProperty("clueText").objectReferenceValue = clueText;
+            serializedTrigger.FindProperty("skipButton").objectReferenceValue = skipButton;
+            serializedTrigger.FindProperty("autoLaunchSeconds").floatValue = 1.5f;
+            serializedTrigger.ApplyModifiedProperties();
+            panel.gameObject.SetActive(false);
         }
 
         private static Button CreateButton(string name, Transform parent, string label, Vector2 anchoredPosition, Vector2 size)
