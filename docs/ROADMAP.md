@@ -56,6 +56,16 @@
 - Old Barnaby as narrative climax.
 - Map visual progression (gates part on unlock).
 
-## v0.8 - Her Game
+## v0.8 - The Great Low Tide (INTEGRATION / DEVICE QA)
 
-- Whatever Reagan asks for after playing v0.7. This is the most important row in the table.
+- Four connected expedition chapters across Shallows, Meadow, Kelp Curtain, and Rocky Shelf.
+- Persistent route reveals, landmarks, ambient Tidelings, authored discoveries, and Coast Atlas.
+- A Field Station that projects existing progress into permanent keepsakes.
+- A coast-festival wrapper around the existing friendly contest and an Old Barnaby finale.
+- Source foundations and Field Station/festival/finale desktop-Editor wiring are present on
+  `main`; remaining authored clue placement is tracked by the integration checklist.
+- Release remains gated on clean generated-setup coverage, full new/legacy-save journeys, and
+  target-iPad performance, safe-area, touch, accessibility, offline, and force-quit checks.
+
+See `docs/GREAT_LOW_TIDE.md` for the experience contract and
+`docs/V0_8_INTEGRATION_CHECKLIST.md` for the reproducible integration and release gates.

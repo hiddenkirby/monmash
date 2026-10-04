@@ -25,6 +25,8 @@ Read these files before changing behavior:
 - `docs/V0_4_ZONE_TRANSITIONS.md` before adding or modifying zone transitions.
 - `docs/V0_8_FIELD_STATION.md` before wiring the v0.8 field station or its earned displays.
 - `docs/V0_8_BARNABY_FINALE.md` before wiring the Old Barnaby finale or its return memory.
+- `docs/V0_8_INTEGRATION_CHECKLIST.md` before regenerating v0.8 scenes or claiming the milestone
+  is release-ready.
 - `docs/NO_NETWORK_GUARDRAILS.md` before adding or upgrading packages, and before release.
 - `docs/ASSET_PIPELINE.md` before importing art, audio, or video assets.
 - `docs/PRE_RELEASE_CHECKLIST.md` and `docs/IP_SAFETY_CHECKLIST.md` before tagging a playable or release build.
@@ -41,6 +43,10 @@ Work has progressed past v0.1 into v0.2 and v0.4 scaffolding:
 - **Conditional encounters:** `EncounterAvailability` and day/night rules are wired into `EncounterDirector`. See `docs/DAY_NIGHT_RULES.md`.
 - **Zone transitions:** `ZoneTransitionTrigger` exists. See `docs/V0_4_ZONE_TRANSITIONS.md`.
 - **Settings:** `TidepoolSettingsService` and `SettingsController` handle audio mute/volume at runtime.
+- **v0.8 Great Low Tide:** chapter, discovery, ambient-life, route-reveal, Coast Atlas, Field
+  Station, coast-festival, and Old Barnaby finale foundations are present. The committed
+  Overworld includes the Field Station plus festival/finale wiring. Target-iPad and full
+  end-to-end save-journey verification remain open; see `docs/V0_8_INTEGRATION_CHECKLIST.md`.
 
 Before starting work, check `git log` and open GitHub issues to see what is already in progress. Do not duplicate or regress existing systems.
 
@@ -102,6 +108,19 @@ Unity menu items under `Tools/Tidepool/`:
 | Verify Field Station Projection | Checks fresh-save access, advanced-save backfill, monotonic displays, and read-only visitors. |
 | Create Old Barnaby Finale Definition | Creates the v0.8 finale copy, cues, prerequisites, and Old Barnaby binding. |
 | Verify Old Barnaby Finale | Checks finale gating, gentle retry, catch-authoritative completion, backfill, and memory state. |
+| Create Great Low Tide Chapter Assets | Creates the four chapter definitions and objective routes. |
+| Verify Great Low Tide Chapters | Checks deterministic and catch-based routes, active goals, and backfill. |
+| Create Coast Atlas Definition | Creates the read-only v0.8 atlas projection. |
+| Verify Coast Atlas Projection | Checks atlas nodes against saved expedition state. |
+| Create Ambient Tideling Zone Profiles | Creates bounded decorative populations for all four zones. |
+| Verify Ambient Tideling Actors | Checks deterministic filters, spawn caps, and read-only actors. |
+| Create Authored Discovery Sequence Assets | Creates the named discovery definitions and replay rules. |
+| Verify Authored Discoveries | Checks eligibility, replay, and catch-authority behavior. |
+| Create Route Unlock Sequence Assets | Creates persistent Meadow, Kelp, and Rocky reveal definitions. |
+| Verify Route Unlock Sequences | Checks durable final state and skip/idempotency behavior. |
+| Create v0.8 Boot Scene | Regenerates the opening/return Boot scene. |
+| Wire v0.8 Field Station Into Overworld | Idempotently adds the station, displays, visitors, and four UI routes. |
+| Wire v0.8 Festival and Finale Into Overworld | Idempotently adds the festival venue and Barnaby approach. |
 | Configure v0.1 Local Playtest | Sets up local playtest configuration. |
 | Apply iPad iOS Player Settings | Applies all iPad/iOS player settings from `docs/UNITY_IOS_PIPELINE.md`. |
 | Validate iPad iOS Player Settings | Validates that player settings match the required values. |
