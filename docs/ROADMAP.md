@@ -63,7 +63,8 @@
 - A Field Station that projects existing progress into permanent keepsakes.
 - A coast-festival wrapper around the existing friendly contest and an Old Barnaby finale.
 - Source foundations and Field Station/festival/finale desktop-Editor wiring are present on
-  `main`; remaining authored clue placement is tracked by the integration checklist.
+  `main`; the Overworld generator also places six authored-discovery clue sites across all
+  four zones.
 - Release remains gated on clean generated-setup coverage, full new/legacy-save journeys, and
   target-iPad performance, safe-area, touch, accessibility, offline, and force-quit checks.
 

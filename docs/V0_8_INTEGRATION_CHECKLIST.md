@@ -11,9 +11,10 @@ are kept.
 
 The source foundations for the four chapters, persistent expedition save state, route reveals,
 ambient Tidelings, authored discoveries, Coast Atlas, Field Station, coast festival, and Old
-Barnaby finale are on `main`. The committed Overworld contains the Field Station and the
-festival/finale wiring. These facts do not replace the release gates below: target-iPad and
-complete new/legacy-save verification are still outstanding.
+Barnaby finale are on `main`. The Overworld generator places six authored-discovery clue sites
+across all four zones, and the committed Overworld contains the Field Station plus the
+festival/finale wiring. These facts do not replace the release gates below: clean regeneration,
+complete new/legacy-save journeys, and target-iPad verification are still outstanding.
 
 ## Clean Generated Setup
 
@@ -45,9 +46,11 @@ complete new/legacy-save verification are still outstanding.
 5. Review every generated asset and scene diff. Do not accept unrelated `ProjectSettings`,
    package, or local playtest-save changes.
 
-The authored discovery definitions are generated, but their world clue sites still require
-the placement and presentation review described in `docs/GREAT_LOW_TIDE.md`. A generated asset
-alone does not satisfy the discovery issue's scene-play acceptance criteria.
+The Overworld generator places six authored-discovery clue sites after generating their
+definitions. Regenerate and inspect those sites for reachable tiles, UI stacking, safe-area
+presentation, and correct scene-return behavior as described in `docs/V0_1_SCENE_ASSEMBLY.md`
+and `docs/GREAT_LOW_TIDE.md`. Generated placement does not replace the discovery issue's
+Play Mode, interruption, save/reload, or target-iPad acceptance checks.
 
 ## Unity Verification Menus
 
