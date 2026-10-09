@@ -13,6 +13,7 @@ namespace Tidepool.Runtime
         [SerializeField] private GameObject lockedVisualRoot;
         [SerializeField] private GameObject unlockedVisualRoot;
         [SerializeField] private GameObject presentationRoot;
+        [SerializeField] private GameObject standardMotionRoot;
         [SerializeField] private GameObject reducedMotionRoot;
         [SerializeField] private Text fallbackText;
         [SerializeField] private Button skipButton;
@@ -35,6 +36,7 @@ namespace Tidepool.Runtime
         private void OnEnable()
         {
             SubscribeToSkip();
+            SetReducedMotion(TidepoolSettingsService.ReducedMotion);
             RefreshFromSave();
         }
 
@@ -97,9 +99,19 @@ namespace Tidepool.Runtime
         public void SetReducedMotion(bool enabled)
         {
             reducedMotion = enabled;
+            RefreshMotionRoots();
+        }
+
+        private void RefreshMotionRoots()
+        {
+            if (standardMotionRoot != null)
+            {
+                standardMotionRoot.SetActive(!reducedMotion);
+            }
+
             if (reducedMotionRoot != null)
             {
-                reducedMotionRoot.SetActive(enabled);
+                reducedMotionRoot.SetActive(reducedMotion);
             }
         }
 
@@ -129,10 +141,7 @@ namespace Tidepool.Runtime
                 presentationRoot.SetActive(true);
             }
 
-            if (reducedMotionRoot != null)
-            {
-                reducedMotionRoot.SetActive(reducedMotion);
-            }
+            RefreshMotionRoots();
 
             sequenceStarted?.Invoke();
             runningSequence = StartCoroutine(AutoCompleteAfterDelay());

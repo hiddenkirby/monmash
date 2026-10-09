@@ -123,7 +123,8 @@ namespace Tidepool.Editor
             ExpeditionChapter[] expeditionChapters = CreateExpeditionChapterAssets.LoadAll();
             CreateExpeditionChapterDirector(gridObject.transform, expeditionChapters);
             CreateRouteUnlockSequenceAssets.CreateAssets();
-            CreateZoneTransitions(gridObject.transform, playerObject.transform, playerMover, grid, zoneWelcomeBanner, expeditionChapters);
+            CreateZoneTransitions(gridObject.transform, playerObject.transform, playerMover, grid, safeArea,
+                zoneWelcomeBanner, expeditionChapters);
             CreateFirstRunGuidance(safeArea);
             GoalsPanelController goalsPanel = CreateGoalsPanel(safeArea, expeditionChapters);
             CreateContestButton(safeArea, playerMover, database);
@@ -365,23 +366,26 @@ namespace Tidepool.Editor
         }
 
         private static void CreateZoneTransitions(Transform gridTransform, Transform playerRoot, PlayerGridMover playerMover,
-            Grid grid, ZoneWelcomeBanner zoneWelcomeBanner, ExpeditionChapter[] expeditionChapters)
+            Grid grid, RectTransform safeArea, ZoneWelcomeBanner zoneWelcomeBanner, ExpeditionChapter[] expeditionChapters)
         {
             CreateZoneTransition("ShallowsToMeadowTransition", gridTransform, playerRoot, playerMover, grid,
                 new Vector3(MeadowEndX - 1, 0, 0), ZoneId.SeagrassMeadow, false,
-                ZoneId.SeagrassMeadow, 0, zoneWelcomeBanner, FindChapter(expeditionChapters, ExpeditionStateIds.ChapterShallows));
+                ZoneId.SeagrassMeadow, 0, safeArea, zoneWelcomeBanner,
+                FindChapter(expeditionChapters, ExpeditionStateIds.ChapterShallows));
             CreateZoneTransition("MeadowToKelpTransition", gridTransform, playerRoot, playerMover, grid,
                 new Vector3(KelpEndX - 1, 0, 0), ZoneId.KelpCurtain, true,
-                ZoneId.SeagrassMeadow, 5, zoneWelcomeBanner, FindChapter(expeditionChapters, ExpeditionStateIds.ChapterMeadow));
+                ZoneId.SeagrassMeadow, 5, safeArea, zoneWelcomeBanner,
+                FindChapter(expeditionChapters, ExpeditionStateIds.ChapterMeadow));
             CreateZoneTransition("KelpToRockyTransition", gridTransform, playerRoot, playerMover, grid,
                 new Vector3(MaxX - 1, 0, 0), ZoneId.RockyShelf, true,
-                ZoneId.KelpCurtain, 3, zoneWelcomeBanner, FindChapter(expeditionChapters, ExpeditionStateIds.ChapterKelp));
+                ZoneId.KelpCurtain, 3, safeArea, zoneWelcomeBanner,
+                FindChapter(expeditionChapters, ExpeditionStateIds.ChapterKelp));
         }
 
         private static void CreateZoneTransition(string name, Transform gridTransform, Transform playerRoot,
             PlayerGridMover playerMover, Grid grid, Vector3 triggerPosition, ZoneId destinationZone,
             bool requireDestinationUnlocked, ZoneId requiredCaughtZone, int requiredCaughtSpeciesCount,
-            ZoneWelcomeBanner zoneWelcomeBanner, ExpeditionChapter expeditionChapterRequirement)
+            RectTransform safeArea, ZoneWelcomeBanner zoneWelcomeBanner, ExpeditionChapter expeditionChapterRequirement)
         {
             GameObject triggerObj = new GameObject(name);
             triggerObj.transform.SetParent(gridTransform);
@@ -397,7 +401,7 @@ namespace Tidepool.Editor
 
             ZoneTransitionTrigger trigger = triggerObj.AddComponent<ZoneTransitionTrigger>();
             RouteUnlockSequenceController unlockSequenceController = requireDestinationUnlocked
-                ? CreateRouteUnlockSequenceController(triggerObj, playerMover, gateVisuals, destinationZone)
+                ? CreateRouteUnlockSequenceController(triggerObj, playerMover, gateVisuals, destinationZone, safeArea)
                 : null;
             SerializedObject serializedTrigger = new SerializedObject(trigger);
             serializedTrigger.FindProperty("destinationZone").enumValueIndex = (int)destinationZone;
@@ -421,18 +425,70 @@ namespace Tidepool.Editor
             GameObject owner,
             PlayerGridMover playerMover,
             GateVisualRoots gateVisuals,
-            ZoneId destinationZone)
+            ZoneId destinationZone,
+            RectTransform safeArea)
         {
             RouteUnlockSequenceController controller = owner.AddComponent<RouteUnlockSequenceController>();
+            Image panel = CreateImage($"{owner.name}RevealPanel", safeArea,
+                new Color(0.08f, 0.22f, 0.24f, 0.96f), Vector2.zero, new Vector2(720f, 260f));
+            ApplyRoundedPanelStyle(panel);
+            Text title = CreateText("Title", panel.transform, GetRouteRevealTitle(destinationZone), 34,
+                TextAnchor.MiddleCenter, new Vector2(0f, 76f), new Vector2(640f, 56f));
+            title.color = Color.white;
+            Text message = CreateText("Message", panel.transform, GetRouteRevealMessage(destinationZone), 28,
+                TextAnchor.MiddleCenter, new Vector2(0f, 18f), new Vector2(620f, 72f));
+            message.color = Color.white;
+
+            GameObject standardMotionRoot = CreateRouteRevealAccent(panel.transform, "StandardRevealAccent", false);
+            GameObject reducedMotionRoot = CreateRouteRevealAccent(panel.transform, "ReducedMotionRevealAccent", true);
+            Button skipButton = CreateButton("ContinueButton", panel.transform, "Continue",
+                new Vector2(0f, -82f), new Vector2(220f, 88f));
+
             SerializedObject serializedController = new SerializedObject(controller);
             serializedController.FindProperty("sequence").objectReferenceValue =
                 CreateRouteUnlockSequenceAssets.LoadForDestination(destinationZone);
             serializedController.FindProperty("playerMover").objectReferenceValue = playerMover;
             serializedController.FindProperty("lockedVisualRoot").objectReferenceValue = gateVisuals.LockedRoot;
             serializedController.FindProperty("unlockedVisualRoot").objectReferenceValue = gateVisuals.UnlockedRoot;
+            serializedController.FindProperty("presentationRoot").objectReferenceValue = panel.gameObject;
+            serializedController.FindProperty("standardMotionRoot").objectReferenceValue = standardMotionRoot;
+            serializedController.FindProperty("reducedMotionRoot").objectReferenceValue = reducedMotionRoot;
+            serializedController.FindProperty("fallbackText").objectReferenceValue = message;
+            serializedController.FindProperty("skipButton").objectReferenceValue = skipButton;
             serializedController.FindProperty("autoCompleteSeconds").floatValue = 2f;
             serializedController.ApplyModifiedProperties();
+            reducedMotionRoot.SetActive(false);
+            panel.gameObject.SetActive(false);
             return controller;
+        }
+
+        private static GameObject CreateRouteRevealAccent(Transform parent, string name, bool reducedMotion)
+        {
+            Image accent = CreateImage(name, parent,
+                reducedMotion ? new Color(0.78f, 0.92f, 0.76f, 0.65f) : new Color(0.62f, 0.90f, 0.92f, 0.8f),
+                new Vector2(0f, -30f), reducedMotion ? new Vector2(180f, 8f) : new Vector2(420f, 12f));
+            return accent.gameObject;
+        }
+
+        private static string GetRouteRevealTitle(ZoneId destinationZone)
+        {
+            switch (destinationZone)
+            {
+                case ZoneId.KelpCurtain:
+                    return "The kelp makes a path";
+                case ZoneId.RockyShelf:
+                    return "The old stones open ahead";
+                default:
+                    return "A new path appears";
+            }
+        }
+
+        private static string GetRouteRevealMessage(ZoneId destinationZone)
+        {
+            RouteUnlockSequence sequence = CreateRouteUnlockSequenceAssets.LoadForDestination(destinationZone);
+            return sequence == null || string.IsNullOrWhiteSpace(sequence.FallbackMessage)
+                ? "The path is ready when you are."
+                : sequence.FallbackMessage;
         }
 
         private static GateVisualRoots CreateGateVisuals(string transitionName, Transform parent, ZoneId destinationZone, Vector3 center)
