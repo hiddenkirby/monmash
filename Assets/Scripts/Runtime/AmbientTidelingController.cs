@@ -223,11 +223,11 @@ namespace Tidepool.Runtime
             switch (entry.BehaviorKind)
             {
                 case AmbientTidelingBehaviorKind.Drift:
-                    offset.x += actor.Direction * actor.Speed * actor.Age;
+                    offset.x += GetHorizontalDriftOffset(entry, actor);
                     offset.y += wave * entry.MotionAmplitude;
                     break;
                 case AmbientTidelingBehaviorKind.School:
-                    offset.x += actor.Direction * actor.Speed * actor.Age;
+                    offset.x += GetHorizontalDriftOffset(entry, actor);
                     offset.y += groupWave * entry.MotionAmplitude * 0.5f + actor.SchoolOffset;
                     break;
                 case AmbientTidelingBehaviorKind.Peek:
@@ -257,6 +257,24 @@ namespace Tidepool.Runtime
             actor.Transform.localPosition = ClampToSpawnArea(entry, actor.Anchor + offset);
             actor.Transform.localScale = Vector3.one * scale;
             actor.Renderer.color = FadeAlpha(tint, alphaMultiplier);
+        }
+
+        private static float GetHorizontalDriftOffset(AmbientTidelingSpawnEntry entry, AmbientTidelingActor actor)
+        {
+            float width = entry.SpawnArea.x;
+            if (width <= 0f || actor.Speed <= 0f)
+            {
+                return 0f;
+            }
+
+            float halfWidth = width * 0.5f;
+            float origin = Mathf.Clamp(actor.Anchor.x + halfWidth, 0f, width);
+            float pathOrigin = actor.Direction > 0f ? origin : width - origin;
+            float pathPosition = Mathf.PingPong(pathOrigin + actor.Speed * actor.Age, width);
+            float localPosition = actor.Direction > 0f
+                ? pathPosition - halfWidth
+                : halfWidth - pathPosition;
+            return localPosition - actor.Anchor.x;
         }
 
         private Vector3 GetApproachOffset(Vector3 anchor, float approachStrength)

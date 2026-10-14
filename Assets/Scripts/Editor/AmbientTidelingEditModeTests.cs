@@ -15,7 +15,8 @@ namespace Tidepool.Editor
         {
             VerifyMissingSpriteFallbackAndNoPhysics();
             VerifySaveAndTimeFilters();
-            Debug.Log("Ambient Tideling edit-mode tests passed: bounded pools, fallback sprites, no physics components, save filters, and time filters.");
+            VerifyLongRunningDriftStaysInMotion();
+            Debug.Log("Ambient Tideling edit-mode tests passed: bounded pools, fallback sprites, no physics components, save filters, time filters, and long-running drift.");
         }
 
         private static void VerifyMissingSpriteFallbackAndNoPhysics()
@@ -129,6 +130,77 @@ namespace Tidepool.Editor
                 UnityEngine.Object.DestroyImmediate(profile);
                 UnityEngine.Object.DestroyImmediate(species);
             }
+        }
+
+        private static void VerifyLongRunningDriftStaysInMotion()
+        {
+            TidelingSpecies species = CreateSpecies("test-drifter", ZoneId.SeagrassMeadow);
+            AmbientTidelingZoneProfile profile = ScriptableObject.CreateInstance<AmbientTidelingZoneProfile>();
+            profile.Configure(
+                ZoneId.SeagrassMeadow,
+                1,
+                0.35f,
+                new[]
+                {
+                    new AmbientTidelingSpawnEntry(
+                        "test-long-running-drift",
+                        species,
+                        AmbientTidelingBehaviorKind.Drift,
+                        AmbientTidelingTimeWindow.Any,
+                        false,
+                        null,
+                        null,
+                        1,
+                        1,
+                        new Vector2(2f, 2f),
+                        Vector2.one,
+                        new Vector2(0.2f, 0.2f),
+                        0f,
+                        0f,
+                        0f,
+                        Color.white,
+                        Color.white,
+                        2)
+                });
+
+            GameObject controllerObject = new GameObject("AmbientTidelingDriftTest");
+            try
+            {
+                AmbientTidelingController controller = controllerObject.AddComponent<AmbientTidelingController>();
+                controller.SetProfile(profile);
+                controller.SetPlaying(true);
+
+                RefreshActors(controller, 100f);
+                SpriteRenderer renderer = controllerObject.GetComponentInChildren<SpriteRenderer>(true);
+                Require(renderer != null, "A drift profile must create a visible actor renderer.");
+                float firstPosition = renderer.transform.localPosition.x;
+
+                RefreshActors(controller, 1f);
+                float secondPosition = renderer.transform.localPosition.x;
+                Require(Mathf.Abs(secondPosition - firstPosition) > 0.001f,
+                    "Long-running drift actors must keep moving instead of clamping permanently to a spawn-area edge.");
+                Require(Mathf.Abs(secondPosition) <= 1f,
+                    "Long-running drift actors must remain inside their configured spawn area.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(controllerObject);
+                UnityEngine.Object.DestroyImmediate(profile);
+                UnityEngine.Object.DestroyImmediate(species);
+            }
+        }
+
+        private static void RefreshActors(AmbientTidelingController controller, float deltaTime)
+        {
+            MethodInfo method = typeof(AmbientTidelingController).GetMethod(
+                "RefreshActors",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            if (method == null)
+            {
+                throw new MissingMethodException(typeof(AmbientTidelingController).Name, "RefreshActors");
+            }
+
+            method.Invoke(controller, new object[] { deltaTime });
         }
 
         private static TidelingSpecies CreateSpecies(string id, ZoneId zone)
