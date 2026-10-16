@@ -34,6 +34,7 @@ namespace Tidepool.Runtime
 
         private void OnEnable()
         {
+            reducedMotion = TidepoolSettingsService.ReducedMotion;
             SubscribeToSkip();
             RefreshFromSave();
         }
@@ -99,7 +100,7 @@ namespace Tidepool.Runtime
             reducedMotion = enabled;
             if (reducedMotionRoot != null)
             {
-                reducedMotionRoot.SetActive(enabled);
+                reducedMotionRoot.SetActive(enabled && presentationRoot != null && presentationRoot.activeSelf);
             }
         }
 
