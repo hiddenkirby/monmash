@@ -79,6 +79,10 @@ namespace Tidepool.Editor
                 safeArea, "FestivalIntroPanel", "FestivalIntroText", "FestivalSkipButton", "Skip");
             (GameObject finaleIntroPanel, Text finaleIntroText, Button finaleSkipButton) = CreateIntroPanel(
                 safeArea, "FinaleIntroPanel", "FinaleIntroText", "FinaleSkipButton", "Continue");
+            GameObject finaleStandardMotionRoot = CreatePresentationAccent(
+                finaleIntroPanel.transform, "FinaleStandardMotionAccent", false);
+            GameObject finaleReducedMotionRoot = CreatePresentationAccent(
+                finaleIntroPanel.transform, "FinaleReducedMotionAccent", true);
 
             SerializedObject serializedFestival = new SerializedObject(festivalController);
             serializedFestival.FindProperty("definition").objectReferenceValue = festivalDefinition;
@@ -96,11 +100,14 @@ namespace Tidepool.Editor
             serializedFinale.FindProperty("playerMover").objectReferenceValue = playerMover;
             serializedFinale.FindProperty("invitationRoot").objectReferenceValue = finaleCard.BeginGroup;
             serializedFinale.FindProperty("presentationRoot").objectReferenceValue = finaleIntroPanel;
+            serializedFinale.FindProperty("standardMotionRoot").objectReferenceValue = finaleStandardMotionRoot;
+            serializedFinale.FindProperty("reducedMotionRoot").objectReferenceValue = finaleReducedMotionRoot;
             serializedFinale.FindProperty("celebrationRoot").objectReferenceValue = finaleController.transform.Find("Celebration").gameObject;
             serializedFinale.FindProperty("presentationText").objectReferenceValue = finaleIntroText;
             serializedFinale.FindProperty("skipButton").objectReferenceValue = finaleSkipButton;
             serializedFinale.FindProperty("autoLaunchSeconds").floatValue = 2f;
             serializedFinale.ApplyModifiedProperties();
+            finaleReducedMotionRoot.SetActive(false);
 
             // Card buttons drive the controllers through void wrappers so the listeners
             // persist across scene save/reload.
@@ -270,6 +277,18 @@ namespace Tidepool.Editor
             Button skipButton = CreateButton(buttonName, panel.transform, buttonLabel, new Vector2(0f, -108f), new Vector2(200f, 88f));
             panel.gameObject.SetActive(false);
             return (panel.gameObject, introText, skipButton);
+        }
+
+        private static GameObject CreatePresentationAccent(Transform parent, string name, bool reducedMotion)
+        {
+            Image accent = CreateImage(
+                name,
+                parent,
+                reducedMotion ? new Color(0.78f, 0.92f, 0.76f, 0.72f) : new Color(0.62f, 0.90f, 0.92f, 0.82f),
+                new Vector2(0f, -48f),
+                reducedMotion ? new Vector2(160f, 8f) : new Vector2(380f, 12f));
+            accent.raycastTarget = false;
+            return accent.gameObject;
         }
 
         private readonly struct FestivalCard

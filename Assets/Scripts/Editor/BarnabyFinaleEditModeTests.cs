@@ -16,7 +16,8 @@ namespace Tidepool.Editor
         {
             VerifyEligibilityAndRetry();
             VerifyCatchBackfill();
-            Debug.Log("Old Barnaby finale tests passed: gated invitation, retry after an attempt, catch-authoritative completion, advanced-save backfill, and idempotent memory state.");
+            VerifyReducedMotionPresentation();
+            Debug.Log("Old Barnaby finale tests passed: gated invitation, retry after an attempt, catch-authoritative completion, advanced-save backfill, idempotent memory state, and reduced-motion presentation.");
         }
 
         private static void VerifyEligibilityAndRetry()
@@ -73,6 +74,39 @@ namespace Tidepool.Editor
                 {
                     File.Delete(savePath);
                 }
+            }
+        }
+
+        private static void VerifyReducedMotionPresentation()
+        {
+            GameObject owner = new GameObject("BarnabyFinaleMotionTest");
+            GameObject presentation = new GameObject("Presentation");
+            GameObject standard = new GameObject("StandardMotion");
+            GameObject reduced = new GameObject("ReducedMotion");
+            try
+            {
+                BarnabyFinaleController controller = owner.AddComponent<BarnabyFinaleController>();
+                SetPrivateField(controller, "presentationRoot", presentation);
+                SetPrivateField(controller, "standardMotionRoot", standard);
+                SetPrivateField(controller, "reducedMotionRoot", reduced);
+
+                presentation.SetActive(true);
+                controller.SetReducedMotion(true);
+                Require(!standard.activeSelf && reduced.activeSelf, "Reduced motion must replace the standard finale accent.");
+
+                controller.SetReducedMotion(false);
+                Require(standard.activeSelf && !reduced.activeSelf, "Standard motion must return when reduced motion is off.");
+
+                presentation.SetActive(false);
+                controller.SetReducedMotion(true);
+                Require(!standard.activeSelf && !reduced.activeSelf, "Finale accents must stay hidden outside presentation.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(owner);
+                UnityEngine.Object.DestroyImmediate(presentation);
+                UnityEngine.Object.DestroyImmediate(standard);
+                UnityEngine.Object.DestroyImmediate(reduced);
             }
         }
 

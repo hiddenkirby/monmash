@@ -14,6 +14,7 @@ namespace Tidepool.Runtime
         [SerializeField] private string catchSceneName = "CatchEncounter";
         [SerializeField] private GameObject invitationRoot;
         [SerializeField] private GameObject presentationRoot;
+        [SerializeField] private GameObject standardMotionRoot;
         [SerializeField] private GameObject reducedMotionRoot;
         [SerializeField] private GameObject celebrationRoot;
         [SerializeField] private Text presentationText;
@@ -35,6 +36,7 @@ namespace Tidepool.Runtime
 
         private void OnEnable()
         {
+            reducedMotion = TidepoolSettingsService.ReducedMotion;
             if (skipButton != null)
             {
                 skipButton.onClick.AddListener(SkipPresentation);
@@ -75,7 +77,7 @@ namespace Tidepool.Runtime
             LockInput();
             SetActive(invitationRoot, false);
             SetActive(presentationRoot, true);
-            SetActive(reducedMotionRoot, reducedMotion);
+            RefreshMotionRoots();
             if (presentationText != null)
             {
                 presentationText.text = definition.InvitationText;
@@ -123,7 +125,7 @@ namespace Tidepool.Runtime
         public void SetReducedMotion(bool enabled)
         {
             reducedMotion = enabled;
-            SetActive(reducedMotionRoot, enabled && presentationRoot != null && presentationRoot.activeSelf);
+            RefreshMotionRoots();
         }
 
         public bool OpenMemory()
@@ -161,6 +163,7 @@ namespace Tidepool.Runtime
             runningPresentation = null;
             encounterActive = true;
             SetActive(presentationRoot, false);
+            SetActive(standardMotionRoot, false);
             SetActive(reducedMotionRoot, false);
             EncounterContext.CurrentSpecies = definition.Species;
             EncounterContext.CurrentZone = ZoneId.RockyShelf;
@@ -199,12 +202,24 @@ namespace Tidepool.Runtime
             SetActive(celebrationRoot, complete);
             SetActive(invitationRoot, !complete && BarnabyFinaleProgress.IsAvailable(definition, data));
             SetActive(presentationRoot, false);
+            SetActive(standardMotionRoot, false);
             SetActive(reducedMotionRoot, false);
         }
 
         private bool HasPresentation()
         {
-            return presentationRoot != null || reducedMotionRoot != null || presentationText != null || skipButton != null;
+            return presentationRoot != null
+                || standardMotionRoot != null
+                || reducedMotionRoot != null
+                || presentationText != null
+                || skipButton != null;
+        }
+
+        private void RefreshMotionRoots()
+        {
+            bool presentationVisible = presentationRoot != null && presentationRoot.activeSelf;
+            SetActive(standardMotionRoot, presentationVisible && !reducedMotion);
+            SetActive(reducedMotionRoot, presentationVisible && reducedMotion);
         }
 
         private void LockInput()
