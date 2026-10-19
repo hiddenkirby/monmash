@@ -17,7 +17,8 @@ namespace Tidepool.Editor
             VerifyEligibilityAndReplay();
             VerifyOutcomeEvent();
             VerifyWinProjection();
-            Debug.Log("Coast festival tests passed: expedition gating, replay, explicit contest outcomes, win-only completion, ribbon backfill, and no-loss preservation.");
+            VerifySavedReducedMotionPreference();
+            Debug.Log("Coast festival tests passed: expedition gating, replay, explicit contest outcomes, win-only completion, ribbon backfill, no-loss preservation, and saved reduced-motion preference.");
         }
 
         private static void VerifyEligibilityAndReplay()
@@ -86,6 +87,38 @@ namespace Tidepool.Editor
                 {
                     File.Delete(savePath);
                 }
+            }
+        }
+
+        private static void VerifySavedReducedMotionPreference()
+        {
+            FieldInfo settingsField = typeof(TidepoolSettingsService).GetField("settings", BindingFlags.Static | BindingFlags.NonPublic);
+            if (settingsField == null)
+            {
+                throw new MissingFieldException(typeof(TidepoolSettingsService).Name, "settings");
+            }
+
+            object previousSettings = settingsField.GetValue(null);
+            GameObject festivalObject = new GameObject("CoastFestivalReducedMotionTest");
+            festivalObject.SetActive(false);
+            try
+            {
+                settingsField.SetValue(null, new SettingsData { reducedMotion = true });
+                CoastFestivalController controller = festivalObject.AddComponent<CoastFestivalController>();
+                festivalObject.SetActive(true);
+
+                FieldInfo reducedMotionField = typeof(CoastFestivalController).GetField("reducedMotion", BindingFlags.Instance | BindingFlags.NonPublic);
+                if (reducedMotionField == null)
+                {
+                    throw new MissingFieldException(typeof(CoastFestivalController).Name, "reducedMotion");
+                }
+
+                Require((bool)reducedMotionField.GetValue(controller), "The festival must honor the saved reduced-motion preference when it becomes active.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(festivalObject);
+                settingsField.SetValue(null, previousSettings);
             }
         }
 

@@ -32,6 +32,7 @@ namespace Tidepool.Runtime
 
         private void OnEnable()
         {
+            reducedMotion = TidepoolSettingsService.ReducedMotion;
             if (skipButton != null)
             {
                 skipButton.onClick.AddListener(SkipIntroduction);
