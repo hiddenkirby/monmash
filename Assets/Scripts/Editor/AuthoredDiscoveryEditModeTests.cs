@@ -17,7 +17,8 @@ namespace Tidepool.Editor
             VerifyOncePerSaveReplayRules();
             VerifyFallbackClueLines();
             VerifyTriggerPointFallback();
-            Debug.Log("Authored discovery edit-mode tests passed: eligibility, replay rules, fallback clue text, and grid-step trigger bounds.");
+            VerifyDisabledTriggerHidesPresentation();
+            Debug.Log("Authored discovery edit-mode tests passed: eligibility, replay rules, fallback clue text, grid-step trigger bounds, and interruption cleanup.");
         }
 
         private static void VerifyUntilCaughtReplayRules()
@@ -130,6 +131,36 @@ namespace Tidepool.Editor
                     "A generated discovery must recognize the player at its grid-step center without requiring a player Rigidbody2D.");
                 Require(!trigger.ContainsWorldPoint(new Vector3(6f, -2f, 0f)),
                     "A generated discovery must not activate from a different grid cell.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(triggerObject);
+            }
+        }
+
+        private static void VerifyDisabledTriggerHidesPresentation()
+        {
+            GameObject triggerObject = new GameObject("AuthoredDiscoveryInterruptionTest");
+            GameObject presentationRoot = new GameObject("PresentationRoot");
+            GameObject reducedMotionRoot = new GameObject("ReducedMotionRoot");
+
+            try
+            {
+                triggerObject.AddComponent<BoxCollider2D>().isTrigger = true;
+                AuthoredDiscoveryTrigger trigger = triggerObject.AddComponent<AuthoredDiscoveryTrigger>();
+                presentationRoot.transform.SetParent(triggerObject.transform, false);
+                reducedMotionRoot.transform.SetParent(triggerObject.transform, false);
+                SetPrivateField(trigger, "presentationRoot", presentationRoot);
+                SetPrivateField(trigger, "reducedMotionRoot", reducedMotionRoot);
+                presentationRoot.SetActive(true);
+                reducedMotionRoot.SetActive(true);
+
+                trigger.enabled = false;
+
+                Require(!presentationRoot.activeSelf,
+                    "Disabling an authored discovery during its clue must hide the standard presentation.");
+                Require(!reducedMotionRoot.activeSelf,
+                    "Disabling an authored discovery during its clue must hide the reduced-motion presentation.");
             }
             finally
             {
