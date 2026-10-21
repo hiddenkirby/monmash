@@ -84,7 +84,7 @@ namespace Tidepool.Runtime
                 playerMover.StepCompleted -= HandlePlayerStepCompleted;
             }
 
-            runningPresentation = null;
+            CancelPendingPresentation();
             encounterActive = false;
             RestoreInput();
         }
@@ -167,11 +167,7 @@ namespace Tidepool.Runtime
 
         public void SkipPresentation()
         {
-            if (runningPresentation != null)
-            {
-                StopCoroutine(runningPresentation);
-                runningPresentation = null;
-            }
+            CancelPendingPresentation();
 
             ApplyDiscoveryState(GameSaveService.Instance);
             presentationSkipped?.Invoke();
@@ -195,6 +191,17 @@ namespace Tidepool.Runtime
             }
 
             LaunchEncounter();
+        }
+
+        private void CancelPendingPresentation()
+        {
+            if (runningPresentation != null)
+            {
+                StopCoroutine(runningPresentation);
+                runningPresentation = null;
+            }
+
+            SetPresentationVisible(false);
         }
 
         private void LaunchEncounter()
