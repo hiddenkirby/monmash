@@ -73,6 +73,18 @@ namespace Tidepool.Editor
                 };
                 Require(ExpeditionChapterProgress.ShouldBackfillCompletion(shallows, advanced), "Advanced saves should backfill the Shallows chapter.");
                 Require(ExpeditionChapterProgress.ShouldBackfillCompletion(meadow, advanced), "Advanced saves should backfill the Meadow chapter without replaying it.");
+
+                SaveData meadowLegacySave = new SaveData
+                {
+                    currentZone = ZoneId.SeagrassMeadow,
+                    unlockedZoneIds = new List<ZoneId> { ZoneId.TidepoolShallows, ZoneId.SeagrassMeadow }
+                };
+                Require(
+                    ExpeditionChapterProgress.ShouldBackfillCompletion(shallows, meadowLegacySave),
+                    "Legacy saves that already reached the Meadow should not be sent back through the Shallows opening chapter.");
+                Require(
+                    !ExpeditionChapterProgress.ShouldBackfillCompletion(meadow, meadowLegacySave),
+                    "Reaching the Meadow must not skip the Meadow chapter itself.");
             }
             finally
             {
