@@ -93,8 +93,10 @@ namespace Tidepool.Runtime
             switch (chapter.Zone)
             {
                 case ZoneId.TidepoolShallows:
-                    return data.currentZone == ZoneId.KelpCurtain
+                    return data.currentZone == ZoneId.SeagrassMeadow
+                        || data.currentZone == ZoneId.KelpCurtain
                         || data.currentZone == ZoneId.RockyShelf
+                        || IsZoneUnlocked(data, ZoneId.SeagrassMeadow)
                         || IsZoneUnlocked(data, ZoneId.KelpCurtain)
                         || IsZoneUnlocked(data, ZoneId.RockyShelf);
                 case ZoneId.SeagrassMeadow:
